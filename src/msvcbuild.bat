@@ -55,6 +55,8 @@
 %LUAC% Win32/BCrypt.lua BCrypt.obj
 %LUAC% Win32/BCryptUtils.lua BCryptUtils.obj
 %LUAC% Win32/EventScheduler.lua EventScheduler.obj
+%LUAC% Win32/GDI32.lua GDI32.obj
+%LUAC% Win32/gdi32_ffi.lua gdi32_ffi.obj
 %LUAC% Win32/guiddef.lua guiddef.obj
 %LUAC% Win32/NativeSocket.lua NativeSocket.obj
 %LUAC% Win32/NetStream.lua NetStream.obj
@@ -63,6 +65,8 @@
 %LUAC% Win32/SocketPool.lua SocketPool.obj
 %LUAC% Win32/SocketUtils.lua SocketUtils.obj
 %LUAC% Win32/StopWatch.lua StopWatch.obj
+%LUAC% Win32/User32.lua User32.obj
+%LUAC% Win32/user32_ffi.lua user32_ffi.obj
 %LUAC% Win32/WebApp.lua WebApp.obj
 %LUAC% Win32/win_error.lua win_error.obj
 %LUAC% Win32/win_kernel32.lua win_kernel32.obj
@@ -72,7 +76,7 @@
 %LUAC% Win32/WinSock_Utils.lua WinSock_Utils.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=BCrypt.obj BCryptUtils.obj EventScheduler.obj guiddef.obj NativeSocket.obj NetStream.obj Network.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj StopWatch.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinSock_Utils.obj WTypes.obj
+@set WIN32LIB=BCrypt.obj BCryptUtils.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj StopWatch.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinSock_Utils.obj WTypes.obj
  
 
 
