@@ -54,6 +54,10 @@ Run the tinn.exe program, and pass it the name of the script you want to run:
 
 tinn.exe test_network.lua
 
-And that's that.
+Examples
+--------
+There are a growing number of examples to be found in the TINNSnips project:  
+https://github.com/Wiladams/TINNSnips  
+
 
 
