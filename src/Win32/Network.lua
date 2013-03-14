@@ -143,7 +143,7 @@ Network_t.GetInterfaces = function(self, stype)
     return interfaces;
 end
 
-Network_t.GetLocalInterface = function(self)
+Network_t.GetLocalAddress = function(self)
 	local network = Network();
 
 	local interfaces = network:GetInterfaces();

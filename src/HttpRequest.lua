@@ -143,7 +143,7 @@ local Parse = function(stream)
 
 	--local method, uri, reqmajor, reqminor
 	--method, uri, reqmajor, reqminor = peg.Match(peg.Request_Line, firstline);
-print("--",method, uri,version)
+--print("--",method, uri,version)
 
 	if (not method)  then
 		return nil, "no Http method found"
