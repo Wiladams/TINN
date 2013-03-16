@@ -15,16 +15,18 @@ local BCRYPT_MAKE_INTERFACE_VERSION = function(major,minor)
 	return {band(0xff, major), band(0xff, minor)}
 end
 
--- Flags to BCryptGenRandom
-local BCRYPT_RNG_USE_ENTROPY_IN_BUFFER   = 0x00000001;
-local BCRYPT_USE_SYSTEM_PREFERRED_RNG    = 0x00000002;
 
 
 local BCrypt = {
 
-BCRYPT_SUCCESS = function (Status)
-	return Status >= 0
-end;
+    -- Flags to BCryptGenRandom
+    BCRYPT_RNG_USE_ENTROPY_IN_BUFFER   = 0x00000001;
+    BCRYPT_USE_SYSTEM_PREFERRED_RNG    = 0x00000002;
+
+
+    BCRYPT_SUCCESS = function (Status)
+	   return Status >= 0
+    end;
 
 --[[
 //

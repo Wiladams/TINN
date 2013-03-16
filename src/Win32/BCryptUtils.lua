@@ -345,7 +345,7 @@ CryptUtils.GetRandomBytes = function(howmany)
 
 	local rngBuff = ffi.new("uint8_t[?]", howmany)
 
-	local status =  BCrypt.Lib.BCryptGenRandom(nil, rngBuff, howmany, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+	local status =  BCrypt.Lib.BCryptGenRandom(nil, rngBuff, howmany, BCrypt.BCRYPT_USE_SYSTEM_PREFERRED_RNG);
 	if status >= 0 then
 		return rngBuff, howmany
 	end
