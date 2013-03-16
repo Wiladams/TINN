@@ -162,5 +162,9 @@ EventScheduler_t.Start =  function(self)
 	end
 end
 
+EventScheduler_t.Stop =  function(self)
+	self.ContinueRunning = false;
+end
+
 return EventScheduler
 
