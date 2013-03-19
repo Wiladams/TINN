@@ -42,6 +42,7 @@
 %LUAC% peg_http.lua peg_http.obj
 %LUAC% re.lua re.obj
 %LUAC% ResourceMapper.lua ResourceMapper.obj
+%LUAC% Runtime.lua Runtime.obj
 %LUAC% SimpleFiber.lua SimpleFiber.obj
 %LUAC% StaticService.lua StaticService.obj
 %LUAC% stream.lua stream.obj
@@ -49,7 +50,7 @@
 %LUAC% url.lua url.obj
 %LUAC% utils.lua utils.obj
 %LUAC% zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj CoSocketIo.obj dkjson.obj FileStream.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj MemoryStream.obj mime.obj peg_http.obj re.obj ResourceMapper.obj SimpleFiber.obj StaticService.obj stream.obj stringzutils.obj url.obj utils.obj zlib.obj
+@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj CoSocketIo.obj dkjson.obj FileStream.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj MemoryStream.obj mime.obj peg_http.obj re.obj ResourceMapper.obj Runtime.obj SimpleFiber.obj StaticService.obj stream.obj stringzutils.obj url.obj utils.obj zlib.obj
 
 @rem Create the Win32 specific stuff
 %LUAC% Win32/BCrypt.lua BCrypt.obj
