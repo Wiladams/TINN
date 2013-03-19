@@ -82,7 +82,7 @@ HttpMessage_t.ReadHeaders = function(self, stream)
 		-- a 'nil' return would indicate either
 		-- an error, or 'eof', so check the err
 		headerline, err = stream:ReadLine(4096)
---print("HEADERLINE: ", headerline, err)
+--print("HttpMessage_t.ReadHeaders(), HEADERLINE: ", headerline, err)
 		if not headerline then 
 			return nil, err
 		end

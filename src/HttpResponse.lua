@@ -155,8 +155,8 @@ local Parse = function(stream)
 
 	local firstline, err = stream:ReadLine(4096)
 
---print(string.format("HttpResponse.Parse() - 1.1: '%s', %s", tostring(firstline), tostring(err)));
---print("-- ISBLANK: ", firstline == "");
+print(string.format("HttpResponse.Parse() - 1.1: '%s', %s", tostring(firstline), tostring(err)));
+print("-- ISBLANK: ", firstline == "");
 
 	if not firstline then
 		print("HttpResponse.Parse(), NO First Line: ", err)
@@ -176,9 +176,9 @@ local Parse = function(stream)
 
 --print("HttpResponse.Parse() - 3.0");
 	local resp = HttpResponse(body, headers, status, phrase)
-	resp.Version = version
-	resp.DataStream = stream
-
+	resp.Version = version;
+	resp.DataStream = stream;
+	resp.FirstLine = firstline;
 
 --print("HttpResponse.Parse() - 6.0");
 

@@ -486,11 +486,15 @@ static int runargs(lua_State *L, char **argv, int n)
 
 static int handle_luainit(lua_State *L)
 {
+ 
 #if LJ_TARGET_CONSOLE
   const char *init = NULL;
 #else
   const char *init = getenv(LUA_INIT);
 #endif
+
+  dostring(L, "require'Runtime'", "=");
+
   if (init == NULL)
     return 0;  /* status OK */
   else if (init[0] == '@')
