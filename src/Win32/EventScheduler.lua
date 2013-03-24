@@ -68,6 +68,10 @@ EventScheduler_t.InMainFiber = function(self)
 	return coroutine.running() == nil; 
 end
 
+EventScheduler_t.Yield = function(self)
+	yield();
+end
+
 EventScheduler_t.YieldForIo = function(self, sock, iotype)
 --print("EventScheduler_t.YieldForIo()");
 --print("-- Current Fiber: ", self.CurrentFiber);

@@ -35,5 +35,9 @@ stop = function()
 	return Runtime:Stop();
 end
 
+yield = function()
+	return Runtime:Yield();
+end
+
 -- Simple Return
 return Runtime
