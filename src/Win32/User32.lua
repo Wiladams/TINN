@@ -1,9 +1,67 @@
 
-local ffi = require "ffi"
+local ffi = require("ffi");
+local bit = require("bit");
+local bor = bit.bor;
 
-local user32_ffi = require ("user32_ffi")
+local Kernel32 = require("win_kernel32");
+local user32_ffi = require ("user32_ffi");
+local User32Lib = ffi.load("User32");
 
-local User32Lib = ffi.load("User32")
+
+local RegisterWindowClass = function(wndclassname, msgproc, style)
+	msgproc = msgproc or User32Lib.DefWindowProcA;
+	style = style or bor(user32_ffi.CS_HREDRAW,user32_ffi.CS_VREDRAW, user32_ffi.CS_OWNDC);
+
+	local hInst = Kernel32.Lib.GetModuleHandleA(nil);
+
+	local wcex = ffi.new("WNDCLASSEXA");
+    wcex.cbSize = ffi.sizeof(wcex);
+    wcex.style          = style;
+    wcex.lpfnWndProc    = msgproc;
+    wcex.cbClsExtra     = 0;
+    wcex.cbWndExtra     = 0;
+    wcex.hInstance      = hInst;
+    wcex.hIcon          = nil;		-- LoadIcon(hInst, MAKEINTRESOURCE(IDI_APPLICATION));
+    wcex.hCursor        = nil;		-- LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground  = nil;		-- (HBRUSH)(COLOR_WINDOW+1);
+    wcex.lpszMenuName   = nil;		-- NULL;
+    wcex.lpszClassName  = wndclassname;
+    wcex.hIconSm        = nil;		-- LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
+
+	local classAtom = User32Lib.RegisterClassExA(wcex);
+
+	if classAtom == nil then
+    	return false, "Call to RegistrationClassEx failed."
+    end
+
+	return classAtom;
+end
+
+local CreateWindowHandle = function(winclass, wintitle, width, height, winstyle, x, y)
+	wintitle = wintitle or "Window";
+	winstyle = winstyle or user32_ffi.WS_OVERLAPPEDWINDOW;
+	x = x or user32_ffi.CW_USEDEFAULT;
+	y = y or user32_ffi.CW_USEDEFAULT;
+
+	local hInst = Kernel32.Lib.GetModuleHandleA(nil);
+	local hWnd = User32Lib.CreateWindowExA(
+		0,
+		winclass,
+		wintitle,
+		winstyle,
+		x, y,width, height,
+		nil,	
+		nil,	
+		hInst,
+		nil);
+
+	if hWnd == nil then
+		return false, "error creating window"
+	end
+
+	return hWnd;
+end
+
 
 --[=[
 ffi.cdef[[
@@ -218,6 +276,8 @@ return {
 	
 	GetDC = User32Lib.GetDC;
 	
+	RegisterWindowClass = RegisterWindowClass,
+	CreateWindowHandle = CreateWindowHandle,
 	User32MSGHandler = User32MSGHandler,
 	NativeWindow = NativeWindow,
 	

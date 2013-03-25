@@ -49,9 +49,10 @@
 %LUAC% stringzutils.lua stringzutils.obj
 %LUAC% url.lua url.obj
 %LUAC% utils.lua utils.obj
+%LUAC% vkeys.lua vkeys.obj
 %LUAC% WebSocketStream.lua WebSocketStream.obj
 %LUAC% zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj CoSocketIo.obj dkjson.obj FileStream.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj MemoryStream.obj mime.obj peg_http.obj re.obj ResourceMapper.obj Runtime.obj SimpleFiber.obj StaticService.obj stream.obj stringzutils.obj url.obj utils.obj WebSocketStream.obj zlib.obj
+@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj CoSocketIo.obj dkjson.obj FileStream.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj MemoryStream.obj mime.obj peg_http.obj re.obj ResourceMapper.obj Runtime.obj SimpleFiber.obj StaticService.obj stream.obj stringzutils.obj url.obj utils.obj vkeys.obj WebSocketStream.obj zlib.obj
 
 @rem Create the Win32 specific stuff
 %LUAC% Win32/BCrypt.lua BCrypt.obj
@@ -60,6 +61,7 @@
 %LUAC% Win32/GDI32.lua GDI32.obj
 %LUAC% Win32/gdi32_ffi.lua gdi32_ffi.obj
 %LUAC% Win32/guiddef.lua guiddef.obj
+%LUAC% Win32/KeyMouse.lua KeyMouse.obj
 %LUAC% Win32/NativeSocket.lua NativeSocket.obj
 %LUAC% Win32/NetStream.lua NetStream.obj
 %LUAC% Win32/Network.lua Network.obj
@@ -78,7 +80,7 @@
 %LUAC% Win32/WinSock_Utils.lua WinSock_Utils.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=BCrypt.obj BCryptUtils.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj StopWatch.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinSock_Utils.obj WTypes.obj
+@set WIN32LIB=BCrypt.obj BCryptUtils.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj KeyMouse.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj StopWatch.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinSock_Utils.obj WTypes.obj
  
 
 

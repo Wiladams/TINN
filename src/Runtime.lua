@@ -8,15 +8,19 @@ Runtime.Run = function(self, func, ...)
 		self:Spawn(func, ...);
 	end
 	
-	self.Scheduler:Start();
+	return self.Scheduler:Start();
 end 
 
 Runtime.Spawn = function(self, func, ...)
-	self.Scheduler:Spawn(func, ...);
+	return self.Scheduler:Spawn(func, ...);
 end
 
 Runtime.Stop = function(self)
-	self.Scheduler:Stop();
+	return self.Scheduler:Stop();
+end
+
+Runtime.Yield = function(self)
+	return self.Scheduler:Yield();
 end
 
 --[[

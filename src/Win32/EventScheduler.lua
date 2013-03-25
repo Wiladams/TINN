@@ -1,7 +1,7 @@
 
-local cocreate = coroutine.create
-local resume = coroutine.resume
-local yield = coroutine.yield
+--local cocreate = coroutine.create
+--local resume = coroutine.resume
+--local yield = coroutine.yield
 local costatus = coroutine.status
 
 local Collections = require "Collections"
@@ -69,7 +69,7 @@ EventScheduler_t.InMainFiber = function(self)
 end
 
 EventScheduler_t.Yield = function(self)
-	yield();
+	coroutine.yield();
 end
 
 EventScheduler_t.YieldForIo = function(self, sock, iotype)
@@ -91,7 +91,7 @@ EventScheduler_t.YieldForIo = function(self, sock, iotype)
 
 	-- Whether we were successful or not in adding the socket
 	-- to the pool, perform a yield() so the world can move on.
-	yield();
+	coroutine.yield();
 end
 
 
@@ -161,7 +161,7 @@ EventScheduler_t.Start =  function(self)
 		end
 		
 		--if not self:InMainFiber() then
-		--	yield();
+		--	coroutine.yield();
 		--end
 	end
 end

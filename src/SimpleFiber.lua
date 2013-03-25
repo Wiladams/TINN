@@ -1,9 +1,4 @@
 
-local cocreate = coroutine.create;
-local costatus = coroutine.status;
-local resume = coroutine.resume;
-local yield = coroutine.yield;
-
 --[[
 	Fiber, contains stuff related to a running fiber
 --]]
@@ -13,7 +8,7 @@ local SimpleFiber_mt = {
 }
 
 local SimpleFiber = function(aroutine, ...)
-	local routine = cocreate(aroutine)
+	local routine = coroutine.create(aroutine)
 	if not routine then
 		return nil
 	end
@@ -21,7 +16,7 @@ local SimpleFiber = function(aroutine, ...)
 	local obj = {
 		routine = routine, 
 		params = {...},
-		status = costatus(routine),
+		status = coroutine.status(routine),
 	}
 	setmetatable(obj, SimpleFiber_mt);
 
@@ -29,16 +24,16 @@ local SimpleFiber = function(aroutine, ...)
 end
 
 SimpleFiber_t.Resume = function(self, ...)
-	local success, values = resume(self.routine, unpack(self.params));
+	local success, values = coroutine.resume(self.routine, unpack(self.params));
 
-	self.status = costatus(self.routine)
+	self.status = coroutine.status(self.routine)
 
 	return success, values;
 end
 
 SimpleFiber_t.Suspend = function(self, ...)
 	self.status = "suspended"
-	return yield("suspended", ...)
+	return coroutine.yield("suspended", ...)
 end
 
 

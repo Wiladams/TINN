@@ -544,7 +544,7 @@ HWND CreateWindowExA(
 	LPVOID lpParam
 	);
 
-
+BOOL DestroyWindow(HWND hWnd);
 
 BOOL ShowWindow(HWND hWnd, int nCmdShow);
 
