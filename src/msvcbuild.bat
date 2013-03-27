@@ -49,10 +49,11 @@
 %LUAC% stringzutils.lua stringzutils.obj
 %LUAC% url.lua url.obj
 %LUAC% utils.lua utils.obj
+%LUAC% Vector.lua Vector.obj
 %LUAC% vkeys.lua vkeys.obj
 %LUAC% WebSocketStream.lua WebSocketStream.obj
 %LUAC% zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj CoSocketIo.obj dkjson.obj FileStream.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj MemoryStream.obj mime.obj peg_http.obj re.obj ResourceMapper.obj Runtime.obj SimpleFiber.obj StaticService.obj stream.obj stringzutils.obj url.obj utils.obj vkeys.obj WebSocketStream.obj zlib.obj
+@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj CoSocketIo.obj dkjson.obj FileStream.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj MemoryStream.obj mime.obj peg_http.obj re.obj ResourceMapper.obj Runtime.obj SimpleFiber.obj StaticService.obj stream.obj stringzutils.obj url.obj utils.obj Vector.obj vkeys.obj WebSocketStream.obj zlib.obj
 
 @rem Create the Win32 specific stuff
 %LUAC% Win32/BCrypt.lua BCrypt.obj
@@ -98,7 +99,7 @@ if exist tinn.exe.manifest^
 @del *.obj *.manifest
 @echo.
 @echo === Successfully built TINN for Windows/%LJARCH% ===
-copy tinn.exe bin 
+move tinn.exe bin 
 @goto :END
 :BAD
 @echo.

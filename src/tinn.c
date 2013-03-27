@@ -530,7 +530,9 @@ static int pmain(lua_State *L)
   }
   lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
   luaL_openlibs(L);  /* open libraries */
+  luaopen_lpeg(L);
   lua_gc(L, LUA_GCRESTART, -1);
+
   if (!(flags & FLAGS_NOENV)) {
     s->status = handle_luainit(L);
     if (s->status != 0) return 0;

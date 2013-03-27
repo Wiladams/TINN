@@ -8,18 +8,18 @@ local u32 = require("user32_ffi");
 local vkeys = require("vkeys");
 
 local buttonmsgmap = {}
-buttonmsgmap[u32.WM_LBUTTONDOWN]	= VK_LBUTTON;
-buttonmsgmap[u32.WM_LBUTTONUP]		= VK_LBUTTON;
-buttonmsgmap[u32.WM_LBUTTONDBLCLK]	= VK_LBUTTON;
-buttonmsgmap[u32.WM_RBUTTONDOWN]	= VK_RBUTTON;
-buttonmsgmap[u32.WM_RBUTTONUP]		= VK_RBUTTON;
-buttonmsgmap[u32.WM_RBUTTONDBLCLK]	= VK_RBUTTON;
-buttonmsgmap[u32.WM_MBUTTONDOWN]	= VK_MBUTTON;
-buttonmsgmap[u32.WM_MBUTTONUP]		= VK_MBUTTON;
-buttonmsgmap[u32.WM_MBUTTONDBLCLK]	= VK_MBUTTON;
-buttonmsgmap[u32.WM_XBUTTONDOWN]	= VK_XBUTTON1;
-buttonmsgmap[u32.WM_XBUTTONUP]		= VK_XBUTTON1;
-buttonmsgmap[u32.WM_XBUTTONDBLCLK]	= VK_XBUTTON1;
+buttonmsgmap[u32.WM_LBUTTONDOWN]	= vkeys.LBUTTON;
+buttonmsgmap[u32.WM_LBUTTONUP]		= vkeys.LBUTTON;
+buttonmsgmap[u32.WM_LBUTTONDBLCLK]	= vkeys.LBUTTON;
+buttonmsgmap[u32.WM_RBUTTONDOWN]	= vkeys.RBUTTON;
+buttonmsgmap[u32.WM_RBUTTONUP]		= vkeys.RBUTTON;
+buttonmsgmap[u32.WM_RBUTTONDBLCLK]	= vkeys.RBUTTON;
+buttonmsgmap[u32.WM_MBUTTONDOWN]	= vkeys.MBUTTON;
+buttonmsgmap[u32.WM_MBUTTONUP]		= vkeys.MBUTTON;
+buttonmsgmap[u32.WM_MBUTTONDBLCLK]	= vkeys.MBUTTON;
+buttonmsgmap[u32.WM_XBUTTONDOWN]	= vkeys.XBUTTON1;
+buttonmsgmap[u32.WM_XBUTTONUP]		= vkeys.XBUTTON1;
+buttonmsgmap[u32.WM_XBUTTONDBLCLK]	= vkeys.XBUTTON1;
 
 local LOWORD = function(param)
 	return band(param, 0x0000ffff);
@@ -57,7 +57,6 @@ local ConvertKeyMouse = function(hWnd, msg, wParam, lParam)
 
 	if msg == u32.WM_LBUTTONDOWN or msg == u32.WM_RBUTTONDOWN or
 		msg == u32.WM_MBUTTONDOWN or msg == u32.WM_XBUTTONDOWN then
-
 		return {kind="mousedown", x=LOWORD(lParam), y=HIWORD(lParam), modifiers = LOWORD(wParam), button=buttonmsgmap[msg]}
 	end
 
