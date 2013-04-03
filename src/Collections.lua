@@ -104,6 +104,19 @@ function Queue:Len()
 	return self.last - self.first+1
 end
 
+function Queue:Entries(func, param)
+	local starting = self.first-1;
+	local len = self:Len();
+
+	local closure = function()
+		starting = starting + 1;
+		return self[starting];
+	end
+
+	return closure;
+end
+
+
 return {
 	List = List;
 	Queue = Queue;
