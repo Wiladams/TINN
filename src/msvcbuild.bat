@@ -83,7 +83,10 @@
 
 @set WIN32LIB=BCrypt.obj BCryptUtils.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj KeyMouse.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj StopWatch.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinSock_Utils.obj WTypes.obj
  
+@rem Create the graphics specific stuff
+%LUAC% graphics/math_matrix.lua math_matrix.obj
 
+@set GRAPHICSLIB=math_matrix.obj
 
 %LJCOMPILE% lpeg.c
 @if errorlevel 1 goto :BAD
@@ -91,7 +94,7 @@
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinn.exe tinn.obj %CLIBS% %TINNLIB% %WIN32LIB% %LJLIBNAME%
+%LJLINK% /out:tinn.exe tinn.obj %CLIBS% %TINNLIB% %GRAPHICSLIB% %WIN32LIB% %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinn.exe.manifest^
   %LJMT% -manifest tinn.exe.manifest -outputresource:tinn.exe
