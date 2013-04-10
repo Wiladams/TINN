@@ -55,12 +55,17 @@ end
 
 local test_mat2 = function()
 	local m1 = mat2({{3,1},{5,2}})
-	local d = math_matrix.mat2_det(m1);
+--[[
+	local d = m1:determinant();
 
 	print("m1")
 	print(m1);
 	print("DET: ", d);
+--]]
 	
+	local rescale = m1 / 2;
+	print("RESCALE");
+	print(rescale);
 end
 
 local test_cofactor = function()
@@ -375,14 +380,14 @@ local test_swizzling = function()
 	print("t1 == t2: ", t1 == t2);
 end
 
-test_vec();
+--test_vec();
 --test_normal();
 --test_cofactor();
 --test_determinant();
 --test_inverse();
 --test_transpose();
 
---test_mat2();
+test_mat2();
 --test_matrix();
 --test_matrix1();
 --test_matrix2();

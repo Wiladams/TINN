@@ -231,13 +231,15 @@ local function make_matrix_kind(ct, rows, columns)
 
 
 		divSelf = function(self, other)
+
 			if type(other) == "cdata" then
 				for i=0,nelems-1 do 
 					self.data[i] = self.data[i] / other.data[i];
 				end
-			elseif type(other)  == "number" then
+			elseif tonumber(other) then
+				local anum = tonumber(other)
 				for i=0,nelems-1 do 
-					self.data[i] = self.data[i] / other;
+					self.data[i] = self.data[i] / anum;
 				end
 			end
 
@@ -539,6 +541,7 @@ local function make_matrix_kind(ct, rows, columns)
 
 		__add = function(self, other) return mat_kind(self):addSelf(other); end;
 		__sub = function(self, other) return mat_kind(self):subSelf(other); end;
+		__div = function(self, other) return mat_kind(self):divSelf(other); end;
 		__unm = function(self) return mat_kind(self):negateSelf(); end;
 
 		-- this one does an algebraic mulitplication, NOT a member-wise
