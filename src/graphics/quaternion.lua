@@ -53,10 +53,10 @@ quaternion_mt = {
 		end
 
 		return quaternion_t.new(
-			a.y*r[2] - a.z*r[1] + r[3]*a.x + a.w*r[0],
-			a.z*r[0] - a.x*r[2] + r[3]*a.y + a.w*r[1],
-			a.x*r[1] - a.y*r[0] + r[3]*a.z + a.w*r[2],
-			a.w*r[3] - a.x*r[0] - a.y*r[1] - a.z*r[2]
+			a.y*r.z - a.z*r.y + r.w*a.x + a.w*r.x,
+			a.z*r.x - a.x*r.z + r.w*a.y + a.w*r.y,
+			a.x*r.y - a.y*r.x + r.w*a.z + a.w*r.z,
+			a.w*r.w - a.x*r.x - a.y*r.y - a.z*r.z
 		);
 	end,
 
@@ -83,12 +83,12 @@ quaternion_t.dot = function(q1, q2)
 	return q1.x*q2.x+q1.y*q2.y+q1.z*q2.z+ q1.w*q2.w;
 end
 
-quaternion_t.norm = function(q)
+quaternion_t.length = function(q)
 	return sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
 end
 
 quaternion_t.normalize = function(q)
-	return q/q:norm();
+	return q/q:length();
 end
 
 quaternion_t.conj = function(q)
@@ -96,12 +96,27 @@ quaternion_t.conj = function(q)
 end
 
 quaternion_t.distance = function(q1, q2)
-	return (q1-q2):norm();
+	return (q1-q2):normalize();
 end
 
 -- Converting quaternion to matrix4x4
 quaternion_t.toMat4 = function(q)
+	m1 = mat4({
+		{ q.w, -q.z,  q.y, q.x},
+		{ q.z,  q.w, -q.x, q.y},
+		{-q.y,  q.x,  q.w, q.z},
+		{-q.x, -q.y, -q.z, q.w}
+		});
+	m2 = mat4({
+		{q.w, -q.z, q.y -q.x},
+		{q.z, q.w, -q.x, -q.y},
+		{-q.y, q.x, q.w, -q.z},
+		{q.x, q.y, q.z, q.w}
+		});
 
+	return m1 * m2;
+
+--[[
 	local function quat_to_mat4_s(q)
 		local lensq = q:dot(q);
 		if (lensq~=0) then
@@ -144,6 +159,7 @@ quaternion_t.toMat4 = function(q)
 	return _quat_to_mat4(
 	_quat_xyzsw(quat_to_mat4_xyzs(q, quat_to_mat4_s(q)),q.w), 
 	_quat_XYZ(quat_to_mat4_xyzs(q, quat_to_mat4_s(q)), q));
+--]]
 end
 
 quaternion_t.identity = quaternion_t.new(0,0,0,1);
@@ -160,10 +176,10 @@ quaternion_t.identity = quaternion_t.new(0,0,0,1);
 --]]
 quaternion_t.fromAxisAngle = function(axis, angle)
 	local _quat = function(a, s, c) 	
-		return quaternion_t.new(a[1]*s, a[2]*s, a[3]*s,c);
+		return quaternion_t.new(a[0]*s, a[1]*s, a[2]*s,c);
 	end
 	
-	return _quat(VNORM(axis), 
+	return _quat(axis:normal(), 
 		sin(angle/2), 
 		cos(angle/2));
 end
