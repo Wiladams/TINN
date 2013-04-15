@@ -85,8 +85,24 @@
  
 @rem Create the graphics specific stuff
 %LUAC% graphics/math_matrix.lua math_matrix.obj
+%LUAC% graphics/quaternion.lua quaternion.obj
 
-@set GRAPHICSLIB=math_matrix.obj
+@set GRAPHICSLIB=math_matrix.obj quaternion
+
+
+@rem Khronos library
+%LUAC% khronos/gl.lua gl.obj
+%LUAC% khronos/GLContext.lua GLContext.obj
+%LUAC% khronos/glext.lua glext.obj
+%LUAC% khronos/GLSLProgram.lua GLSLProgram.obj
+%LUAC% khronos/GLTexture.lua GLTexture.obj
+%LUAC% khronos/glu.lua glu.obj
+%LUAC% khronos/GLWindow.lua GLWindow.obj
+%LUAC% khronos/OglMan.lua OglMan.obj
+%LUAC% khronos/View3D.lua View3D.obj
+%LUAC% khronos/wglext.lua wglext.obj
+
+@set KHRONOSLIB=gl.obj GLContext.obj glext.obj GLSLProgram.obj GLTexture.obj glu.obj GLWindow.obj OglMan.obj View3D.obj wglext.obj
 
 %LJCOMPILE% lpeg.c
 @if errorlevel 1 goto :BAD
@@ -94,7 +110,7 @@
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinn.exe tinn.obj %CLIBS% %TINNLIB% %GRAPHICSLIB% %WIN32LIB% %LJLIBNAME%
+%LJLINK% /out:tinn.exe tinn.obj %CLIBS% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WIN32LIB% %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinn.exe.manifest^
   %LJMT% -manifest tinn.exe.manifest -outputresource:tinn.exe

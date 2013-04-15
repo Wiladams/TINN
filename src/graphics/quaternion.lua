@@ -11,8 +11,17 @@ local sqrt = math.sqrt;
 local math_matrix = require("math_matrix");
 local mat4 = math_matrix.mat4;
 
-quaternion_t = {}
-quaternion_mt = {
+
+
+local quaternion_t = {}
+
+setmetatable(quaternion_t, {
+	__call = function(self, ...)
+		return quaternion_t.new(...);
+	end,
+	})
+
+local quaternion_mt = {
 	__index = quaternion_t;
 
 	-- Basic quaternion arithmetic
@@ -67,13 +76,38 @@ quaternion_mt = {
 }
 
 
-quaternion_t.new = function(x, y, z, w)
-	local obj = {
-		x=x; 
-		y=y; 
-		z=z; 
-		w=w;
-		};
+--[[
+	Construct a Quaternion
+	method 1:
+	  quaternion(x,y,z,w)
+
+	method 2:
+	  quaternion(axis, angle)
+
+	method 3:
+	  quaternion(quaternion)
+--]]
+quaternion_t.new = function(...)
+	local nargs = select('#', ...)
+	
+	local obj = {}
+	if nargs == 4 then
+		obj.x=select(1,...); 
+		obj.y=select(2,...); 
+		obj.z=select(3,...); 
+		obj.w=select(4,...);
+	elseif nargs == 2 then
+		local axis = select(1,...);
+		local angle = select(2,...);
+		local a = axis:normal();
+		local s = sin(angle/2);
+		local c = cos(angle/2);
+
+		obj.x = a[0]*s;
+		obj.y = a[1]*s;
+		obj.z = a[2]*s;
+		obj.w = c;
+	end
 	setmetatable(obj, quaternion_mt);
 
 	return  obj;
@@ -99,8 +133,15 @@ quaternion_t.distance = function(q1, q2)
 	return (q1-q2):normalize();
 end
 
+quaternion_t.slerp = function(p, q, t, theta)
+	return (sin((1-t)*theta)*p + sin(t*theta)*q)/sin(theta);
+end
+
 -- Converting quaternion to matrix4x4
 quaternion_t.toMat4 = function(q)
+	-- This conversion could be multiplied out in long
+	-- form, but, assuming we have fast matrix multiply
+	-- just use that instead for simplicity
 	m1 = mat4({
 		{ q.w, -q.z,  q.y, q.x},
 		{ q.z,  q.w, -q.x, q.y},
@@ -115,73 +156,9 @@ quaternion_t.toMat4 = function(q)
 		});
 
 	return m1 * m2;
-
---[[
-	local function quat_to_mat4_s(q)
-		local lensq = q:dot(q);
-		if (lensq~=0) then
-			return 2/lensq;
-		end 
-
-		return 0;
-	end
-
-	local function quat_to_mat4_xyzs(q, s)
-		return {q.x*s,q.y*s, q.z*s};
-	end
-
-	local function quat_to_mat4_X(xyzs, x) 
-		return xyzs*x;
-	end
-
-	local function _quat_xyzsw(xyzs, w)
-		return  xyzs*w;
-	end
-
-	local function _quat_XYZ(xyzs, q)
-		return {
-			quat_to_mat4_X(xyzs, q.x),
-			quat_to_mat4_X(xyzs, q.y),
-			quat_to_mat4_X(xyzs,q.z)
-		};
- 	end
-
-	local function _quat_to_mat4(xyzsw, XYZ) 
-		local m4 = mat4();
-		-- set each of these as a column
-		m4:setColumn(0,{(1.0-(ZYZ[2][2]+ZYZ[3][3])),  (ZYZ[1][2]-xyzsw[2]), (ZYZ[1][3]+xyzsw[1]), 0});
-		m4:setColumn(1,{(ZYZ[1][2]+xyzsw[2]), (1-(ZYZ[1][1]+ZYZ[3][3])), (ZYZ[2][3]-xyzsw[0]), 0});
-		m4:setColumn(2,{(ZYZ[1][3]-xyzsw[1]), (ZYZ[2][3]+xyzsw[0]), (1.0-(ZYZ[1][1]+ZYZ[2][2])), 0}); 
-		m4:setColumn(3,{0,  0, 0, 1});
-	end
-
-
-	return _quat_to_mat4(
-	_quat_xyzsw(quat_to_mat4_xyzs(q, quat_to_mat4_s(q)),q.w), 
-	_quat_XYZ(quat_to_mat4_xyzs(q, quat_to_mat4_s(q)), q));
---]]
 end
 
 quaternion_t.identity = quaternion_t.new(0,0,0,1);
 
---[[
-	Function: quat
-
-	Description: Create a quaternion which represents a rotation
-	around a specified axis by a given angle.
-
-	Parameters
-		axis - vec3
-		angle - The amount of rotation in degrees
---]]
-quaternion_t.fromAxisAngle = function(axis, angle)
-	local _quat = function(a, s, c) 	
-		return quaternion_t.new(a[0]*s, a[1]*s, a[2]*s,c);
-	end
-	
-	return _quat(axis:normal(), 
-		sin(angle/2), 
-		cos(angle/2));
-end
 
 return quaternion_t;
