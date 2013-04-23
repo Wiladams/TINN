@@ -77,6 +77,8 @@ local WindowProc = function(hwnd, msg, wparam, lparam)
 	-- if we have a win, then the window is capable
 	-- of handling the message
 	if win then
+		--print(string.format("MSG: 0x%x",msg));
+
 		if (win.MessageDelegate) then
 			result = win.MessageDelegate(hwnd, msg, wparam, lparam)
 			return result
@@ -108,15 +110,14 @@ local WindowProc = function(hwnd, msg, wparam, lparam)
 		if msg == User32.FFI.WM_SIZE then
 			local newWidth = LOWORD(lparam);
 			local newHeight = HIWORD(lparam);
-			print("WM_SIZE: ", wparam, newWidth, newHeight);
+			--print("WM_SIZE: ", wparam, newWidth, newHeight);
 
 			win:OnWindowResized(newWidth, newHeight);
 		end
 
 	end
 
-	-- otherwise, it's not associated with a window that we know
-	-- so do default processing
+	-- If we have reached here, then do default message processing
 	return User32.Lib.DefWindowProcA(hwnd, msg, wparam, lparam);
 end
 
@@ -213,7 +214,7 @@ function GLWindow_t:CreateWindow(params)
 	local dwExStyle = bit.bor(User32.FFI.WS_EX_APPWINDOW, User32.FFI.WS_EX_WINDOWEDGE)
 	local dwStyle = bit.bor(User32.FFI.WS_SYSMENU, User32.FFI.WS_VISIBLE, User32.FFI.WS_POPUP)
 
-print("GameWindow:CreateWindow - 1.0")
+--print("GameWindow:CreateWindow - 1.0")
 	local hwnd = User32.Lib.CreateWindowExA(
 		0,
 		self.ClassName,
@@ -226,7 +227,7 @@ print("GameWindow:CreateWindow - 1.0")
 		nil,
 		self.AppInstance,
 		nil)
-print("GameWindow:CreateWindow - 2.0")
+--print("GameWindow:CreateWindow - 2.0")
 
 	assert(hwnd,"unable to create window"..tostring(Kernel32.GetLastError()))
 
@@ -268,7 +269,7 @@ end
 
 
 function GLWindow_t:OnCreated(hwnd)
-print("GLWindow:OnCreated: ", hwnd)
+--print("GLWindow:OnCreated: ", hwnd)
 
 	local winptr = ffi.cast("intptr_t", hwnd)
 	local winnum = tonumber(winptr)
@@ -278,7 +279,7 @@ print("GLWindow:OnCreated: ", hwnd)
 
 	self.GDIContext = DeviceContext(User32.Lib.GetDC(self.WindowHandle));
 
-print("GDIContext: ", self.GDIContext, self.GDIContext.Handle);
+--print("GDIContext: ", self.GDIContext, self.GDIContext.Handle);
 	self.GDIContext:UseDCPen()
 	self.GDIContext:UseDCBrush()
 
@@ -291,7 +292,7 @@ print("GDIContext: ", self.GDIContext, self.GDIContext.Handle);
 end
 
 function GLWindow_t:OnDestroy()
-	print("GameWindow:OnDestroy")
+	--print("GameWindow:OnDestroy")
 
 	ffi.C.PostQuitMessage(0)
 
@@ -299,9 +300,9 @@ function GLWindow_t:OnDestroy()
 end
 
 function GLWindow_t:OnQuit()
-print("GameWindow:OnQuit")
+--print("GameWindow:OnQuit")
 	self.IsRunning = false
-stop();
+	stop();
 	-- delete glcontext
 	--if self.GLContext then
 	--	self.GLContext:Destroy()
@@ -315,7 +316,7 @@ function GLWindow_t:OnTick(tickCount)
 end
 
 function GLWindow_t:OnFocusMessage(msg)
-print("OnFocusMessage")
+--print("OnFocusMessage")
 	if (self.OnSetFocusDelegate) then
 		self.OnSetFocusDelegate(self, msg)
 	end

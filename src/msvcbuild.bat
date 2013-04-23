@@ -70,6 +70,7 @@
 %LUAC% Win32/SocketPool.lua SocketPool.obj
 %LUAC% Win32/SocketUtils.lua SocketUtils.obj
 %LUAC% Win32/StopWatch.lua StopWatch.obj
+%LUAC% Win32/UIOSimulator.lua UIOSimulator.obj
 %LUAC% Win32/User32.lua User32.obj
 %LUAC% Win32/user32_ffi.lua user32_ffi.obj
 %LUAC% Win32/WebApp.lua WebApp.obj
@@ -81,7 +82,7 @@
 %LUAC% Win32/WinSock_Utils.lua WinSock_Utils.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=BCrypt.obj BCryptUtils.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj KeyMouse.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj StopWatch.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinSock_Utils.obj WTypes.obj
+@set WIN32LIB=BCrypt.obj BCryptUtils.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj KeyMouse.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj StopWatch.obj UIOSimulator.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinSock_Utils.obj WTypes.obj
  
 @rem Create the graphics specific stuff
 %LUAC% graphics/math_matrix.lua math_matrix.obj
