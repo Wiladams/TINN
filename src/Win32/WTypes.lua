@@ -68,6 +68,7 @@ typedef ULONG_PTR *		PULONG_PTR;
 typedef DWORD *			LPCOLORREF;
 
 typedef BOOL *			LPBOOL;
+typedef BYTE *      LPBYTE;
 typedef char *			LPSTR;
 typedef short *			LPWSTR;
 typedef short *			PWSTR;
@@ -123,6 +124,7 @@ typedef HANDLE 			HGLRC;
 typedef HANDLE			HHOOK;
 typedef void *			HINSTANCE;
 typedef void *			HKEY;
+typedef HKEY *      PHKEY;
 typedef void *			HKL;
 typedef HANDLE			HLOCAL;
 typedef void *			HMEMF;
@@ -189,8 +191,10 @@ typedef struct _ULARGE_INTEGER
 {
     ULONGLONG QuadPart;
 } 	ULARGE_INTEGER;
+]]
 
 
+ffi.cdef[[
 typedef struct _FILETIME
 {
     DWORD dwLowDateTime;
