@@ -302,7 +302,8 @@ end
 
 return {
 	strlen = strlen,
-
+	strcpy = strcpy,
+	
 	bintohex = bintohex,
 	hextobin = hextobin,
 }
