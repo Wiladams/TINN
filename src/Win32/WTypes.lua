@@ -7,6 +7,17 @@ local bor = bit.bor
 local lshift = bit.lshift
 local rshift = bit.rshift
 
+ffi.cdef[[
+
+
+typedef uint32_t *  PDWORD;
+typedef long *    PLONG;
+typedef uint64_t  ULONG64;
+typedef uint64_t *  PULONG64;
+typedef uint64_t    DWORD64;
+typedef uint64_t *  PDWORD64;
+]]
+
 
 ffi.cdef[[
 

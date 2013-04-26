@@ -20,7 +20,6 @@
 @set LUAC=luajit -b
 @set LJDLLNAME=lua51.dll
 @set LJLIBNAME=lua51.lib
-@set ALL_LIB=Collections.lua
 
 
 @rem The TINN core library
@@ -37,6 +36,7 @@
 %LUAC% HttpMessage.lua HttpMessage.obj
 %LUAC% HttpRequest.lua HttpRequest.obj
 %LUAC% HttpResponse.lua HttpResponse.obj
+%LUAC% core/langutils.lua langutils.obj
 %LUAC% MemoryStream.lua MemoryStream.obj
 %LUAC% mime.lua mime.obj
 %LUAC% peg_http.lua peg_http.obj
@@ -53,11 +53,12 @@
 %LUAC% vkeys.lua vkeys.obj
 %LUAC% WebSocketStream.lua WebSocketStream.obj
 %LUAC% zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj CoSocketIo.obj dkjson.obj FileStream.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj MemoryStream.obj mime.obj peg_http.obj re.obj ResourceMapper.obj Runtime.obj SimpleFiber.obj StaticService.obj stream.obj stringzutils.obj url.obj utils.obj Vector.obj vkeys.obj WebSocketStream.obj zlib.obj
+@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj CoSocketIo.obj dkjson.obj FileStream.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj langutils.obj MemoryStream.obj mime.obj peg_http.obj re.obj ResourceMapper.obj Runtime.obj SimpleFiber.obj StaticService.obj stream.obj stringzutils.obj url.obj utils.obj Vector.obj vkeys.obj WebSocketStream.obj zlib.obj
 
 @rem Create the Win32 specific stuff
 %LUAC% Win32/BCrypt.lua BCrypt.obj
 %LUAC% Win32/BCryptUtils.lua BCryptUtils.obj
+%LUAC% Win32/dbghelp_ffi.lua dbghelp_ffi.obj
 %LUAC% Win32/EventScheduler.lua EventScheduler.obj
 %LUAC% Win32/GDI32.lua GDI32.obj
 %LUAC% Win32/gdi32_ffi.lua gdi32_ffi.obj
@@ -69,6 +70,10 @@
 %LUAC% Win32/SocketIoPool.lua SocketIoPool.obj
 %LUAC% Win32/SocketPool.lua SocketPool.obj
 %LUAC% Win32/SocketUtils.lua SocketUtils.obj
+%LUAC% Win32/schannel.lua schannel.obj
+%LUAC% Win32/SecError.lua SecError.obj
+%LUAC% Win32/sspi.lua sspi.obj
+%LUAC% Win32/sspi_ffi.lua sspi_ffi.obj
 %LUAC% Win32/StopWatch.lua StopWatch.obj
 %LUAC% Win32/UIOSimulator.lua UIOSimulator.obj
 %LUAC% Win32/User32.lua User32.obj
@@ -79,10 +84,11 @@
 %LUAC% Win32/win_socket.lua win_socket.obj
 %LUAC% Win32/WinBase.lua WinBase.obj
 %LUAC% Win32/WinCrypt.lua WinCrypt.obj
+%LUAC% Win32/WinNT.lua WinNT.obj
 %LUAC% Win32/WinSock_Utils.lua WinSock_Utils.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=BCrypt.obj BCryptUtils.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj KeyMouse.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj StopWatch.obj UIOSimulator.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinSock_Utils.obj WTypes.obj
+@set WIN32LIB=BCrypt.obj BCryptUtils.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj KeyMouse.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj sspi_ffi.obj StopWatch.obj UIOSimulator.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinNT.obj WinSock_Utils.obj WTypes.obj
  
 @rem Create the graphics specific stuff
 %LUAC% graphics/math_matrix.lua math_matrix.obj
