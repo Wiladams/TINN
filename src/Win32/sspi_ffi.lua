@@ -175,13 +175,7 @@ typedef PSecHandle PCtxtHandle;
 
 
 
-if WIN32_CHICAGO then
-ffi.cdef[[
-typedef unsigned int64_t QWORD;
-typedef QWORD SECURITY_INTEGER, *PSECURITY_INTEGER;
-]]
-
-elseif (_NTDEF_) or (_WINNT_) then
+if (_NTDEF_) or (_WINNT_) then
 ffi.cdef[[
 typedef LARGE_INTEGER _SECURITY_INTEGER, SECURITY_INTEGER, *PSECURITY_INTEGER; 
 ]]

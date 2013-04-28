@@ -2,7 +2,12 @@
 -- From WinBase.h
 local ffi = require "ffi"
 
-require "WTypes"
+require ("WTypes");
+require ("Handle_ffi");
+require ("Heap_ffi");
+require ("SysInfo_ffi");
+require ("UMS_ffi");
+require ("Util_ffi");
 
 -- Winnt.h
 MAXIMUM_WAIT_OBJECTS = 64     -- Maximum number of wait objects
@@ -179,98 +184,6 @@ THREAD_TERMINATE					= 0x0001
 --]]
 
 
-
-PROCESS_HEAP_REGION             =0x0001
-PROCESS_HEAP_UNCOMMITTED_RANGE  =0x0002
-PROCESS_HEAP_ENTRY_BUSY         =0x0004
-PROCESS_HEAP_ENTRY_MOVEABLE     =0x0010
-PROCESS_HEAP_ENTRY_DDESHARE     =0x0020
-
-HEAP_NO_SERIALIZE				= 0x00000001
-HEAP_GENERATE_EXCEPTIONS		= 0x00000004
-HEAP_ZERO_MEMORY				= 0x00000008
-HEAP_REALLOC_IN_PLACE_ONLY		= 0x00000010
-HEAP_CREATE_ENABLE_EXECUTE		= 0x00040000
-
-
-ffi.cdef[[
-
-
-typedef struct _PROCESS_HEAP_ENTRY {
-    PVOID lpData;
-    DWORD cbData;
-    BYTE cbOverhead;
-    BYTE iRegionIndex;
-    WORD wFlags;
-    union {
-        struct {
-            HANDLE hMem;
-            DWORD dwReserved[ 3 ];
-        } Block;
-        struct {
-            DWORD dwCommittedSize;
-            DWORD dwUnCommittedSize;
-            LPVOID lpFirstBlock;
-            LPVOID lpLastBlock;
-        } Region;
-    } DUMMYUNIONNAME;
-} PROCESS_HEAP_ENTRY, *LPPROCESS_HEAP_ENTRY, *PPROCESS_HEAP_ENTRY;
-
-
-HANDLE HeapCreate(DWORD flOptions,
-    SIZE_T dwInitialSize,
-    SIZE_T dwMaximumSize);
-
-
-BOOL HeapDestroy(HANDLE hHeap);
-
-
-LPVOID HeapAlloc(
-    HANDLE hHeap,
-    DWORD dwFlags,
-    SIZE_T dwBytes);
-
-
-LPVOID HeapReAlloc(HANDLE hHeap,
-	DWORD dwFlags,
-    LPVOID lpMem,
-	SIZE_T dwBytes);
-
-BOOL HeapFree(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem);
-
-SIZE_T HeapSize(HANDLE hHeap, DWORD dwFlags, LPCVOID lpMem);
-
-BOOL HeapValidate(HANDLE hHeap, DWORD dwFlags, LPCVOID lpMem);
-
-SIZE_T HeapCompact(HANDLE hHeap, DWORD dwFlags);
-
-HANDLE GetProcessHeap( void );
-
-DWORD GetProcessHeaps(DWORD NumberOfHeaps, PHANDLE ProcessHeaps);
-
-BOOL HeapLock(HANDLE hHeap);
-
-BOOL HeapUnlock(HANDLE hHeap);
-
-BOOL HeapWalk(HANDLE hHeap, PROCESS_HEAP_ENTRY * lpEntry);
-
-]]
-
---[[
-BOOL HeapSetInformation (HANDLE HeapHandle,
-    HEAP_INFORMATION_CLASS HeapInformationClass,
-    PVOID HeapInformation,
-    SIZE_T HeapInformationLength);
-
-BOOL HeapQueryInformation (HANDLE HeapHandle,
-    HEAP_INFORMATION_CLASS HeapInformationClass,
-    __out_bcount_part_opt(HeapInformationLength, *ReturnLength) PVOID HeapInformation,
-    SIZE_T HeapInformationLength,
-    __out_opt PSIZE_T ReturnLength
-    );
---]]
-
-
 ffi.cdef[[
 typedef struct _OVERLAPPED {
     ULONG_PTR Internal;
@@ -287,7 +200,12 @@ typedef struct _OVERLAPPED {
     HANDLE hEvent;
 } OVERLAPPED, *LPOVERLAPPED;
 
-
+typedef struct _PROCESS_INFORMATION {
+    HANDLE hProcess;
+    HANDLE hThread;
+    DWORD dwProcessId;
+    DWORD dwThreadId;
+} PROCESS_INFORMATION, *PPROCESS_INFORMATION, *LPPROCESS_INFORMATION;
 
 BOOL GetQueuedCompletionStatus(
     HANDLE CompletionPort,
@@ -318,3 +236,146 @@ typedef struct _BY_HANDLE_FILE_INFORMATION {
     DWORD nFileIndexLow;
 } BY_HANDLE_FILE_INFORMATION, *PBY_HANDLE_FILE_INFORMATION, *LPBY_HANDLE_FILE_INFORMATION;
 ]]
+
+
+ffi.cdef[[
+//
+// Dual Mode API below this line. Dual Mode Structures also included.
+//
+
+static const int  STARTF_USESHOWWINDOW    =0x00000001;
+static const int  STARTF_USESIZE          =0x00000002;
+static const int  STARTF_USEPOSITION      =0x00000004;
+static const int  STARTF_USECOUNTCHARS    =0x00000008;
+static const int  STARTF_USEFILLATTRIBUTE =0x00000010;
+static const int  STARTF_RUNFULLSCREEN    =0x00000020; // ignored for non-x86 platforms
+static const int  STARTF_FORCEONFEEDBACK  =0x00000040;
+static const int  STARTF_FORCEOFFFEEDBACK =0x00000080;
+static const int  STARTF_USESTDHANDLES    =0x00000100;
+
+
+static const int  STARTF_USEHOTKEY        =0x00000200;
+static const int  STARTF_TITLEISLINKNAME  =0x00000800;
+static const int  STARTF_TITLEISAPPID     =0x00001000;
+static const int  STARTF_PREVENTPINNING   =0x00002000;
+
+typedef struct _STARTUPINFOA {
+    DWORD   cb;
+    LPSTR   lpReserved;
+    LPSTR   lpDesktop;
+    LPSTR   lpTitle;
+    DWORD   dwX;
+    DWORD   dwY;
+    DWORD   dwXSize;
+    DWORD   dwYSize;
+    DWORD   dwXCountChars;
+    DWORD   dwYCountChars;
+    DWORD   dwFillAttribute;
+    DWORD   dwFlags;
+    WORD    wShowWindow;
+    WORD    cbReserved2;
+    LPBYTE  lpReserved2;
+    HANDLE  hStdInput;
+    HANDLE  hStdOutput;
+    HANDLE  hStdError;
+} STARTUPINFOA, *LPSTARTUPINFOA;
+
+typedef struct _STARTUPINFOW {
+    DWORD   cb;
+    LPWSTR  lpReserved;
+    LPWSTR  lpDesktop;
+    LPWSTR  lpTitle;
+    DWORD   dwX;
+    DWORD   dwY;
+    DWORD   dwXSize;
+    DWORD   dwYSize;
+    DWORD   dwXCountChars;
+    DWORD   dwYCountChars;
+    DWORD   dwFillAttribute;
+    DWORD   dwFlags;
+    WORD    wShowWindow;
+    WORD    cbReserved2;
+    LPBYTE  lpReserved2;
+    HANDLE  hStdInput;
+    HANDLE  hStdOutput;
+    HANDLE  hStdError;
+} STARTUPINFOW, *LPSTARTUPINFOW;
+]]
+
+if UNICODE then
+ffi.cdef[[
+typedef STARTUPINFOW STARTUPINFO;
+typedef LPSTARTUPINFOW LPSTARTUPINFO;
+]]
+else
+ffi.cdef[[
+typedef STARTUPINFOA STARTUPINFO;
+typedef LPSTARTUPINFOA LPSTARTUPINFO;
+]]
+end -- UNICODE
+
+ffi.cdef[[
+typedef struct _PROC_THREAD_ATTRIBUTE_LIST *PPROC_THREAD_ATTRIBUTE_LIST, *LPPROC_THREAD_ATTRIBUTE_LIST;
+
+typedef struct _STARTUPINFOEXA {
+    STARTUPINFOA StartupInfo;
+    LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList;
+} STARTUPINFOEXA, *LPSTARTUPINFOEXA;
+typedef struct _STARTUPINFOEXW {
+    STARTUPINFOW StartupInfo;
+    LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList;
+} STARTUPINFOEXW, *LPSTARTUPINFOEXW;
+]]
+
+if UNICODE then
+ffi.cdef[[
+typedef STARTUPINFOEXW STARTUPINFOEX;
+typedef LPSTARTUPINFOEXW LPSTARTUPINFOEX;
+]]
+else
+ffi.cdef[[
+typedef STARTUPINFOEXA STARTUPINFOEX;
+typedef LPSTARTUPINFOEXA LPSTARTUPINFOEX;
+]]
+end -- UNICODE
+
+
+
+ffi.cdef[[
+//
+// LogonFlags
+//
+static const int LOGON_WITH_PROFILE            =  0x00000001;
+static const int  LOGON_NETCREDENTIALS_ONLY    =   0x00000002;
+static const int  LOGON_ZERO_PASSWORD_BUFFER   =   0x80000000;
+
+BOOL
+CreateProcessWithLogonW(
+    LPCWSTR lpUsername,
+    LPCWSTR lpDomain,
+    LPCWSTR lpPassword,
+    DWORD dwLogonFlags,
+    LPCWSTR lpApplicationName,
+    LPWSTR lpCommandLine,
+    DWORD dwCreationFlags,
+    LPVOID lpEnvironment,
+    LPCWSTR lpCurrentDirectory,
+    LPSTARTUPINFOW lpStartupInfo,
+    LPPROCESS_INFORMATION lpProcessInformation
+    );
+
+
+BOOL
+CreateProcessWithTokenW(
+    HANDLE hToken,
+    DWORD dwLogonFlags,
+    LPCWSTR lpApplicationName,
+    LPWSTR lpCommandLine,
+    DWORD dwCreationFlags,
+    LPVOID lpEnvironment,
+    LPCWSTR lpCurrentDirectory,
+    LPSTARTUPINFOW lpStartupInfo,
+    LPPROCESS_INFORMATION lpProcessInformation
+    );
+]]
+

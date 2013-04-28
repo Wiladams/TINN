@@ -23,37 +23,41 @@
 
 
 @rem The TINN core library
-%LUAC% base64.lua base64.obj
-%LUAC% BinaryStream.lua BinaryStream.obj
-%LUAC% BitBang.lua BitBang.obj
-%LUAC% Collections.lua Collections.obj
-%LUAC% CoSocketIo.lua CoSocketIo.obj
-%LUAC% dkjson.lua dkjson.obj
-%LUAC% FileStream.lua FileStream.obj
-%LUAC% httpstatus.lua httpstatus.obj
-%LUAC% HttpChunkIterator.lua HttpChunkIterator.obj
-%LUAC% HttpHeaders.lua HttpHeaders.obj
-%LUAC% HttpMessage.lua HttpMessage.obj
-%LUAC% HttpRequest.lua HttpRequest.obj
-%LUAC% HttpResponse.lua HttpResponse.obj
+%LUAC% core/base64.lua base64.obj
+%LUAC% core/BinaryStream.lua BinaryStream.obj
+%LUAC% core/BitBang.lua BitBang.obj
+%LUAC% core/Collections.lua Collections.obj
+%LUAC% core/dkjson.lua dkjson.obj
+%LUAC% core/FileStream.lua FileStream.obj
 %LUAC% core/langutils.lua langutils.obj
-%LUAC% MemoryStream.lua MemoryStream.obj
-%LUAC% mime.lua mime.obj
-%LUAC% peg_http.lua peg_http.obj
-%LUAC% re.lua re.obj
-%LUAC% ResourceMapper.lua ResourceMapper.obj
+%LUAC% core/MemoryStream.lua MemoryStream.obj
+%LUAC% core/re.lua re.obj
 %LUAC% Runtime.lua Runtime.obj
 %LUAC% SimpleFiber.lua SimpleFiber.obj
-%LUAC% StaticService.lua StaticService.obj
-%LUAC% stream.lua stream.obj
-%LUAC% stringzutils.lua stringzutils.obj
-%LUAC% url.lua url.obj
-%LUAC% utils.lua utils.obj
-%LUAC% Vector.lua Vector.obj
+%LUAC% core/stream.lua stream.obj
+%LUAC% core/stringzutils.lua stringzutils.obj
+%LUAC% core/Vector.lua Vector.obj
 %LUAC% vkeys.lua vkeys.obj
-%LUAC% WebSocketStream.lua WebSocketStream.obj
-%LUAC% zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj CoSocketIo.obj dkjson.obj FileStream.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj langutils.obj MemoryStream.obj mime.obj peg_http.obj re.obj ResourceMapper.obj Runtime.obj SimpleFiber.obj StaticService.obj stream.obj stringzutils.obj url.obj utils.obj Vector.obj vkeys.obj WebSocketStream.obj zlib.obj
+%LUAC% core/zlib.lua zlib.obj
+@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj MemoryStream.obj re.obj ResourceMapper.obj Runtime.obj SimpleFiber.obj stream.obj stringzutils.obj Vector.obj vkeys.obj zlib.obj
+
+@rem The Net library
+%LUAC% net/CoSocketIo.lua CoSocketIo.obj
+%LUAC% net/httpstatus.lua httpstatus.obj
+%LUAC% net/HttpChunkIterator.lua HttpChunkIterator.obj
+%LUAC% net/HttpHeaders.lua HttpHeaders.obj
+%LUAC% net/HttpMessage.lua HttpMessage.obj
+%LUAC% net/HttpRequest.lua HttpRequest.obj
+%LUAC% net/HttpResponse.lua HttpResponse.obj
+%LUAC% net/mime.lua mime.obj
+%LUAC% net/peg_http.lua peg_http.obj
+%LUAC% net/ResourceMapper.lua ResourceMapper.obj
+%LUAC% net/StaticService.lua StaticService.obj
+%LUAC% net/url.lua url.obj
+%LUAC% net/utils.lua utils.obj
+%LUAC% net/WebSocketStream.lua WebSocketStream.obj
+
+@set NETLIB=CoSocketIo.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj mime.obj peg_http.obj StaticService.obj url.obj utils.obj WebSocketStream.obj 
 
 @rem Create the Win32 specific stuff
 %LUAC% Win32/BCrypt.lua BCrypt.obj
@@ -63,6 +67,10 @@
 %LUAC% Win32/GDI32.lua GDI32.obj
 %LUAC% Win32/gdi32_ffi.lua gdi32_ffi.obj
 %LUAC% Win32/guiddef.lua guiddef.obj
+%LUAC% Win32/Handle.lua Handle.obj
+%LUAC% Win32/Handle_ffi.lua Handle_ffi.obj
+%LUAC% Win32/Heap.lua Heap.obj
+%LUAC% Win32/Heap_ffi.lua Heap_ffi.obj
 %LUAC% Win32/KeyMouse.lua KeyMouse.obj
 %LUAC% Win32/NativeSocket.lua NativeSocket.obj
 %LUAC% Win32/NetStream.lua NetStream.obj
@@ -75,9 +83,13 @@
 %LUAC% Win32/sspi.lua sspi.obj
 %LUAC% Win32/sspi_ffi.lua sspi_ffi.obj
 %LUAC% Win32/StopWatch.lua StopWatch.obj
+%LUAC% Win32/SysInfo.lua SysInfo.obj
+%LUAC% Win32/SysInfo_ffi.lua SysInfo_ffi.obj
 %LUAC% Win32/UIOSimulator.lua UIOSimulator.obj
+%LUAC% Win32/UMS_ffi.lua UMS_ffi.obj
 %LUAC% Win32/User32.lua User32.obj
 %LUAC% Win32/user32_ffi.lua user32_ffi.obj
+%LUAC% Win32/Util_ffi.lua Util_ffi.obj
 %LUAC% Win32/WebApp.lua WebApp.obj
 %LUAC% Win32/win_error.lua win_error.obj
 %LUAC% Win32/win_kernel32.lua win_kernel32.obj
@@ -88,7 +100,7 @@
 %LUAC% Win32/WinSock_Utils.lua WinSock_Utils.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=BCrypt.obj BCryptUtils.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj KeyMouse.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj sspi_ffi.obj StopWatch.obj UIOSimulator.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinNT.obj WinSock_Utils.obj WTypes.obj
+@set WIN32LIB=BCrypt.obj BCryptUtils.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Handle_ffi.obj Heap.obj Heap_ffi.obj KeyMouse.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj sspi_ffi.obj StopWatch.obj SysInfo.obj SysInfo_ffi.obj UIOSimulator.obj UMS_ffi.obj Util_ffi.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinNT.obj WinSock_Utils.obj WTypes.obj
  
 @rem Create the graphics specific stuff
 %LUAC% graphics/math_matrix.lua math_matrix.obj
@@ -117,7 +129,7 @@
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinn.exe tinn.obj %CLIBS% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WIN32LIB% %LJLIBNAME%
+%LJLINK% /out:tinn.exe tinn.obj %CLIBS% %NETLIB% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WIN32LIB% %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinn.exe.manifest^
   %LJMT% -manifest tinn.exe.manifest -outputresource:tinn.exe

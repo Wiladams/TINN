@@ -12,32 +12,45 @@ ffi.cdef[[
 
 typedef uint32_t *  PDWORD;
 typedef long *    PLONG;
-typedef uint64_t  ULONG64;
-typedef uint64_t *  PULONG64;
-typedef uint64_t    DWORD64;
-typedef uint64_t *  PDWORD64;
 ]]
 
 
 ffi.cdef[[
 
 // Basic Data types
-typedef unsigned char	BYTE;
-typedef long			BOOL;
+typedef unsigned char BYTE;
+typedef unsigned char *PBYTE;
+
 typedef BYTE			BOOLEAN;
-typedef char			CHAR;
-typedef wchar_t			WCHAR;
-typedef uint16_t		WORD;
-typedef unsigned long	DWORD;
+typedef char          CHAR;
+
+typedef wchar_t			  WCHAR;
+typedef uint16_t		  WORD;
+
+
+typedef long      BOOL;
+typedef long *    PBOOL;
+
+typedef int         INT;
+typedef long        LONG;
+typedef int32_t     INT32;
+typedef signed int  LONG32;
+typedef unsigned long DWORD;
 typedef uint32_t		DWORD32;
-typedef int				INT;
-typedef int32_t			INT32;
+
+typedef int64_t     LONGLONG;
+typedef uint64_t    DWORDLONG;
+typedef uint64_t   *PDWORDLONG;
 typedef int64_t			INT64;
+typedef uint64_t    ULONG64;
+typedef uint64_t *  PULONG64;
+typedef uint64_t    DWORD64;
+typedef uint64_t *  PDWORD64;
+
+
 typedef float 			FLOAT;
-typedef long			LONG;
-typedef signed int		LONG32;
-typedef int64_t			LONGLONG;
 typedef size_t			SIZE_T;
+typedef size_t *    PSIZE_T;
 
 typedef uint8_t			BCHAR;
 typedef unsigned char	UCHAR;
@@ -51,7 +64,6 @@ typedef uint64_t		ULONGLONG;
 
 // Some pointer types
 typedef int *        LPINT;
-typedef unsigned char *PBYTE;
 typedef char *			PCHAR;
 typedef uint16_t *		PWCHAR;
 
@@ -68,6 +80,7 @@ typedef LONGLONG 		*PLONGLONG;
 typedef ULONGLONG 		*PULONGLONG;
 
 
+typedef void        VOID;
 typedef void *			PVOID;
 typedef DWORD *			DWORD_PTR;
 typedef intptr_t		LONG_PTR;

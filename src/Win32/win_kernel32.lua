@@ -1,7 +1,9 @@
 local ffi = require "ffi"
 local C = ffi.C
 
-require "WinBase"
+require ("WinBase");
+require ("Handle");
+
 local kernel32 = ffi.load("kernel32");
 
 -- File System Calls
@@ -51,7 +53,6 @@ DWORD GetLastError();
 
 HMODULE GetModuleHandleA(LPCSTR lpModuleName);
 
-BOOL CloseHandle(HANDLE hObject);
 
 HANDLE CreateEventA(LPSECURITY_ATTRIBUTES lpEventAttributes,
 		BOOL bManualReset, BOOL bInitialState, LPCSTR lpName);
@@ -98,31 +99,7 @@ HANDLE CreateWaitableTimerA(LPSECURITY_ATTRIBUTES lpTimerAttributes,
 
 ]]
 
-ffi.cdef[[
-typedef struct _OSVERSIONINFO {
-  DWORD dwOSVersionInfoSize;
-  DWORD dwMajorVersion;
-  DWORD dwMinorVersion;
-  DWORD dwBuildNumber;
-  DWORD dwPlatformId;
-  TCHAR szCSDVersion[128];
-} OSVERSIONINFO, *POSVERSIONINFO;
 
-BOOL GetVersionExA(POSVERSIONINFO pVersionInfo);
-
-]]
-
-OSVERSIONINFO = ffi.typeof("OSVERSIONINFO")
-OSVERSIONINFO_mt = {
-	__new = function(ct)
-		local obj = ffi.new("OSVERSIONINFO")
-		obj.dwOSVersionInfoSize = ffi.sizeof("OSVERSIONINFO");
-		kernel32.GetVersionExA(obj);
-
-		return obj;
-	end,
-}
-OSVERSIONINFO = ffi.metatype(OSVERSIONINFO, OSVERSIONINFO_mt);
 
 
 function GetPerformanceFrequency(anum)

@@ -4,6 +4,8 @@ require "win_kernel32"
 local kernel32 = ffi.load("kernel32")
 
 local StopWatch = {}
+setmetatable(StopWatch, {__call = function(self, ...) return StopWatch.new(...);end});
+
 local StopWatch_mt = {
 	__index = StopWatch,
 }
