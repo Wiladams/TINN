@@ -62,6 +62,8 @@
 @rem Create the Win32 specific stuff
 %LUAC% Win32/BCrypt.lua BCrypt.obj
 %LUAC% Win32/BCryptUtils.lua BCryptUtils.obj
+%LUAC% Win32/datetime.lua datetime.obj
+%LUAC% Win32/datetime_ffi.lua datetime_ffi.obj
 %LUAC% Win32/dbghelp_ffi.lua dbghelp_ffi.obj
 %LUAC% Win32/EventScheduler.lua EventScheduler.obj
 %LUAC% Win32/GDI32.lua GDI32.obj
@@ -100,7 +102,7 @@
 %LUAC% Win32/WinSock_Utils.lua WinSock_Utils.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=BCrypt.obj BCryptUtils.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Handle_ffi.obj Heap.obj Heap_ffi.obj KeyMouse.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj sspi_ffi.obj StopWatch.obj SysInfo.obj SysInfo_ffi.obj UIOSimulator.obj UMS_ffi.obj Util_ffi.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinNT.obj WinSock_Utils.obj WTypes.obj
+@set WIN32LIB=BCrypt.obj BCryptUtils.obj datetime.obj datetime_ffi.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Handle_ffi.obj Heap.obj Heap_ffi.obj KeyMouse.obj NativeSocket.obj NetStream.obj Network.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj sspi_ffi.obj StopWatch.obj SysInfo.obj SysInfo_ffi.obj UIOSimulator.obj UMS_ffi.obj Util_ffi.obj WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinNT.obj WinSock_Utils.obj WTypes.obj
  
 @rem Create the graphics specific stuff
 %LUAC% graphics/math_matrix.lua math_matrix.obj

@@ -232,7 +232,7 @@ local function Unicode16ToAnsi(in_Src, nsrcBytes)
 
 	-- find out how many characters needed
 	local bytesneeded = kernel32.WideCharToMultiByte(CP_ACP, 0, srcShorts, -1, nil, 0, nil, nil);
-print("bytesneeded: ", bytesneeded);
+--print("bytesneeded: ", bytesneeded);
 
 	if bytesneeded <= 0 then
 		return nil;

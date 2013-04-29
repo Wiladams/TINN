@@ -1,11 +1,11 @@
 
 local makeGlobal = function(thing, name)
-	if type(thing) == "table" then
-		for k,v in pairs(example) 
-			do _G[k]=v 
-		end
-	elseif thing and name then
+	if name and thing then
 		_G[name] = thing;
+	elseif type(thing) == "table" then
+		for k,v in pairs(thing) do 
+			_G[k]=v 
+		end
 	end
 	
 	return true;

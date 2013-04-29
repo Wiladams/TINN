@@ -5,6 +5,7 @@ local ffi = require("ffi");
 local SysInfo_ffi = require("SysInfo_ffi");
 local k32Lib = ffi.load("kernel32");
 
+--[[
 if UNICODE then
 GetComputerName  = k32Lib.GetComputerNameW;
 SetComputerName  = k32Lib.SetComputerNameW;
@@ -18,28 +19,67 @@ GetComputerNameEx  = k32Lib.GetComputerNameExA;
 SetComputerNameEx  = k32Lib.SetComputerNameExA;
 DnsHostnameToComputerName  = k32Lib.DnsHostnameToComputerNameA;
 end -- !UNICODE
+--]]
 
 
-
-OSVERSIONINFO = ffi.typeof("OSVERSIONINFO")
-OSVERSIONINFO_mt = {
+local OSVERSIONINFO = ffi.typeof("OSVERSIONINFO")
+local OSVERSIONINFO_mt = {
 	__new = function(ct)
 		local obj = ffi.new("OSVERSIONINFO")
 		obj.dwOSVersionInfoSize = ffi.sizeof("OSVERSIONINFO");
-		kernel32.GetVersionExA(obj);
+		k32Lib.GetVersionExA(obj);
 
 		return obj;
+	end,
+
+	__tostring = function(self)
+		return string.format("%d.%d.%d", 
+			self.dwMajorVersion, self.dwMinorVersion, self.dwBuildNumber);
 	end,
 }
 OSVERSIONINFO = ffi.metatype(OSVERSIONINFO, OSVERSIONINFO_mt);
 
 
+local GetSystemDirectory = function()
+   local lpBuffer = ffi.new("char[?]", ffi.C.MAX_PATH+1);
+    local buffSize = k32Lib.GetSystemDirectoryA(lpBuffer, ffi.C.MAX_PATH);
+    
+    if res == 0 then
+        return false, k32Lib.GetLastError();
+    end
+
+    return ffi.string(lpBuffer, buffSize);
+end
+
+
+local GetSystemWindowsDirectory = function()
+   local lpBuffer = ffi.new("char[?]", ffi.C.MAX_PATH+1);
+    local buffSize = k32Lib.GetSystemWindowsDirectoryA(lpBuffer, ffi.C.MAX_PATH);
+    
+    if res == 0 then
+        return false, k32Lib.GetLastError();
+    end
+
+    return ffi.string(lpBuffer, buffSize);
+end
+
+
+local systemDirectory = function()
+    print(GetSystemDirectory());
+end
+
+local windowsDirectory = function()
+    print(GetSystemWindowsDirectory());
+end
+
 return {
-	GetComputerName = GetComputerName;
-	SetComputerName = SetComputerName;
-	GetComputerNameEx = GetComputerNameEx;
-	SetComputerNameEx = SetComputerNameEx;
-	DnsHostnameToComputerName = DnsHostnameToComputerName;
+    OSVersionInfo = OSVERSIONINFO;
+
+    getSystemDirectory = GetSystemDirectory;
+    getSystemWindowsDirectory = GetSystemWindowsDirectory;
+
+    systemDirectory = systemDirectory,
+    windowsDirectory = windowsDirectory,
 }
 
 --[[
