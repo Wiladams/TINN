@@ -249,8 +249,6 @@ static const int ENABLE_WRAP_AT_EOL_OUTPUT  = 0x0002;
 
 
 
-static const int CONSOLE_REAL_OUTPUT_HANDLE = (((HANDLE)(LONG_PTR) (-2) )); //(LongToHandle(-2))
-static const int CONSOLE_REAL_INPUT_HANDLE 	= ((HANDLE)(LONG_PTR) (-3) ); //(LongToHandle(-3))
 
 typedef BOOL ( *PHANDLER_ROUTINE)(DWORD CtrlType);
 
@@ -263,6 +261,8 @@ typedef struct _CONSOLE_READCONSOLE_CONTROL {
 
 ]]
 
+CONSOLE_REAL_OUTPUT_HANDLE = ffi.cast("HANDLE", ffi.cast("LONG_PTR", -2)); -- (LongToHandle(-2))
+CONSOLE_REAL_INPUT_HANDLE    = ffi.cast("HANDLE", ffi.cast("LONG_PTR", -3)); -- (LongToHandle(-3))
 
 ffi.cdef[[
 BOOL
