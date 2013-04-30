@@ -61,6 +61,7 @@
 
 @rem Core windows API set
 %LUAC% Win32/core_console.lua core_console.obj
+%LUAC% Win32/core_interlocked.lua core_interlocked.obj
 %LUAC% Win32/core_processenvironment.lua core_processenvironment.obj
 %LUAC% Win32/Handle_ffi.lua Handle_ffi.obj
 %LUAC% Win32/Heap_ffi.lua Heap_ffi.obj
@@ -68,7 +69,7 @@
 %LUAC% Win32/UMS_ffi.lua UMS_ffi.obj
 %LUAC% Win32/Util_ffi.lua Util_ffi.obj
 
-@set WINCOREAPI=core_console.obj core_processenvironment.obj Handle_ffi.obj Heap_ffi.obj SysInfo_ffi.obj UMS_ffi.obj Util_ffi.obj
+@set WINCOREAPI=core_console.obj core_interlocked.obj core_processenvironment.obj Handle_ffi.obj Heap_ffi.obj SysInfo_ffi.obj UMS_ffi.obj Util_ffi.obj
 
 
 @rem Create the Win32 specific stuff
