@@ -31,6 +31,9 @@ typedef uint16_t		  WORD;
 typedef long      BOOL;
 typedef long *    PBOOL;
 
+typedef int16_t     SHORT;
+typedef unsigned short  USHORT;
+
 typedef int         INT;
 typedef long        LONG;
 typedef int32_t     INT32;
@@ -58,7 +61,6 @@ typedef unsigned int	UINT;
 typedef unsigned int	UINT32;
 typedef unsigned long	ULONG;
 typedef unsigned int	ULONG32;
-typedef unsigned short	USHORT;
 typedef uint64_t		ULONGLONG;
 
 
