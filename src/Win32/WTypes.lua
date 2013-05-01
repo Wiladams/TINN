@@ -7,6 +7,8 @@ local bor = bit.bor
 local lshift = bit.lshift
 local rshift = bit.rshift
 
+_WIN64 = ffi.os == "Windows" and ffi.abi("64bit");
+
 ffi.cdef[[
 
 

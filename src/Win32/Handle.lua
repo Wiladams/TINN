@@ -59,7 +59,7 @@ local Handle_mt = {
 
 	__index = Handle_t;
 }
-
+ffi.metatype(Handle, Handle_mt);
 
 Handle_t.getHandleInformation = function(self)
 	local lpdwFlags = ffi.new("DWORD[1]");
@@ -94,7 +94,7 @@ Handle_t.isInheritable = function(self)
 		return false, err;
 	end
 
-	return band(info, ffi.C.HANDLE_FLAG_INHERIT);
+	return band(info, ffi.C.HANDLE_FLAG_INHERIT) > 0;
 end
 
 Handle_t.setInheritable = function(self, turnoff)
@@ -108,7 +108,7 @@ Handle_t.isProtectedFromClose = function(self)
 		return false, err;
 	end
 
-	return band(info, ffi.C.HANDLE_FLAG_PROTECT_FROM_CLOSE);
+	return band(info, ffi.C.HANDLE_FLAG_PROTECT_FROM_CLOSE) > 0;
 end
 
 Handle_t.setProtectedFromClose = function(self, turnoff)
