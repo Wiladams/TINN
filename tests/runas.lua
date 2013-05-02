@@ -118,13 +118,7 @@ local CreateProcessWithLogon = function(usercreds, lpApplicationName, lpCommandL
 end
 
 
-test_createprocess = function()
-    local usercreds = {UserName = "appgtest", Domain = "redmond", Password="P0rsche911"};
-    --local usercreds = {UserName = "wiladams", Domain = "redmond", Password="NoMoreTime_5"};
+local usercreds = {UserName = Domain = Password = };
 
     local res, err = CreateProcessWithLogon(usercreds, "c:\\tools\\tinn\\tinn.exe", "-v");
 
-    print("Create Process Result: ", res, err);
-end
-
-test_createprocess();
