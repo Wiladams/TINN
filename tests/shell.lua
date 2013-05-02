@@ -1,3 +1,0 @@
--- shell.lua
-
-require("tver");

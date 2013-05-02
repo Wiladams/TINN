@@ -17,7 +17,6 @@ local advLib = ffi.load("Advapi32");
 -- Advapi32
 -- CreateProcessAsUserW
 -- OpenProcessToken
--- OpenProcessToken
 -- OpenThreadToken
 -- SetThreadToken
 
@@ -188,12 +187,10 @@ void GetCurrentProcessorNumberEx(
     );
 
 HANDLE
-GetCurrentThread(
-    void    );
+GetCurrentThread(void);
 
 DWORD
-GetCurrentThreadId(
-    void    );
+GetCurrentThreadId(void);
 ]]
 
 
@@ -227,18 +224,14 @@ GetProcessHandleCount(
 
 
 DWORD
-GetProcessId(
-    HANDLE Process
-    );
+GetProcessId(HANDLE Process);
 
 DWORD
-GetProcessIdOfThread(
-    HANDLE Thread
-    );
+GetProcessIdOfThread(HANDLE Thread);
 
 BOOL
 GetProcessTimes(
-     HANDLE hProcess,
+    HANDLE hProcess,
     LPFILETIME lpCreationTime,
     LPFILETIME lpExitTime,
     LPFILETIME lpKernelTime,
@@ -319,13 +312,6 @@ OpenProcessToken (
     PHANDLE TokenHandle
     );
 
-
-BOOL
-OpenProcessToken (
-           HANDLE ProcessHandle,
-           DWORD DesiredAccess,
-    PHANDLE TokenHandle
-    );
 
 HANDLE
 OpenThread(
@@ -500,9 +486,9 @@ return {
 	InitializeProcThreadAttributeList = k32Lib.InitializeProcThreadAttributeList,
 	IsProcessorFeaturePresent = k32Lib.IsProcessorFeaturePresent,
 	OpenProcess = k32Lib.OpenProcess,
-	OpenProcessToken = k32Lib.OpenProcessToken,
+	OpenProcessToken = advLib.OpenProcessToken,
 	OpenThread = k32Lib.OpenThread,
-	OpenThreadToken = k32Lib.OpenThreadToken,
+	OpenThreadToken = advLib.OpenThreadToken,
 	ProcessIdToSessionId = k32Lib.ProcessIdToSessionId,
 	QueryProcessAffinityUpdateMode = k32Lib.QueryProcessAffinityUpdateMode,
 	QueueUserAPC = k32Lib.QueueUserAPC,
@@ -516,7 +502,7 @@ return {
 	SetThreadPriority = k32Lib.SetThreadPriority,
 	SetThreadPriorityBoost = k32Lib.SetThreadPriorityBoost,
 	SetThreadStackGuarantee = k32Lib.SetThreadStackGuarantee,
-	SetThreadToken = k32Lib.SetThreadToken,
+	SetThreadToken = advLib.SetThreadToken,
 	SuspendThread = k32Lib.SuspendThread,
 	SwitchToThread = k32Lib.SwitchToThread,
 	TerminateProcess = k32Lib.TerminateProcess,

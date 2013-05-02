@@ -232,8 +232,9 @@ typedef struct _FILETIME
 typedef struct _FILETIME *PFILETIME;
 
 typedef struct _FILETIME *LPFILETIME;
+]]
 
-
+ffi.cdef[[
 typedef struct _SYSTEMTIME
 {
     WORD wYear;

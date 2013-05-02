@@ -489,3 +489,41 @@ typedef struct _CONTEXT {
     DWORD64 LastExceptionFromRip;
 } CONTEXT, *PCONTEXT;
 ]]
+
+ffi.cdef[[
+// begin_wdm
+//
+//  The following are masks for the predefined standard access types
+//
+
+static const int DELETE                          = (0x00010000);
+static const int READ_CONTROL                    = (0x00020000);
+static const int WRITE_DAC                       = (0x00040000);
+static const int WRITE_OWNER                     = (0x00080000);
+static const int SYNCHRONIZE                     = (0x00100000);
+
+static const int STANDARD_RIGHTS_REQUIRED        = 0x000F0000;
+
+static const int STANDARD_RIGHTS_READ            = READ_CONTROL;
+static const int STANDARD_RIGHTS_WRITE           = READ_CONTROL;
+static const int STANDARD_RIGHTS_EXECUTE         = READ_CONTROL;
+
+static const int STANDARD_RIGHTS_ALL             = 0x001F0000;
+static const int SPECIFIC_RIGHTS_ALL             = 0x0000FFFF;
+
+
+static const int PROCESS_TERMINATE                  = (0x0001);
+static const int PROCESS_CREATE_THREAD              = (0x0002); 
+static const int PROCESS_SET_SESSIONID              = (0x0004); 
+static const int PROCESS_VM_OPERATION               = (0x0008); 
+static const int PROCESS_VM_READ                    = (0x0010); 
+static const int PROCESS_VM_WRITE                   = (0x0020); 
+static const int PROCESS_DUP_HANDLE                 = (0x0040); 
+static const int PROCESS_CREATE_PROCESS             = (0x0080); 
+static const int PROCESS_SET_QUOTA                  = (0x0100); 
+static const int PROCESS_SET_INFORMATION            = (0x0200); 
+static const int PROCESS_QUERY_INFORMATION          = (0x0400); 
+static const int PROCESS_SUSPEND_RESUME             = (0x0800); 
+static const int PROCESS_QUERY_LIMITED_INFORMATION  = (0x1000); 
+static const int PROCESS_ALL_ACCESS        = (STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0xFFFF);
+]]
