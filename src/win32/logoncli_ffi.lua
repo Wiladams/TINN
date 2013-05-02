@@ -1,6 +1,9 @@
 -- logoncli_ffi.lua
 
 local ffi = require ("ffi");
+local bit = require("bit");
+local bor = bit.bor;
+
 local Lib = ffi.load("logoncli"); -- logoncli.dll
 require("WTypes");
 require("ntstatus");
@@ -10,6 +13,61 @@ ffi.cdef[[
 typedef DWORD NET_API_STATUS;
 ]]
 
+ffi.cdef[[
+//
+// Flags to passed to DsGetDcName
+//
+
+static const int DS_FORCE_REDISCOVERY            = 0x00000001;
+
+static const int DS_DIRECTORY_SERVICE_REQUIRED   = 0x00000010;
+static const int DS_DIRECTORY_SERVICE_PREFERRED  = 0x00000020;
+static const int DS_GC_SERVER_REQUIRED           = 0x00000040;
+static const int DS_PDC_REQUIRED                 = 0x00000080;
+static const int DS_BACKGROUND_ONLY              = 0x00000100;
+static const int DS_IP_REQUIRED                  = 0x00000200;
+static const int DS_KDC_REQUIRED                 = 0x00000400;
+static const int DS_TIMESERV_REQUIRED            = 0x00000800;
+static const int DS_WRITABLE_REQUIRED            = 0x00001000;
+static const int DS_GOOD_TIMESERV_PREFERRED      = 0x00002000;
+static const int DS_AVOID_SELF                   = 0x00004000;
+static const int DS_ONLY_LDAP_NEEDED             = 0x00008000;
+
+
+static const int DS_IS_FLAT_NAME                 = 0x00010000;
+static const int DS_IS_DNS_NAME                  = 0x00020000;
+
+static const int DS_TRY_NEXTCLOSEST_SITE         = 0x00040000;
+
+static const int DS_DIRECTORY_SERVICE_6_REQUIRED = 0x00080000;
+
+static const int DS_WEB_SERVICE_REQUIRED         = 0x00100000;
+
+static const int DS_RETURN_DNS_NAME              = 0x40000000;
+static const int DS_RETURN_FLAT_NAME             = 0x80000000;
+
+static const int DSGETDC_VALID_FLAGS = ( \
+            DS_FORCE_REDISCOVERY | \
+            DS_DIRECTORY_SERVICE_REQUIRED | \
+            DS_DIRECTORY_SERVICE_PREFERRED | \
+            DS_GC_SERVER_REQUIRED | \
+            DS_PDC_REQUIRED | \
+            DS_BACKGROUND_ONLY | \
+            DS_IP_REQUIRED | \
+            DS_KDC_REQUIRED | \
+            DS_TIMESERV_REQUIRED | \
+            DS_WRITABLE_REQUIRED | \
+            DS_GOOD_TIMESERV_PREFERRED | \
+            DS_AVOID_SELF | \
+            DS_ONLY_LDAP_NEEDED | \
+            DS_IS_FLAT_NAME | \
+            DS_IS_DNS_NAME | \
+            DS_TRY_NEXTCLOSEST_SITE | \
+            DS_DIRECTORY_SERVICE_6_REQUIRED | \
+            DS_WEB_SERVICE_REQUIRED | \
+            DS_RETURN_FLAT_NAME  | \
+            DS_RETURN_DNS_NAME );
+]]
 ffi.cdef[[
 //
 // API to enumerate trusted domains
@@ -331,8 +389,9 @@ DWORD
 DsGetDcSiteCoverageA(
       LPCSTR ServerName ,
      PULONG EntryCount,
-     LPSTR **SiteNames
+     void *SiteNames
     );
+//     LPSTR **SiteNames
 
 DWORD
 DsGetDcSiteCoverageW(
