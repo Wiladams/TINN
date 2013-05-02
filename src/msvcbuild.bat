@@ -90,6 +90,8 @@
 %LUAC% Win32/KeyMouse.lua KeyMouse.obj
 %LUAC% Win32/NativeSocket.lua NativeSocket.obj
 %LUAC% Win32/NetStream.lua NetStream.obj
+%LUAC% Win32/netutils.lua netutils.obj
+%LUAC% Win32/netutils_ffi.lua netutils_ffi.obj
 %LUAC% Win32/Network.lua Network.obj
 %LUAC% Win32/ntstatus.lua ntstatus.obj
 %LUAC% Win32/processenvironment.lua processenvironment.obj
@@ -115,7 +117,7 @@
 %LUAC% Win32/WinSock_Utils.lua WinSock_Utils.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=console.obj BCrypt.obj BCryptUtils.obj datetime.obj datetime_ffi.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj KeyMouse.obj NativeSocket.obj NetStream.obj Network.obj ntstatus.obj processenvironment.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj sspi_ffi.obj StopWatch.obj SysInfo.obj UIOSimulator.obj  WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinNT.obj WinSock_Utils.obj WTypes.obj
+@set WIN32LIB=console.obj BCrypt.obj BCryptUtils.obj datetime.obj datetime_ffi.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj KeyMouse.obj NativeSocket.obj NetStream.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj processenvironment.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj sspi_ffi.obj StopWatch.obj SysInfo.obj UIOSimulator.obj  WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinNT.obj WinSock_Utils.obj WTypes.obj
  
 @rem Create the graphics specific stuff
 %LUAC% graphics/math_matrix.lua math_matrix.obj

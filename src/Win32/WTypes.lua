@@ -102,6 +102,7 @@ typedef short *			LPWSTR;
 typedef short *			PWSTR;
 typedef const short *	LPCWSTR;
 typedef const short *	PCWSTR;
+typedef PWSTR *PZPWSTR;
 typedef LPSTR			LPTSTR;
 
 typedef DWORD *			LPDWORD;

@@ -5,6 +5,7 @@ local bit = require "bit"
 local band = bit.band
 
 local k32 = require "win_kernel32"
+require("ntstatus");
 
 local L = k32.AnsiToUnicode16
 
@@ -410,10 +411,7 @@ CRYPT_DEFAULT_CONTEXT      = L"Default";
 
 -- From BCrypt.h
 
-ffi.cdef[[
-	typedef uint32_t	NTSTATUS;
-	typedef NTSTATUS *PNTSTATUS;
-]]
+
 
 
 
