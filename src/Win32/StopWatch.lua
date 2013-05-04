@@ -1,13 +1,20 @@
 local ffi = require"ffi"
 
-require "win_kernel32"
-local kernel32 = ffi.load("kernel32")
+local core_profile = require("core_profile_l1_1_0");
 
 local StopWatch = {}
-setmetatable(StopWatch, {__call = function(self, ...) return StopWatch.new(...);end});
+setmetatable(StopWatch, {
+	__call = function(self, ...) 
+		return StopWatch.new(...);
+	end,
+});
 
 local StopWatch_mt = {
 	__index = StopWatch,
+	
+	__tostring = function(self)
+		return string.format("Frequency: %d  Count: %d", self.Frequency, self.StartCount)
+	end,
 }
 
 function StopWatch.new()
@@ -24,12 +31,10 @@ function StopWatch.new()
 	return obj
 end
 
-function StopWatch:__tostring()
-	return string.format("Frequency: %d  Count: %d", self.Frequency, self.StartCount)
-end
+
 
 function StopWatch:GetCurrentTicks()
-	return GetPerformanceCounter(self.countbuff);
+	return core_profile.getPerformanceCounter(self.countbuff);
 end
 
 --[[
@@ -42,8 +47,8 @@ end
 --]]
 
 function StopWatch:Reset()
-	self.Frequency = 1/GetPerformanceFrequency(self.freqbuff);
-	self.StartCount = GetPerformanceCounter(self.countbuff);
+	self.Frequency = 1/core_profile.getPerformanceFrequency(self.freqbuff);
+	self.StartCount = core_profile.getPerformanceCounter(self.countbuff);
 end
 
 -- <summary>
@@ -53,7 +58,7 @@ end
 
 function StopWatch:Seconds()
 	--local currentCount = GetPerformanceCounter(self.countbuff);
-	local currentCount = GetPerformanceCounter();
+	local currentCount = core_profile.getPerformanceCounter();
 
 	local ellapsed = currentCount - self.StartCount
 	local seconds = ellapsed * self.Frequency;

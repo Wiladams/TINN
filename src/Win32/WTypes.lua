@@ -37,6 +37,8 @@ typedef int16_t     SHORT;
 typedef unsigned short  USHORT;
 
 typedef int         INT;
+typedef int *        LPINT;
+typedef int *        PINT;
 typedef long        LONG;
 typedef int32_t     INT32;
 typedef signed int  LONG32;
@@ -67,14 +69,16 @@ typedef uint64_t		ULONGLONG;
 
 
 // Some pointer types
-typedef int *        LPINT;
 typedef char *			PCHAR;
+typedef const char * PCCHAR;
+typedef unsigned char *PUCHAR;
+typedef char *      PSTR;
+
+
 typedef uint16_t *		PWCHAR;
 
 typedef unsigned char *PBOOLEAN;
-typedef unsigned char	*PUCHAR;
 typedef const unsigned char *PCUCHAR;
-typedef char *      PSTR;
 typedef unsigned int	*PUINT;
 typedef unsigned int	*PUINT32;
 typedef unsigned long	*PULONG;

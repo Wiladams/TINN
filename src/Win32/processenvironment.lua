@@ -25,6 +25,7 @@ local GetCurrentDirectory = function()
 	return ffi.string(lpBuffer);
 end
 
+
 cmdLine = function()
 	print(GetCommandLine());
 end

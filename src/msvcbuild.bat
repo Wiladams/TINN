@@ -60,18 +60,21 @@
 @set NETLIB=CoSocketIo.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj mime.obj peg_http.obj StaticService.obj url.obj utils.obj WebSocketStream.obj 
 
 @rem Core windows API set
-%LUAC% Win32/core_console.lua core_console.obj
-%LUAC% Win32/core_interlocked.lua core_interlocked.obj
-%LUAC% Win32/core_processenvironment.lua core_processenvironment.obj
-%LUAC% Win32/core_processthreads_l1_1_1.lua core_processthreads_l1_1_1.obj
-%LUAC% Win32/Handle_ffi.lua Handle_ffi.obj
-%LUAC% Win32/Heap_ffi.lua Heap_ffi.obj
-%LUAC% Win32/power_base_l1_1_0.lua power_base_l1_1_0.obj
-%LUAC% Win32/SysInfo_ffi.lua SysInfo_ffi.obj
-%LUAC% Win32/UMS_ffi.lua UMS_ffi.obj
-%LUAC% Win32/Util_ffi.lua Util_ffi.obj
+%LUAC% Win32/apiset/core_console.lua core_console.obj
+%LUAC% Win32/apiset/core_interlocked.lua core_interlocked.obj
+%LUAC% Win32/apiset/core_processenvironment.lua core_processenvironment.obj
+%LUAC% Win32/apiset/core_processthreads_l1_1_1.lua core_processthreads_l1_1_1.obj
+%LUAC% Win32/apiset/core_profile_l1_1_0.lua core_profile_l1_1_0.obj
+%LUAC% Win32/apiset/Handle_ffi.lua Handle_ffi.obj
+%LUAC% Win32/apiset/Heap_ffi.lua Heap_ffi.obj
+%LUAC% Win32/apiset/power_base_l1_1_0.lua power_base_l1_1_0.obj
+%LUAC% Win32/apiset/SysInfo_ffi.lua SysInfo_ffi.obj
+%LUAC% Win32/apiset/UMS_ffi.lua UMS_ffi.obj
+%LUAC% Win32/apiset/Util_ffi.lua Util_ffi.obj
+%LUAC% Win32/apiset/WinBer_ffi.lua WinBer_ffi.obj
+%LUAC% Win32/apiset/wldap32_ffi.lua wldap32_ffi.obj
 
-@set WINCOREAPI=core_console.obj core_interlocked.obj core_processenvironment.obj core_processthreads_l1_1_1.obj Handle_ffi.obj Heap_ffi.obj power_base_l1_1_0.obj SysInfo_ffi.obj UMS_ffi.obj Util_ffi.obj
+@set WINCOREAPI=core_console.obj core_interlocked.obj core_processenvironment.obj core_processthreads_l1_1_1.obj core_profile_l1_1_0.obj Handle_ffi.obj Heap_ffi.obj power_base_l1_1_0.obj SysInfo_ffi.obj UMS_ffi.obj Util_ffi.obj WinBer_ffi.obj wldap32_ffi.obj
 
 
 @rem Create the Win32 specific stuff

@@ -1,4 +1,8 @@
 -- logoncli_ffi.lua
+--[[
+    References:
+    http://ivbel.blogspot.com/2012/01/how-to-list-all-users-groups-of-domain.html
+--]]
 
 local ffi = require ("ffi");
 local bit = require("bit");

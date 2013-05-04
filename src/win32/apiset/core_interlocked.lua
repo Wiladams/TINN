@@ -5,7 +5,6 @@ local ffi = require("ffi");
 require("WTypes");
 require("WinNT");
 
-local _WIN64 = ffi.os == "Windows" and ffi.abi("64bit");
 
 ffi.cdef[[
 

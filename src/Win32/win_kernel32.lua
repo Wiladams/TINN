@@ -83,8 +83,6 @@ DWORD SuspendThread(HANDLE hThread);
 
 void * GetProcAddress(HMODULE hModule, LPCSTR lpProcName);
 
-BOOL QueryPerformanceFrequency(int64_t *lpFrequency);
-BOOL QueryPerformanceCounter(int64_t *lpPerformanceCount);
 
 //	DWORD QueueUserAPC(PAPCFUNC pfnAPC, HANDLE hThread, ULONG_PTR dwData);
 
@@ -102,35 +100,6 @@ HANDLE CreateWaitableTimerA(LPSECURITY_ATTRIBUTES lpTimerAttributes,
 
 
 
-function GetPerformanceFrequency(anum)
-	anum = anum or ffi.new("int64_t[1]");
-	local success = ffi.C.QueryPerformanceFrequency(anum)
-	if success == 0 then
-		return nil 
-	end
-
-	return tonumber(anum[0])
-end
-
-function GetPerformanceCounter(anum)
-	anum = anum or ffi.new("int64_t[1]")
-	local success = ffi.C.QueryPerformanceCounter(anum)
-	if success == 0 then 
-		return nil 
-	end
-
-	return tonumber(anum[0])
-end
-
-function GetCurrentTickTime()
-	local frequency = 1/GetPerformanceFrequency();
-	local currentCount = GetPerformanceCounter();
-	local seconds = currentCount * frequency;
---print(string.format("win_kernel32 - GetCurrentTickTime() - %d\n", seconds));
-
-	return seconds;
-end
-
 
 function GetProcAddress(library, funcname)
 	ffi.load(library)
@@ -138,20 +107,6 @@ function GetProcAddress(library, funcname)
 	return paddr
 end
 
-function GetCurrentDirectory()
-	local buffsize = 1024;
-	local buff = ffi.new("char[1024]");
-	local err = kernel32.GetCurrentDirectoryA(buffsize, buff);
-
-	if err == 0 then return nil end
-
-	return ffi.string(buff);
-end
-
-local CreateWaitableTimer =  function(manualReset, name)
-
-	local handle =  kernel32.CreateWaitableTimerA(nil, manualReset, name);
-end
 
 
 --[[
@@ -261,11 +216,7 @@ return {
 	-- Local functions
 	CreateEvent = kernel32.CreateEventA;
 	GetLastError = kernel32.GetLastError;
-	GetPerformanceFrequency = GetPerformanceFrequency,
-	GetPerformanceCounter = GetPerformanceCounter,
-	GetCurrentTickTime = GetCurrentTickTime,
 	GetProcAddress = GetProcAddress,
-	GetCurrentDirectory = GetCurrentDirectory,
 
 	AnsiToUnicode16 = AnsiToUnicode16L,
 	Unicode16ToAnsi = Unicode16ToAnsi,
