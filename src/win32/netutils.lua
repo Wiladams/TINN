@@ -3,6 +3,9 @@
 local ffi = require("ffi");
 local netutils = require("netutils_ffi");
 local kernel32 = require("win_kernel32");
+local core_string = require("core_string_l1_1_0");
+
+local L = core_string.toUnicode;
 
 
 local NetApiBufferAllocate = function(ByteCount)
@@ -46,7 +49,7 @@ local NetApiBufferSize = function(Buffer)
 end
 
 local NetRemoteComputerSupports = function(UncServerName, OptionsWanted)
-	UncServerName = kernel32.AnsiToUnicode16(UncServerName);
+	UncServerName = L(UncServerName);
 
 	local pOptionsSupported = ffi.new("DWORD[1]");
 	local status = netutils.NetRemoteComputerSupports(UncServerName, OptionsWanted, pOptionsSupported);

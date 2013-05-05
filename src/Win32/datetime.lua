@@ -4,6 +4,9 @@
 local ffi = require("ffi");
 local k32 = require("win_kernel32");
 local k32Lib = k32.Lib;
+local core_string = require("core_string_l1_1_0");
+
+local L = core_string.toUnicode;
 
 local datetime_ffi = require("datetime_ffi");
 
@@ -12,11 +15,11 @@ local GetTimeFormat = function(lpFormat, dwFlags, lpTime, lpLocaleName)
 	
 	--lpFormat = lpFormat or "hh':'mm':'ss tt";
 	if lpFormat then
-		lpFormat = k32.AnsiToUnicode16(lpFormat);
+		lpFormat = L(lpFormat);
 	end
 
 	if lpLocaleName then
-		lpLocaleName = k32.AnsiToUnicode16(lpLocaleName);
+		lpLocaleName = L(lpLocaleName);
 	end
 
 	-- first call to figure out how big the string needs to be
@@ -48,14 +51,14 @@ local GetTimeFormat = function(lpFormat, dwFlags, lpTime, lpLocaleName)
 	end
 
 	-- We have a widechar, turn it into ASCII
-	return k32.Unicode16ToAnsi(lpDataStr);
+	return core_string.toAnsi(lpDataStr);
 end
 
 local GetDateFormat = function(lpFormat, dwFlags, lpDate, lpLocaleName)
 	dwFlags = dwFlags or 0;
 
 	if lpFormat then
-		lpFormat = k32.AnsiToUnicode16(lpFormat);
+		lpFormat = L(lpFormat);
 	end
 
 	local buffsize = k32Lib.GetDateFormatEx(

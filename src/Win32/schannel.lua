@@ -8,8 +8,9 @@ local bor = bit.bor;
 
 
 local K32 = require ("win_kernel32");
+local core_string = require("core_string_l1_1_0");
 
-local L=K32.AnsiToUnicode16;
+local L = core_string.toUnicode;
 
 
 require ("WinCrypt");
@@ -685,153 +686,7 @@ BOOL SslEmptyCacheW(LPWSTR pszTargetName, DWORD  dwFlags);
 ]]
 
 
-
-
-
 --[=[
-// Structures for compatability with the
-// NT 4.0 SP2 / IE 3.0 schannel interface, do
-// not use.
-
-typedef struct _SSL_CREDENTIAL_CERTIFICATE {
-    DWORD   cbPrivateKey;
-    PBYTE   pPrivateKey;
-    DWORD   cbCertificate;
-    PBYTE   pCertificate;
-    PSTR    pszPassword;
-} SSL_CREDENTIAL_CERTIFICATE, * PSSL_CREDENTIAL_CERTIFICATE;
-
-
-
-
-// Structures for use with the
-// NT 4.0 SP3 Schannel interface,
-// do not use.
-#define SCHANNEL_SECRET_TYPE_CAPI   0x00000001
-#define SCHANNEL_SECRET_PRIVKEY     0x00000002
-#define SCH_CRED_X509_CERTCHAIN     0x00000001
-#define SCH_CRED_X509_CAPI          0x00000002
-#define SCH_CRED_CERT_CONTEXT       0x00000003
-
-struct _HMAPPER;
-typedef struct _SCH_CRED
-{
-    DWORD     dwVersion;                // always SCH_CRED_VERSION.
-    DWORD     cCreds;                   // Number of credentials.
-    PVOID     *paSecret;                // Array of SCH_CRED_SECRET_* pointers
-    PVOID     *paPublic;                // Array of SCH_CRED_PUBLIC_* pointers
-    DWORD     cMappers;                 // Number of credential mappers.
-    struct _HMAPPER   **aphMappers;     // pointer to an array of pointers to credential mappers
-} SCH_CRED, * PSCH_CRED;
-
-// Structures for use with the
-// NT 4.0 SP3 Schannel interface,
-// do not use.
-typedef struct _SCH_CRED_SECRET_CAPI
-{
-    DWORD           dwType;      // SCHANNEL_SECRET_TYPE_CAPI
-    HCRYPTPROV      hProv;       // credential secret information.
-
-} SCH_CRED_SECRET_CAPI, * PSCH_CRED_SECRET_CAPI;
-
-
-// Structures for use with the
-// NT 4.0 SP3 Schannel interface,
-// do not use.
-typedef struct _SCH_CRED_SECRET_PRIVKEY
-{
-    DWORD           dwType;       // SCHANNEL_SECRET_PRIVKEY
-    PBYTE           pPrivateKey;   // Der encoded private key
-    DWORD           cbPrivateKey;
-    PSTR            pszPassword;  // Password to crack the private key.
-
-} SCH_CRED_SECRET_PRIVKEY, * PSCH_CRED_SECRET_PRIVKEY;
-
-
-// Structures for use with the
-// NT 4.0 SP3 Schannel interface,
-// do not use.
-typedef struct _SCH_CRED_PUBLIC_CERTCHAIN
-{
-    DWORD       dwType;
-    DWORD       cbCertChain;
-    PBYTE       pCertChain;
-} SCH_CRED_PUBLIC_CERTCHAIN, *PSCH_CRED_PUBLIC_CERTCHAIN;
-
-
-ffi.cdef[[
-// Structures needed for Pre NT4.0 SP2 calls.
-typedef struct _PctPublicKey
-{
-    DWORD Type;
-    DWORD cbKey;
-    UCHAR pKey[1];
-} PctPublicKey;
-
-typedef struct _X509Certificate {
-    DWORD           Version;
-    DWORD           SerialNumber[4];
-    ALG_ID          SignatureAlgorithm;
-    FILETIME        ValidFrom;
-    FILETIME        ValidUntil;
-    PSTR            pszIssuer;
-    PSTR            pszSubject;
-    PctPublicKey    *pPublicKey;
-} X509Certificate, * PX509Certificate;
-
-
-
-// Pre NT4.0 SP2 calls.  Call CAPI1 or CAPI2
-// to get the same functionality instead.
-BOOL
-SslGenerateKeyPair(
-    PSSL_CREDENTIAL_CERTIFICATE pCerts,
-    PSTR pszDN,
-    PSTR pszPassword,
-    DWORD Bits );
-
-// Pre NT4.0 SP2 calls.  Call CAPI1 or CAPI2
-// to get the same functionality instead.
-void
-SslGenerateRandomBits(PUCHAR      pRandomData,LONG        cRandomData);
-
-// Pre NT4.0 SP2 calls.  Call CAPI1 or CAPI2
-// to get the same functionality instead.
-BOOL
-SslCrackCertificate(PUCHAR              pbCertificate,
-    DWORD               cbCertificate,
-    DWORD               dwFlags,
-    PX509Certificate *  ppCertificate);
-
-// Pre NT4.0 SP2 calls.  Call CAPI1 or CAPI2
-// to get the same functionality instead.
-void
-SslFreeCertificate(PX509Certificate    pCertificate);
-
-DWORD
-SslGetMaximumKeySize(DWORD   Reserved );
-
-BOOL
-SslGetDefaultIssuers(PBYTE pbIssuers, DWORD *pcbIssuers);
-]]
-
-
-
-ffi.cdef[[
-// Pre NT4.0 SP2 calls.  Call CAPI1 or CAPI2
-// to get the same functionality instead.
-typedef BOOL ( * SSL_CRACK_CERTIFICATE_FN); (PUCHAR pbCertificate,
-    DWORD               cbCertificate,
-    BOOL                VerifySignature,
-    PX509Certificate *  ppCertificate);
-
-
-// Pre NT4.0 SP2 calls.  Call CAPI1 or CAPI2
-// to get the same functionality instead.
-typedef void ( * SSL_FREE_CERTIFICATE_FN);(PX509Certificate    pCertificate);
-]]
-
-
 
 schannel.SSL_CRACK_CERTIFICATE_NAME  = K32.TEXT("SslCrackCertificate");
 schannel.SSL_FREE_CERTIFICATE_NAME   = K32.TEXT("SslFreeCertificate");
@@ -847,20 +702,3 @@ end
 
 
 return schannel
-
---[[
-//+---------------------------------------------------------------------------
-//
-//  Microsoft Windows
-//  Copyright (C); Microsoft Corporation, 1992-1999.
-//
-//  File:       schannel.h
-//
-//  Contents:   Public Definitions for SCHANNEL Security Provider
-//
-//  Classes:
-//
-//  Functions:
-//
-//----------------------------------------------------------------------------
---]]

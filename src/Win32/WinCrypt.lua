@@ -8,10 +8,12 @@ local lshift = bit.lshift
 
 require "WTypes"
 k32 = require "win_kernel32"
-A = k32.Unicode16ToAnsi
-L = k32.AnsiToUnicode16
+local core_string = require("core_string_l1_1_0");
 
-require "base64"
+local L = core_string.toUnicode;
+local A = core_string.toAnsi;
+
+local base64 = require "base64"
 local MemoryStream = require "MemoryStream"
 local BinaryStream = require "BinaryStream"
 

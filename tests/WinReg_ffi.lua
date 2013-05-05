@@ -16,8 +16,7 @@ Abstract:
 local ffi = require("ffi");
 require("WTypes");
 
-if not _WINREG_ then
-_WINREG_ = true;
+
 
 ffi.cdef[[
 typedef LONG * PLONG;
@@ -1262,156 +1261,11 @@ RegLoadAppKeyW (
 ]]
 
 
-if UNICODE then
-RegLoadAppKey = RegLoadAppKeyW
-else
-RegLoadAppKey = RegLoadAppKeyA
-end -- !UNICODE
-
-ffi.cdef[[
-//
-// Remoteable System Shutdown APIs
-//
-
-//__drv_preferredFunction("InitiateSystemShutdownEx", "Legacy API. Rearchitect to avoid Reboot")
-
-BOOL
-
-InitiateSystemShutdownA(
-    LPSTR lpMachineName,
-    LPSTR lpMessage,
-    DWORD dwTimeout,
-    BOOL bForceAppsClosed,
-    BOOL bRebootAfterShutdown
-    );
-//__drv_preferredFunction("InitiateSystemShutdownEx", "Legacy API. Rearchitect to avoid Reboot")
-
-BOOL
-InitiateSystemShutdownW(
-    LPWSTR lpMachineName,
-    LPWSTR lpMessage,
-    DWORD dwTimeout,
-    BOOL bForceAppsClosed,
-    BOOL bRebootAfterShutdown
-    );
-]]
 
 
-if UNICODE then
-InitiateSystemShutdown = InitiateSystemShutdownW
-else
-InitiateSystemShutdown = InitiateSystemShutdownA
-end -- !UNICODE
 
-ffi.cdef[[
 
-BOOL
-AbortSystemShutdownA(
-    LPSTR lpMachineName
-    );
 
-BOOL
-AbortSystemShutdownW(
-    LPWSTR lpMachineName
-    );
-]]
-
-if UNICODE then
-AbortSystemShutdown = AbortSystemShutdownW
-else
-AbortSystemShutdown = AbortSystemShutdownA
-end -- !UNICODE
-
---[[
-//
-// defines for InitiateSystemShutdownEx reason codes
-//
-
-#include <reason.h>             // get the public reasons
---]]
-
-ffi.cdef[[
-//
-// MAX Shutdown TimeOut == 10 Years in seconds
-//
-static const int MAX_SHUTDOWN_TIMEOUT = (10*365*24*60*60);
-
-//__drv_preferredFunction("a design alternative", "Rearchitect to avoid Reboot") 
-//__drv_when(((dwReason==0 && lpMessage==0)) || dwReason>=0xd0000000, 
-//    __drv_reportError("Requires a valid dwReason or lpMessage"))
-
-BOOL
-InitiateSystemShutdownExA(
-    LPSTR lpMachineName,
-    LPSTR lpMessage,
-    DWORD dwTimeout,
-    BOOL bForceAppsClosed,
-    BOOL bRebootAfterShutdown,
-    DWORD dwReason
-    );
-//__drv_preferredFunction("a design alternative", "Rearchitect to avoid Reboot") 
-//__drv_when(((dwReason==0 && lpMessage==0)) || dwReason>=0xd0000000, 
-//    __drv_reportError("Requires a valid dwReason or lpMessage"))
-
-BOOL
-InitiateSystemShutdownExW(
-    LPWSTR lpMachineName,
-    LPWSTR lpMessage,
-    DWORD dwTimeout,
-    BOOL bForceAppsClosed,
-    BOOL bRebootAfterShutdown,
-    DWORD dwReason
-    );
-]]
-
-if UNICODE then
-InitiateSystemShutdownEx = InitiateSystemShutdownExW
-else
-InitiateSystemShutdownEx = InitiateSystemShutdownExA
-end -- !UNICODE
-
-ffi.cdef[[
-//
-// Shutdown flags
-//
-
-static const int SHUTDOWN_FORCE_OTHERS           =0x00000001;
-static const int SHUTDOWN_FORCE_SELF             =0x00000002;
-static const int SHUTDOWN_RESTART                =0x00000004;
-static const int SHUTDOWN_POWEROFF               =0x00000008;
-static const int SHUTDOWN_NOREBOOT               =0x00000010;
-static const int SHUTDOWN_GRACE_OVERRIDE         =0x00000020;
-static const int SHUTDOWN_INSTALL_UPDATES        =0x00000040;
-static const int SHUTDOWN_RESTARTAPPS            =0x00000080;
-static const int SHUTDOWN_SKIP_SVC_PRESHUTDOWN   =0x00000100;
-]]
-
-ffi.cdef[[
-
-DWORD
-InitiateShutdownA(
-    LPSTR lpMachineName,
-    LPSTR lpMessage,
-         DWORD dwGracePeriod,
-         DWORD dwShutdownFlags,
-         DWORD dwReason
-    );
-
-DWORD
-InitiateShutdownW(
-    LPWSTR lpMachineName,
-    LPWSTR lpMessage,
-         DWORD dwGracePeriod,
-         DWORD dwShutdownFlags,
-         DWORD dwReason
-    );
-]]
-
-if UNICODE then
-InitiateShutdown = InitiateShutdownW
-else
-InitiateShutdown = InitiateShutdownA
-end -- !UNICODE
 
 ffi.cdef[[
 
@@ -1432,15 +1286,6 @@ RegSaveKeyExW (
     );
 ]]
 
-if UNICODE then
-RegSaveKeyEx = RegSaveKeyExW
-else
-RegSaveKeyEx = RegSaveKeyExA
-end -- !UNICODE
 
-
-
-
-end -- _WINREG_
 
 

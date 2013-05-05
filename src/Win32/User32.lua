@@ -6,13 +6,14 @@ local bor = bit.bor;
 local Kernel32 = require("win_kernel32");
 local user32_ffi = require ("user32_ffi");
 local User32Lib = ffi.load("User32");
+local core_library = require("core_libraryloader_l1_1_1");
 
 
 local RegisterWindowClass = function(wndclassname, msgproc, style)
 	msgproc = msgproc or User32Lib.DefWindowProcA;
 	style = style or bor(user32_ffi.CS_HREDRAW,user32_ffi.CS_VREDRAW, user32_ffi.CS_OWNDC);
 
-	local hInst = Kernel32.Lib.GetModuleHandleA(nil);
+	local hInst = core_library.GetModuleHandleA(nil);
 
 	local wcex = ffi.new("WNDCLASSEXA");
     wcex.cbSize = ffi.sizeof(wcex);
@@ -43,7 +44,7 @@ local CreateWindowHandle = function(winclass, wintitle, width, height, winstyle,
 	x = x or user32_ffi.CW_USEDEFAULT;
 	y = y or user32_ffi.CW_USEDEFAULT;
 
-	local hInst = Kernel32.Lib.GetModuleHandleA(nil);
+	local hInst = core_library.GetModuleHandleA(nil);
 	local hWnd = User32Lib.CreateWindowExA(
 		0,
 		winclass,
@@ -145,7 +146,7 @@ User32MSGHandler_mt = {
 
 
 User32MSGHandler.new = function(classname, msgproc, classStyle)
-	local appInstance = kernel32.GetModuleHandleA(nil)
+	local appInstance = core_library.GetModuleHandleA(nil)
 	msgproc = msgproc or User32_MsgProc
 	classStyle = classStyle or bit.bor(user32_ffi.CS_HREDRAW, user32_ffi.CS_VREDRAW, user32_ffi.CS_OWNDC);
 

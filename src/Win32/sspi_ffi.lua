@@ -7,8 +7,10 @@ local rshift = bit.rshift;
 local lshift = bit.lshift;
 
 local K32 = require ("win_kernel32");
+local core_string = require("core_string_l1_1_0");
 
-local L=K32.AnsiToUnicode16;
+local L = core_string.toUnicode;
+
 
 SECURITY_WIN32 = true;
 

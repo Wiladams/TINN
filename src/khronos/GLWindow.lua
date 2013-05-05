@@ -16,7 +16,7 @@ local Kernel32 = require ("win_kernel32");
 local StopWatch = require ("StopWatch");
 
 local GLContext = require("GLContext");
-
+local core_library = require("core_libraryloader_l1_1_1");
 
 local GLWindow_t = {
 	Defaults = {
@@ -179,7 +179,7 @@ end
 
 
 function GLWindow_t:Register(params)
-	self.AppInstance = Kernel32.Lib.GetModuleHandleA(nil)
+	self.AppInstance = core_library.GetModuleHandleA(nil)
 	self.ClassName = params.ClassName
 
 	local classStyle = bit.bor(User32.FFI.CS_HREDRAW, User32.FFI.CS_VREDRAW, User32.FFI.CS_OWNDC);

@@ -491,6 +491,57 @@ typedef struct _CONTEXT {
 ]]
 
 ffi.cdef[[
+static const int EXCEPTION_NONCONTINUABLE =0x1;    // Noncontinuable exception
+static const int EXCEPTION_MAXIMUM_PARAMETERS =15; // maximum number of exception parameters
+
+//
+// Exception record definition.
+//
+
+typedef struct _EXCEPTION_RECORD {
+    DWORD    ExceptionCode;
+    DWORD ExceptionFlags;
+    struct _EXCEPTION_RECORD *ExceptionRecord;
+    PVOID ExceptionAddress;
+    DWORD NumberParameters;
+    ULONG_PTR ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];
+    } EXCEPTION_RECORD;
+
+typedef EXCEPTION_RECORD *PEXCEPTION_RECORD;
+
+typedef struct _EXCEPTION_RECORD32 {
+    DWORD    ExceptionCode;
+    DWORD ExceptionFlags;
+    DWORD ExceptionRecord;
+    DWORD ExceptionAddress;
+    DWORD NumberParameters;
+    DWORD ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];
+} EXCEPTION_RECORD32, *PEXCEPTION_RECORD32;
+
+typedef struct _EXCEPTION_RECORD64 {
+    DWORD    ExceptionCode;
+    DWORD ExceptionFlags;
+    DWORD64 ExceptionRecord;
+    DWORD64 ExceptionAddress;
+    DWORD NumberParameters;
+    DWORD __unusedAlignment;
+    DWORD64 ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];
+} EXCEPTION_RECORD64, *PEXCEPTION_RECORD64;
+
+//
+// Typedef for pointer returned by exception_info()
+//
+
+typedef struct _EXCEPTION_POINTERS {
+    PEXCEPTION_RECORD ExceptionRecord;
+    PCONTEXT ContextRecord;
+} EXCEPTION_POINTERS, *PEXCEPTION_POINTERS;
+
+typedef LONG (* PVECTORED_EXCEPTION_HANDLER)(struct _EXCEPTION_POINTERS *ExceptionInfo);
+
+]]
+
+ffi.cdef[[
 // begin_wdm
 //
 //  The following are masks for the predefined standard access types
@@ -526,4 +577,30 @@ static const int PROCESS_QUERY_INFORMATION          = (0x0400);
 static const int PROCESS_SUSPEND_RESUME             = (0x0800); 
 static const int PROCESS_QUERY_LIMITED_INFORMATION  = (0x1000); 
 static const int PROCESS_ALL_ACCESS        = (STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0xFFFF);
+]]
+
+ffi.cdef[[
+typedef DWORD SECURITY_INFORMATION, *PSECURITY_INFORMATION;
+
+typedef enum _SID_NAME_USE {
+    SidTypeUser = 1,
+    SidTypeGroup,
+    SidTypeDomain,
+    SidTypeAlias,
+    SidTypeWellKnownGroup,
+    SidTypeDeletedAccount,
+    SidTypeInvalid,
+    SidTypeUnknown,
+    SidTypeComputer,
+    SidTypeLabel
+} SID_NAME_USE, *PSID_NAME_USE;
+
+//
+// Locally Unique Identifier
+//
+
+typedef struct _LUID {
+    DWORD LowPart;
+    LONG HighPart;
+} LUID, *PLUID;
 ]]

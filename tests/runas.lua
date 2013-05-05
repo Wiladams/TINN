@@ -9,7 +9,8 @@ local lshift = bit.lshift;
 local kernel32 = require("win_kernel32");
 local k32Lib = kernel32.Lib;
 local advlib = ffi.load("AdvApi32");
-local L = kernel32.AnsiToUnicode16;
+local core_string = require("core_string_l1_1_0");
+local L = core_string.toUnicode;
 
 
 ffi.cdef[[

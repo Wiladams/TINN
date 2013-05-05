@@ -7,6 +7,7 @@ require("WinBase");
 local kernel32 = require("win_kernel32");
 local k32Lib = kernel32.Lib;
 local advLib = ffi.load("Advapi32");
+local WinNT = require("WinNT");
 
 
 -- Win8
@@ -20,53 +21,7 @@ local advLib = ffi.load("Advapi32");
 -- OpenThreadToken
 -- SetThreadToken
 
-ffi.cdef[[
-static const int EXCEPTION_NONCONTINUABLE =0x1;    // Noncontinuable exception
-static const int EXCEPTION_MAXIMUM_PARAMETERS =15; // maximum number of exception parameters
 
-//
-// Exception record definition.
-//
-
-typedef struct _EXCEPTION_RECORD {
-    DWORD    ExceptionCode;
-    DWORD ExceptionFlags;
-    struct _EXCEPTION_RECORD *ExceptionRecord;
-    PVOID ExceptionAddress;
-    DWORD NumberParameters;
-    ULONG_PTR ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];
-    } EXCEPTION_RECORD;
-
-typedef EXCEPTION_RECORD *PEXCEPTION_RECORD;
-
-typedef struct _EXCEPTION_RECORD32 {
-    DWORD    ExceptionCode;
-    DWORD ExceptionFlags;
-    DWORD ExceptionRecord;
-    DWORD ExceptionAddress;
-    DWORD NumberParameters;
-    DWORD ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];
-} EXCEPTION_RECORD32, *PEXCEPTION_RECORD32;
-
-typedef struct _EXCEPTION_RECORD64 {
-    DWORD    ExceptionCode;
-    DWORD ExceptionFlags;
-    DWORD64 ExceptionRecord;
-    DWORD64 ExceptionAddress;
-    DWORD NumberParameters;
-    DWORD __unusedAlignment;
-    DWORD64 ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];
-} EXCEPTION_RECORD64, *PEXCEPTION_RECORD64;
-
-//
-// Typedef for pointer returned by exception_info()
-//
-
-typedef struct _EXCEPTION_POINTERS {
-    PEXCEPTION_RECORD ExceptionRecord;
-    PCONTEXT ContextRecord;
-} EXCEPTION_POINTERS, *PEXCEPTION_POINTERS;
-]]
 
 ffi.cdef[[
 typedef PCONTEXT LPCONTEXT;

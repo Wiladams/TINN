@@ -61,20 +61,25 @@
 
 @rem Core windows API set
 %LUAC% Win32/apiset/core_console.lua core_console.obj
+%LUAC% Win32/apiset/core_errorhandling_l1_1_1.lua core_errorhandling_l1_1_1.obj
 %LUAC% Win32/apiset/core_interlocked.lua core_interlocked.obj
+%LUAC% Win32/apiset/core_libraryloader_l1_1_1.lua core_libraryloader_l1_1_1.obj
 %LUAC% Win32/apiset/core_processenvironment.lua core_processenvironment.obj
 %LUAC% Win32/apiset/core_processthreads_l1_1_1.lua core_processthreads_l1_1_1.obj
 %LUAC% Win32/apiset/core_profile_l1_1_0.lua core_profile_l1_1_0.obj
+%LUAC% Win32/apiset/core_string_l1_1_0.lua core_string_l1_1_0.obj
 %LUAC% Win32/apiset/Handle_ffi.lua Handle_ffi.obj
 %LUAC% Win32/apiset/Heap_ffi.lua Heap_ffi.obj
 %LUAC% Win32/apiset/power_base_l1_1_0.lua power_base_l1_1_0.obj
+%LUAC% Win32/apiset/security_lsalookup_l2_1_0.lua security_lsalookup_l2_1_0.obj
+%LUAC% Win32/apiset/security_sddl_l1_1_0.lua security_sddl_l1_1_0.obj
 %LUAC% Win32/apiset/SysInfo_ffi.lua SysInfo_ffi.obj
 %LUAC% Win32/apiset/UMS_ffi.lua UMS_ffi.obj
 %LUAC% Win32/apiset/Util_ffi.lua Util_ffi.obj
 %LUAC% Win32/apiset/WinBer_ffi.lua WinBer_ffi.obj
 %LUAC% Win32/apiset/wldap32_ffi.lua wldap32_ffi.obj
 
-@set WINCOREAPI=core_console.obj core_interlocked.obj core_processenvironment.obj core_processthreads_l1_1_1.obj core_profile_l1_1_0.obj Handle_ffi.obj Heap_ffi.obj power_base_l1_1_0.obj SysInfo_ffi.obj UMS_ffi.obj Util_ffi.obj WinBer_ffi.obj wldap32_ffi.obj
+@set WINCOREAPI=core_console.obj core_errorhandling_l1_1_1.obj core_interlocked.obj core_libraryloader_l1_1_1.obj core_processenvironment.obj core_processthreads_l1_1_1.obj core_profile_l1_1_0.obj core_string_l1_1_0.obj Handle_ffi.obj Heap_ffi.obj power_base_l1_1_0.obj security_lsalookup_l2_1_0.obj security_sddl_l1_1_0.obj SysInfo_ffi.obj UMS_ffi.obj Util_ffi.obj WinBer_ffi.obj wldap32_ffi.obj
 
 
 @rem Create the Win32 specific stuff
