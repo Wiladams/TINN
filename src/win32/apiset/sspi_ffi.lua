@@ -8,6 +8,7 @@ local lshift = bit.lshift;
 
 local K32 = require ("win_kernel32");
 local core_string = require("core_string_l1_1_0");
+local require("ntstatus");
 
 local L = core_string.toUnicode;
 
@@ -99,17 +100,9 @@ end -- !ISSP_LEVEL
 --
 
 
-ffi.cdef[[
-typedef WCHAR SEC_WCHAR;
-typedef CHAR SEC_CHAR;
-]]
 
-if not __SECSTATUS_DEFINED__ then
-ffi.cdef[[
-typedef LONG SECURITY_STATUS;
-]]
-__SECSTATUS_DEFINED__ = true;
-end
+
+
 
 --[[
 //
@@ -140,47 +133,14 @@ end -- UNICODE
 //
 --]]
 
-if not __SECHANDLE_DEFINED__ then
-ffi.cdef[[
-typedef struct _SecHandle
-{
-    ULONG_PTR dwLower ;
-    ULONG_PTR dwUpper ;
-} SecHandle, * PSecHandle ;
-]]
-__SECHANDLE_DEFINED__ = true
-end -- __SECHANDLE_DEFINED__
 
-SecInvalidateHandle = function( x )
-    ffi.cast("PSecHandle", x).dwLower = ffi.cast("ULONG_PTR", ((INT_PTR)-1)) ;
-    ffi.cast("PSecHandle", x).dwUpper = ffi.cast("ULONG_PTR", ((INT_PTR)-1)) ;
-end
 
-SecIsValidHandle = function( x )
-    return x.dwLower ~= ffi.cast("ULONG_PTR", -1) and 
-        x.dwUpper ~= ffi.cast("ULONG_PTR", -1);
-end
 
-ffi.cdef[[
-//
-// pseudo handle value: the handle has already been deleted
-//
-
-static const int SEC_DELETED_HANDLE  = ((ULONG_PTR) (-2));
-
-typedef SecHandle CredHandle;
-typedef PSecHandle PCredHandle;
-
-typedef SecHandle CtxtHandle;
-typedef PSecHandle PCtxtHandle;
-]]
 
 
 
 if (_NTDEF_) or (_WINNT_) then
-ffi.cdef[[
-typedef LARGE_INTEGER _SECURITY_INTEGER, SECURITY_INTEGER, *PSECURITY_INTEGER; 
-]]
+
 else
 ffi.cdef[[ 
 typedef struct _SECURITY_INTEGER
@@ -192,10 +152,7 @@ typedef struct _SECURITY_INTEGER
 end -- _NTDEF_ || _WINNT_
 
 if not SECURITY_MAC then
-ffi.cdef[[
-typedef SECURITY_INTEGER TimeStamp;                 
-typedef SECURITY_INTEGER * PTimeStamp;      
-]]
+
 else -- SECURITY_MAC
 ffi.cdef[[
 typedef unsigned long TimeStamp;
@@ -227,38 +184,7 @@ typedef UNICODE_STRING SECURITY_STRING, *PSECURITY_STRING;
 end -- _NTDEF_
 
 
-ffi.cdef[[
-//
-// SecPkgInfo structure
-//
-//  Provides general information about a security provider
-//
 
-typedef struct _SecPkgInfoW
-{
-    unsigned long fCapabilities;        // Capability bitmask
-    unsigned short wVersion;            // Version of driver
-    unsigned short wRPCID;              // ID for RPC Runtime
-    unsigned long cbMaxToken;           // Size of authentication token (max)
-    SEC_WCHAR * Name;           // Text name
-    SEC_WCHAR * Comment;        // Comment
-} SecPkgInfoW, * PSecPkgInfoW;
-
-
-
-typedef struct _SecPkgInfoA
-{
-    unsigned long fCapabilities;        // Capability bitmask
-    unsigned short wVersion;            // Version of driver
-    unsigned short wRPCID;              // ID for RPC Runtime
-    unsigned long cbMaxToken;           // Size of authentication token (max)
-
-    SEC_CHAR * Name;            // Text name
-
-
-    SEC_CHAR * Comment;         // Comment
-} SecPkgInfoA, * PSecPkgInfoA;
-]]
 
 
 
@@ -292,26 +218,7 @@ static const int SECPKG_FLAG_NEGOTIABLE2               =  0x00200000;  // this p
 static const int SECPKG_ID_NONE      =0xFFFF;
 ]]
 
-ffi.cdef[[
-//
-// SecBuffer
-//
-//  Generic memory descriptors for buffers passed in to the security
-//  API
-//
 
-typedef struct _SecBuffer {
-    unsigned long cbBuffer;             // Size of the buffer, in bytes
-    unsigned long BufferType;           // Type of the buffer (below)
-    void * pvBuffer;            // Pointer to the buffer
-} SecBuffer, * PSecBuffer;
-
-typedef struct _SecBufferDesc {
-    unsigned long ulVersion;            // Version number
-    unsigned long cBuffers;             // Number of buffers
-    PSecBuffer pBuffers;                // Pointer to array of buffers
-} SecBufferDesc, * PSecBufferDesc;
-]]
 
 ffi.cdef[[
 static const int SECBUFFER_VERSION           =0;
@@ -897,16 +804,7 @@ typedef struct _SecPkgContext_Bindings
 ]]
 
 
-ffi.cdef[[
-typedef void
-(* SEC_GET_KEY_FN) (
-    void * Arg,                 // Argument passed in
-    void * Principal,           // Principal ID
-    unsigned long KeyVer,               // Key Version
-    void * * Key,       // Returned ptr to key
-    SECURITY_STATUS * Status    // returned status
-    );
-]]
+
 
 ffi.cdef[[
 //
@@ -948,77 +846,14 @@ typedef SECURITY_STATUS
     PTimeStamp);
 ]]
 else
-ffi.cdef[[
 
-SECURITY_STATUS 
-AcquireCredentialsHandleW(
-
-     LPWSTR pszPrincipal,                // Name of principal
-         LPWSTR pszPackage,                  // Name of package
-
-         unsigned long fCredentialUse,       // Flags indicating use
-     void * pvLogonId,           // Pointer to logon ID
-     void * pAuthData,           // Package specific data
-     SEC_GET_KEY_FN pGetKeyFn,           // Pointer to GetKey() func
-     void * pvGetKeyArgument,    // Value to pass to GetKey()
-        PCredHandle phCredential,           // (out) Cred Handle
-     PTimeStamp ptsExpiry                // (out) Lifetime (optional)
-    );
-
-typedef SECURITY_STATUS
-(* ACQUIRE_CREDENTIALS_HANDLE_FN_W)(
-
-    SEC_WCHAR *,
-    SEC_WCHAR *,
-    unsigned long,
-    void *,
-    void *,
-    SEC_GET_KEY_FN,
-    void *,
-    PCredHandle,
-    PTimeStamp);
-]]
 end
 
 
-ffi.cdef[[
-SECURITY_STATUS 
-AcquireCredentialsHandleA(
-    const char * pszPrincipal,                 // Name of principal
-    const char * pszPackage,                   // Name of package
-    unsigned long fCredentialUse,       // Flags indicating use
-    void * pvLogonId,           // Pointer to logon ID
-    void * pAuthData,           // Package specific data
-    SEC_GET_KEY_FN pGetKeyFn,           // Pointer to GetKey() func
-    void * pvGetKeyArgument,    // Value to pass to GetKey()
-    PCredHandle phCredential,           // (out) Cred Handle
-    PTimeStamp ptsExpiry                // (out) Lifetime (optional)
-    );
-
-typedef SECURITY_STATUS
-(* ACQUIRE_CREDENTIALS_HANDLE_FN_A)(
-    SEC_CHAR *,
-    SEC_CHAR *,
-    unsigned long,
-    void *,
-    void *,
-    SEC_GET_KEY_FN,
-    void *,
-    PCredHandle,
-    PTimeStamp);
 
 
 
 
-SECURITY_STATUS 
-FreeCredentialsHandle(
-    PCredHandle phCredential            // Handle to free
-    );
-
-typedef SECURITY_STATUS
-(* FREE_CREDENTIALS_HANDLE_FN)(
-    PCredHandle );
-]]
 
 if ISSP_MODE == 0 then      -- For Kernel mode
 ffi.cdef[[
@@ -1048,58 +883,11 @@ typedef SECURITY_STATUS
     PTimeStamp);
 ]]
 else
-ffi.cdef[[
 
-SECURITY_STATUS 
-AddCredentialsW(
-    PCredHandle hCredentials,
-    LPWSTR pszPrincipal,                // Name of principal
-    LPWSTR pszPackage,                  // Name of package
-    unsigned long fCredentialUse,       // Flags indicating use
-    void * pAuthData,           // Package specific data
-    SEC_GET_KEY_FN pGetKeyFn,           // Pointer to GetKey() func
-    void * pvGetKeyArgument,    // Value to pass to GetKey()
-    PTimeStamp ptsExpiry                // (out) Lifetime (optional)
-    );
-
-typedef SECURITY_STATUS
-(* ADD_CREDENTIALS_FN_W)(
-    PCredHandle,
-    SEC_WCHAR *,
-    SEC_WCHAR *,
-    unsigned long,
-    void *,
-    SEC_GET_KEY_FN,
-    void *,
-    PTimeStamp);
-]]
 end
 
 
-ffi.cdef[[
-SECURITY_STATUS 
-AddCredentialsA(
-    PCredHandle hCredentials,
-    LPSTR pszPrincipal,             // Name of principal
-    LPSTR pszPackage,                   // Name of package
-    unsigned long fCredentialUse,       // Flags indicating use
-    void * pAuthData,           // Package specific data
-    SEC_GET_KEY_FN pGetKeyFn,           // Pointer to GetKey() func
-    void * pvGetKeyArgument,    // Value to pass to GetKey()
-     PTimeStamp ptsExpiry                // (out) Lifetime (optional)
-    );
 
-typedef SECURITY_STATUS
-(* ADD_CREDENTIALS_FN_A)(
-    PCredHandle,
-    SEC_CHAR *,
-    SEC_CHAR *,
-    unsigned long,
-    void *,
-    SEC_GET_KEY_FN,
-    void *,
-    PTimeStamp);
-]]
 
 
 
@@ -1112,57 +900,7 @@ typedef SECURITY_STATUS
 --]]
 
 if ISSP_MODE ~= 0 then
-ffi.cdef[[
-SECURITY_STATUS 
-ChangeAccountPasswordW(
-       SEC_WCHAR *  pszPackageName,
-       SEC_WCHAR *  pszDomainName,
-       SEC_WCHAR *  pszAccountName,
-       SEC_WCHAR *  pszOldPassword,
-       SEC_WCHAR *  pszNewPassword,
-       BOOLEAN              bImpersonating,
-       unsigned long        dwReserved,
-    PSecBufferDesc       pOutput
-    );
 
-typedef SECURITY_STATUS
-(* CHANGE_PASSWORD_FN_W)(
-    SEC_WCHAR *,
-    SEC_WCHAR *,
-    SEC_WCHAR *,
-    SEC_WCHAR *,
-    SEC_WCHAR *,
-    BOOLEAN,
-    unsigned long,
-    PSecBufferDesc
-    );
-
-
-
-SECURITY_STATUS 
-ChangeAccountPasswordA(
-       SEC_CHAR *  pszPackageName,
-       SEC_CHAR *  pszDomainName,
-       SEC_CHAR *  pszAccountName,
-       SEC_CHAR *  pszOldPassword,
-       SEC_CHAR *  pszNewPassword,
-       BOOLEAN             bImpersonating,
-       unsigned long       dwReserved,
-    PSecBufferDesc      pOutput
-    );
-
-typedef SECURITY_STATUS
-(* CHANGE_PASSWORD_FN_A)(
-    SEC_CHAR *,
-    SEC_CHAR *,
-    SEC_CHAR *,
-    SEC_CHAR *,
-    SEC_CHAR *,
-    BOOLEAN,
-    unsigned long,
-    PSecBufferDesc
-    );
-]]
 end -- ISSP_MODE
 
 --[[
@@ -1208,319 +946,8 @@ typedef SECURITY_STATUS
     PTimeStamp);
 ]]
 else
-ffi.cdef[[
 
-SECURITY_STATUS 
-InitializeSecurityContextW(
-    PCredHandle phCredential,               // Cred to base context
-    PCtxtHandle phContext,                  // Existing context (OPT)
-    SEC_WCHAR * pszTargetName,         // Name of target
-    unsigned long fContextReq,              // Context Requirements
-    unsigned long Reserved1,                // Reserved, MBZ
-    unsigned long TargetDataRep,            // Data rep of target
-    PSecBufferDesc pInput,                  // Input Buffers
-    unsigned long Reserved2,                // Reserved, MBZ
-    PCtxtHandle phNewContext,               // (out) New Context handle
-    PSecBufferDesc pOutput,                 // (inout) Output Buffers
-    unsigned long * pfContextAttr,  // (out) Context attrs
-    PTimeStamp ptsExpiry                    // (out) Life span (OPT)
-    );
-
-typedef SECURITY_STATUS
-(* INITIALIZE_SECURITY_CONTEXT_FN_W)(
-    PCredHandle,
-    PCtxtHandle,
-    SEC_WCHAR *,
-    unsigned long,
-    unsigned long,
-    unsigned long,
-    PSecBufferDesc,
-    unsigned long,
-    PCtxtHandle,
-    PSecBufferDesc,
-    unsigned long *,
-    PTimeStamp);
-]]
 end
-
-
-
-ffi.cdef[[
-
-SECURITY_STATUS 
-InitializeSecurityContextA(
-    PCredHandle phCredential,               // Cred to base context
-    PCtxtHandle phContext,                  // Existing context (OPT)
-    SEC_CHAR * pszTargetName,       // Name of target
-    unsigned long fContextReq,              // Context Requirements
-    unsigned long Reserved1,                // Reserved, MBZ
-    unsigned long TargetDataRep,            // Data rep of target
-    PSecBufferDesc pInput,                  // Input Buffers
-    unsigned long Reserved2,                // Reserved, MBZ
-    PCtxtHandle phNewContext,               // (out) New Context handle
-    PSecBufferDesc pOutput,                 // (inout) Output Buffers
-    unsigned long * pfContextAttr,  // (out) Context attrs
-    PTimeStamp ptsExpiry                    // (out) Life span (OPT)
-    );
-
-typedef SECURITY_STATUS
-(* INITIALIZE_SECURITY_CONTEXT_FN_A)(
-    PCredHandle,
-    PCtxtHandle,
-    SEC_CHAR *,
-    unsigned long,
-    unsigned long,
-    unsigned long,
-    PSecBufferDesc,
-    unsigned long,
-    PCtxtHandle,
-    PSecBufferDesc,
-    unsigned long *,
-    PTimeStamp);
-]]
-
-
-
-ffi.cdef[[
-
-SECURITY_STATUS 
-AcceptSecurityContext(
-     PCredHandle phCredential,               // Cred to base context
-     PCtxtHandle phContext,                  // Existing context (OPT)
-     PSecBufferDesc pInput,                  // Input buffer
-         unsigned long fContextReq,              // Context Requirements
-         unsigned long TargetDataRep,            // Target Data Rep
-     PCtxtHandle phNewContext,               // (out) New context handle
-     PSecBufferDesc pOutput,                 // (inout) Output buffers
-        unsigned long * pfContextAttr,  // (out) Context attributes
-     PTimeStamp ptsExpiry                    // (out) Life span (OPT)
-    );
-
-typedef SECURITY_STATUS
-(* ACCEPT_SECURITY_CONTEXT_FN)(
-    PCredHandle,
-    PCtxtHandle,
-    PSecBufferDesc,
-    unsigned long,
-    unsigned long,
-    PCtxtHandle,
-    PSecBufferDesc,
-    unsigned long *,
-    PTimeStamp);
-]]
-
-ffi.cdef[[
-SECURITY_STATUS 
-CompleteAuthToken(
-    PCtxtHandle phContext,              // Context to complete
-    PSecBufferDesc pToken               // Token to complete
-    );
-
-typedef SECURITY_STATUS
-(* COMPLETE_AUTH_TOKEN_FN)(
-    PCtxtHandle,
-    PSecBufferDesc);
-
-
-SECURITY_STATUS 
-ImpersonateSecurityContext(
-    PCtxtHandle phContext               // Context to impersonate
-    );
-
-typedef SECURITY_STATUS
-(* IMPERSONATE_SECURITY_CONTEXT_FN)(
-    PCtxtHandle);
-
-
-
-SECURITY_STATUS 
-RevertSecurityContext(
-    PCtxtHandle phContext               // Context from which to re
-    );
-
-typedef SECURITY_STATUS
-(* REVERT_SECURITY_CONTEXT_FN)(
-    PCtxtHandle);
-
-
-
-SECURITY_STATUS 
-QuerySecurityContextToken(
-     PCtxtHandle phContext,
-    void * * Token
-    );
-
-typedef SECURITY_STATUS
-(* QUERY_SECURITY_CONTEXT_TOKEN_FN)(
-    PCtxtHandle, void * *);
-
-
-
-SECURITY_STATUS DeleteSecurityContext(
-    PCtxtHandle phContext               // Context to delete
-    );
-
-typedef SECURITY_STATUS
-(* DELETE_SECURITY_CONTEXT_FN)(
-    PCtxtHandle);
-
-
-
-SECURITY_STATUS 
-ApplyControlToken(
-    PCtxtHandle phContext,              // Context to modify
-    PSecBufferDesc pInput               // Input token to apply
-    );
-
-typedef SECURITY_STATUS
-(* APPLY_CONTROL_TOKEN_FN)(
-    PCtxtHandle, PSecBufferDesc);
-
-
-
-SECURITY_STATUS 
-QueryContextAttributesW(
-     PCtxtHandle phContext,              // Context to query
-     unsigned long ulAttribute,          // Attribute to query
-    void * pBuffer              // Buffer for attributes
-    );
-
-typedef SECURITY_STATUS
-(* QUERY_CONTEXT_ATTRIBUTES_FN_W)(
-    PCtxtHandle,
-    unsigned long,
-    void *);
-
-SECURITY_STATUS 
-QueryContextAttributesA(
-     PCtxtHandle phContext,              // Context to query
-     unsigned long ulAttribute,          // Attribute to query
-    void * pBuffer              // Buffer for attributes
-    );
-
-typedef SECURITY_STATUS
-(* QUERY_CONTEXT_ATTRIBUTES_FN_A)(
-    PCtxtHandle,
-    unsigned long,
-    void *);
-]]
-
-
-
-ffi.cdef[[
-SECURITY_STATUS 
-SetContextAttributesW(
-    PCtxtHandle phContext,                   // Context to Set
-    unsigned long ulAttribute,               // Attribute to Set
-    void * pBuffer, // Buffer for attributes
-    unsigned long cbBuffer                   // Size (in bytes) of Buffer
-    );
-
-typedef SECURITY_STATUS
-(* SET_CONTEXT_ATTRIBUTES_FN_W)(
-    PCtxtHandle,
-    unsigned long,
-    void *,
-    unsigned long );
-
-]]
-
-
-ffi.cdef[[
-SECURITY_STATUS 
-SetContextAttributesA(
-    PCtxtHandle phContext,                   // Context to Set
-    unsigned long ulAttribute,               // Attribute to Set
-    void * pBuffer, // Buffer for attributes
-    unsigned long cbBuffer                   // Size (in bytes) of Buffer
-    );
-
-typedef SECURITY_STATUS
-(* SET_CONTEXT_ATTRIBUTES_FN_A)(
-    PCtxtHandle,
-    unsigned long,
-    void *,
-    unsigned long );
-]]
-
-
-ffi.cdef[[
-
-SECURITY_STATUS 
-QueryCredentialsAttributesW(
-       PCredHandle phCredential,           // Credential to query
-       unsigned long ulAttribute,          // Attribute to query
-    void * pBuffer              // Buffer for attributes
-    );
-
-typedef SECURITY_STATUS
-(* QUERY_CREDENTIALS_ATTRIBUTES_FN_W)(
-    PCredHandle,
-    unsigned long,
-    void *);
-
-SECURITY_STATUS 
-QueryCredentialsAttributesA(
-       PCredHandle phCredential,           // Credential to query
-       unsigned long ulAttribute,          // Attribute to query
-    void * pBuffer              // Buffer for attributes
-    );
-
-typedef SECURITY_STATUS
-(* QUERY_CREDENTIALS_ATTRIBUTES_FN_A)(
-    PCredHandle,
-    unsigned long,
-    void *);
-]]
-
-
-
-ffi.cdef[[
-
-SECURITY_STATUS 
-SetCredentialsAttributesW(
-    PCredHandle phCredential,                // Credential to Set
-    unsigned long ulAttribute,               // Attribute to Set
-    void * pBuffer, // Buffer for attributes
-    unsigned long cbBuffer                   // Size (in bytes) of Buffer
-    );
-
-typedef SECURITY_STATUS
-(* SET_CREDENTIALS_ATTRIBUTES_FN_W)(
-    PCredHandle,
-    unsigned long,
-    void *,
-    unsigned long );
-
-]] -- For W2k3SP1 and greater
-
-
-ffi.cdef[[
-SECURITY_STATUS 
-SetCredentialsAttributesA(
-    PCredHandle phCredential,                // Credential to Set
-    unsigned long ulAttribute,               // Attribute to Set
-    void * pBuffer, // Buffer for attributes
-    unsigned long cbBuffer                   // Size (in bytes) of Buffer
-    );
-
-typedef SECURITY_STATUS
-(* SET_CREDENTIALS_ATTRIBUTES_FN_A)(
-    PCredHandle,
-    unsigned long,
-    void *,
-    unsigned long );
-]]
-
-
-ffi.cdef[[
-SECURITY_STATUS 
-FreeContextBuffer(
-    PVOID pvContextBuffer      // buffer to free
-    );
-
-typedef SECURITY_STATUS (* FREE_CONTEXT_BUFFER_FN)(PVOID);
-]]
 
 
 ffi.cdef[[
@@ -1531,93 +958,10 @@ ffi.cdef[[
 //////////////////////////////////////////////////////////////////
 
 
-SECURITY_STATUS 
-MakeSignature(
-    PCtxtHandle phContext,              // Context to use
-    unsigned long fQOP,                 // Quality of Protection
-    PSecBufferDesc pMessage,            // Message to sign
-    unsigned long MessageSeqNo          // Message Sequence Num.
-    );
-
-typedef SECURITY_STATUS
-(* MAKE_SIGNATURE_FN)(
-    PCtxtHandle,
-    unsigned long,
-    PSecBufferDesc,
-    unsigned long);
-
-
-
-SECURITY_STATUS 
-VerifySignature(
-     PCtxtHandle phContext,              // Context to use
-     PSecBufferDesc pMessage,            // Message to verify
-     unsigned long MessageSeqNo,         // Sequence Num.
-    unsigned long * pfQOP       // QOP used
-    );
-
-typedef SECURITY_STATUS
-(* VERIFY_SIGNATURE_FN)(
-    PCtxtHandle,
-    PSecBufferDesc,
-    unsigned long,
-    unsigned long *);
-
 // This only exists win Win2k3 and Greater
 static const int SECQOP_WRAP_NO_ENCRYPT     = 0x80000001;
 static const int SECQOP_WRAP_OOB_DATA       = 0x40000000;
 
-SECURITY_STATUS 
-EncryptMessage(    PCtxtHandle         phContext,
-                   unsigned long       fQOP,
-                PSecBufferDesc      pMessage,
-                   unsigned long       MessageSeqNo);
-
-typedef SECURITY_STATUS
-(* ENCRYPT_MESSAGE_FN)(
-    PCtxtHandle, unsigned long, PSecBufferDesc, unsigned long);
-
-
-SECURITY_STATUS 
-DecryptMessage(      PCtxtHandle         phContext,
-                  PSecBufferDesc      pMessage,
-                     unsigned long       MessageSeqNo,
-                 unsigned long *     pfQOP);
-
-
-typedef SECURITY_STATUS
-(* DECRYPT_MESSAGE_FN)(
-    PCtxtHandle, PSecBufferDesc, unsigned long,
-    unsigned long *);
-]]
-
-
-
-ffi.cdef[[
-///////////////////////////////////////////////////////////////////////////
-////
-////    Misc.
-////
-///////////////////////////////////////////////////////////////////////////
-
-
-SECURITY_STATUS 
-EnumerateSecurityPackagesW(
-    unsigned long * pcPackages,     // Receives num. packages
-    PSecPkgInfoW  * ppPackageInfo    // Receives array of info
-    );
-
-typedef SECURITY_STATUS (* ENUMERATE_SECURITY_PACKAGES_FN_W)(unsigned long *,PSecPkgInfoW *);
-
-
-
-SECURITY_STATUS 
-EnumerateSecurityPackagesA(
-    unsigned long * pcPackages,     // Receives num. packages
-    PSecPkgInfoA  * ppPackageInfo    // Receives array of info
-    );
-
-typedef SECURITY_STATUS (* ENUMERATE_SECURITY_PACKAGES_FN_A)(unsigned long *, PSecPkgInfoA *);
 ]]
 
 
@@ -1636,37 +980,14 @@ typedef SECURITY_STATUS
     PSecPkgInfoW *);
 ]]
 else
-ffi.cdef[[
 
-SECURITY_STATUS 
-QuerySecurityPackageInfoW(
-    LPWSTR pszPackageName,          // Name of package
-    PSecPkgInfoW *ppPackageInfo     // Receives package info
-    );
-
-typedef SECURITY_STATUS
-(* QUERY_SECURITY_PACKAGE_INFO_FN_W)(
-    SEC_WCHAR *,
-    PSecPkgInfoW *);
-]]
 end
 
 
 
 
 
-ffi.cdef[[
-SECURITY_STATUS 
-QuerySecurityPackageInfoA(
-           LPSTR pszPackageName,           // Name of package
-    PSecPkgInfoA *ppPackageInfo     // Receives package info
-    );
 
-typedef SECURITY_STATUS
-(* QUERY_SECURITY_PACKAGE_INFO_FN_A)(
-    SEC_CHAR *,
-    PSecPkgInfoA *);
-]]
 
 
 ffi.cdef[[
@@ -1719,31 +1040,7 @@ end
 --]]
 
 
-ffi.cdef[[
-///////////////////////////////////////////////////////////////////////////
-////
-////    Context export/import
-////
-///////////////////////////////////////////////////////////////////////////
 
-
-
-SECURITY_STATUS 
-ExportSecurityContext(
-     PCtxtHandle          phContext,             // (in) context to export
-     ULONG                fFlags,                // (in) option flags
-    PSecBuffer           pPackedContext,        // (out) marshalled context
-    void * * pToken             // (out, optional) token handle for impersonation
-    );
-
-typedef SECURITY_STATUS
-(* EXPORT_SECURITY_CONTEXT_FN)(
-    PCtxtHandle,
-    ULONG,
-    PSecBuffer,
-    void * *
-    );
-]]
 
 
 if ISSP_MODE == 0 then
@@ -1766,51 +1063,17 @@ typedef SECURITY_STATUS
     );
 ]]
 else
-ffi.cdef[[
 
-SECURITY_STATUS 
-ImportSecurityContextW(
-     LPWSTR               pszPackage,
-     PSecBuffer           pPackedContext,        // (in) marshalled context
-     void *               Token,                 // (in, optional) handle to token for context
-    PCtxtHandle          phContext              // (out) new context handle
-    );
-
-typedef SECURITY_STATUS
-(* IMPORT_SECURITY_CONTEXT_FN_W)(
-    SEC_WCHAR *,
-    PSecBuffer,
-    void *,
-    PCtxtHandle
-    );
-]]
 end
 
 
 
-ffi.cdef[[
-SECURITY_STATUS 
-ImportSecurityContextA(
-     LPSTR                pszPackage,
-     PSecBuffer           pPackedContext,        // (in) marshalled context
-     void *               Token,                 // (in, optional) handle to token for context
-    PCtxtHandle          phContext              // (out) new context handle
-    );
 
-typedef SECURITY_STATUS
-(* IMPORT_SECURITY_CONTEXT_FN_A)(
-    SEC_CHAR *,
-    PSecBuffer,
-    void *,
-    PCtxtHandle
-    );
-]]
 
 if ISSP_MODE == 0 then
 ffi.cdef[[
 
 NTSTATUS
-NTAPI
 SecMakeSPN(
      PUNICODE_STRING ServiceClass,
      PUNICODE_STRING ServiceName,
@@ -1825,7 +1088,6 @@ SecMakeSPN(
 
 
 NTSTATUS
-NTAPI
 SecMakeSPNEx(
      PUNICODE_STRING ServiceClass,
      PUNICODE_STRING ServiceName,
@@ -1841,7 +1103,6 @@ SecMakeSPNEx(
 
 
 NTSTATUS
-NTAPI
 SecMakeSPNEx2(
      PUNICODE_STRING ServiceClass,
      PUNICODE_STRING ServiceName,
@@ -1895,197 +1156,12 @@ end   -- Kernel mode
 
 -- #define FreeCredentialHandle FreeCredentialsHandle
 
-ffi.cdef[[
-typedef struct _SECURITY_FUNCTION_TABLE_W {
-    unsigned long                       dwVersion;
-    ENUMERATE_SECURITY_PACKAGES_FN_W    EnumerateSecurityPackagesW;
-    QUERY_CREDENTIALS_ATTRIBUTES_FN_W   QueryCredentialsAttributesW;
-    ACQUIRE_CREDENTIALS_HANDLE_FN_W     AcquireCredentialsHandleW;
-    FREE_CREDENTIALS_HANDLE_FN          FreeCredentialsHandle;
-    void *                      Reserved2;
-    INITIALIZE_SECURITY_CONTEXT_FN_W    InitializeSecurityContextW;
-    ACCEPT_SECURITY_CONTEXT_FN          AcceptSecurityContext;
-    COMPLETE_AUTH_TOKEN_FN              CompleteAuthToken;
-    DELETE_SECURITY_CONTEXT_FN          DeleteSecurityContext;
-    APPLY_CONTROL_TOKEN_FN              ApplyControlToken;
-    QUERY_CONTEXT_ATTRIBUTES_FN_W       QueryContextAttributesW;
-    IMPERSONATE_SECURITY_CONTEXT_FN     ImpersonateSecurityContext;
-    REVERT_SECURITY_CONTEXT_FN          RevertSecurityContext;
-    MAKE_SIGNATURE_FN                   MakeSignature;
-    VERIFY_SIGNATURE_FN                 VerifySignature;
-    FREE_CONTEXT_BUFFER_FN              FreeContextBuffer;
-    QUERY_SECURITY_PACKAGE_INFO_FN_W    QuerySecurityPackageInfoW;
-    void *                      Reserved3;
-    void *                      Reserved4;
-    EXPORT_SECURITY_CONTEXT_FN          ExportSecurityContext;
-    IMPORT_SECURITY_CONTEXT_FN_W        ImportSecurityContextW;
-    ADD_CREDENTIALS_FN_W                AddCredentialsW ;
-    void *                      Reserved8;
-    QUERY_SECURITY_CONTEXT_TOKEN_FN     QuerySecurityContextToken;
-    ENCRYPT_MESSAGE_FN                  EncryptMessage;
-    DECRYPT_MESSAGE_FN                  DecryptMessage;
-    // Fields below this are available in OSes after w2k
-    SET_CONTEXT_ATTRIBUTES_FN_W         SetContextAttributesW;
-
-    // Fields below this are available in OSes after W2k3SP1
-    SET_CREDENTIALS_ATTRIBUTES_FN_W     SetCredentialsAttributesW;
-    CHANGE_PASSWORD_FN_W                ChangeAccountPasswordW;
-} SecurityFunctionTableW, * PSecurityFunctionTableW;
-
-]]
-
-
-ffi.cdef[[
-typedef struct _SECURITY_FUNCTION_TABLE_A {
-    unsigned long                       dwVersion;
-    ENUMERATE_SECURITY_PACKAGES_FN_A    EnumerateSecurityPackagesA;
-    QUERY_CREDENTIALS_ATTRIBUTES_FN_A   QueryCredentialsAttributesA;
-    ACQUIRE_CREDENTIALS_HANDLE_FN_A     AcquireCredentialsHandleA;
-    FREE_CREDENTIALS_HANDLE_FN          FreeCredentialHandle;
-    void *                      Reserved2;
-    INITIALIZE_SECURITY_CONTEXT_FN_A    InitializeSecurityContextA;
-    ACCEPT_SECURITY_CONTEXT_FN          AcceptSecurityContext;
-    COMPLETE_AUTH_TOKEN_FN              CompleteAuthToken;
-    DELETE_SECURITY_CONTEXT_FN          DeleteSecurityContext;
-    APPLY_CONTROL_TOKEN_FN              ApplyControlToken;
-    QUERY_CONTEXT_ATTRIBUTES_FN_A       QueryContextAttributesA;
-    IMPERSONATE_SECURITY_CONTEXT_FN     ImpersonateSecurityContext;
-    REVERT_SECURITY_CONTEXT_FN          RevertSecurityContext;
-    MAKE_SIGNATURE_FN                   MakeSignature;
-    VERIFY_SIGNATURE_FN                 VerifySignature;
-    FREE_CONTEXT_BUFFER_FN              FreeContextBuffer;
-    QUERY_SECURITY_PACKAGE_INFO_FN_A    QuerySecurityPackageInfoA;
-    void *                      Reserved3;
-    void *                      Reserved4;
-    EXPORT_SECURITY_CONTEXT_FN          ExportSecurityContext;
-    IMPORT_SECURITY_CONTEXT_FN_A        ImportSecurityContextA;
-    ADD_CREDENTIALS_FN_A                AddCredentialsA ;
-    void *                      Reserved8;
-    QUERY_SECURITY_CONTEXT_TOKEN_FN     QuerySecurityContextToken;
-    ENCRYPT_MESSAGE_FN                  EncryptMessage;
-    DECRYPT_MESSAGE_FN                  DecryptMessage;
-    SET_CONTEXT_ATTRIBUTES_FN_A         SetContextAttributesA;
-    SET_CREDENTIALS_ATTRIBUTES_FN_A     SetCredentialsAttributesA;
-    CHANGE_PASSWORD_FN_A                ChangeAccountPasswordA;
-} SecurityFunctionTableA, * PSecurityFunctionTableA;
-
-
-]]
-
-
-
-ffi.cdef[[
-PSecurityFunctionTableA InitSecurityInterfaceA(void);
-
-typedef PSecurityFunctionTableA (* INIT_SECURITY_INTERFACE_A)(void);
-]]
-
-ffi.cdef[[
-
-PSecurityFunctionTableW InitSecurityInterfaceW(void);
-
-typedef PSecurityFunctionTableW (* INIT_SECURITY_INTERFACE_W)(void);
-]]
-
-
-
 
 if SECURITY_WIN32 then
 ffi.cdef[[
 //
 // SASL Profile Support
 //
-
-
-SECURITY_STATUS
-SaslEnumerateProfilesA(
-    LPSTR * ProfileList,
-          ULONG * ProfileCount
-    );
-
-SECURITY_STATUS
-SaslEnumerateProfilesW(
-    LPWSTR * ProfileList,
-          ULONG * ProfileCount
-    );
-
-
-
-SECURITY_STATUS
-SaslGetProfilePackageA(
-           LPSTR ProfileName,
-    PSecPkgInfoA * PackageInfo
-    );
-
-
-SECURITY_STATUS
-SaslGetProfilePackageW(
-           LPWSTR ProfileName,
-    PSecPkgInfoW * PackageInfo
-    );
-
-
-SECURITY_STATUS
-SaslIdentifyPackageA(
-           PSecBufferDesc pInput,
-    PSecPkgInfoA * PackageInfo
-    );
-
-SECURITY_STATUS
-SaslIdentifyPackageW(
-           PSecBufferDesc pInput,
-    PSecPkgInfoW * PackageInfo
-    );
-
-
-SECURITY_STATUS
-SaslInitializeSecurityContextW(
-       PCredHandle                 phCredential,       // Cred to base context
-       PCtxtHandle                 phContext,          // Existing context (OPT)
-       LPWSTR                      pszTargetName,      // Name of target
-           unsigned long               fContextReq,        // Context Requirements
-           unsigned long               Reserved1,          // Reserved, MBZ
-           unsigned long               TargetDataRep,      // Data rep of target
-       PSecBufferDesc              pInput,             // Input Buffers
-           unsigned long               Reserved2,          // Reserved, MBZ
-    PCtxtHandle                 phNewContext,       // (out) New Context handle
-    PSecBufferDesc              pOutput,            // (inout) Output Buffers
-          unsigned long *     pfContextAttr,      // (out) Context attrs
-       PTimeStamp                  ptsExpiry           // (out) Life span (OPT)
-    );
-
-SECURITY_STATUS
-SaslInitializeSecurityContextA(
-       PCredHandle                 phCredential,       // Cred to base context
-       PCtxtHandle                 phContext,          // Existing context (OPT)
-       LPSTR                       pszTargetName,      // Name of target
-           unsigned long               fContextReq,        // Context Requirements
-           unsigned long               Reserved1,          // Reserved, MBZ
-           unsigned long               TargetDataRep,      // Data rep of target
-       PSecBufferDesc              pInput,             // Input Buffers
-           unsigned long               Reserved2,          // Reserved, MBZ
-    PCtxtHandle                 phNewContext,       // (out) New Context handle
-    PSecBufferDesc              pOutput,            // (inout) Output Buffers
-          unsigned long *     pfContextAttr,      // (out) Context attrs
-       PTimeStamp                  ptsExpiry           // (out) Life span (OPT)
-    );
-
-
-
-
-SECURITY_STATUS
-SaslAcceptSecurityContext(
-       PCredHandle                 phCredential,       // Cred to base context
-       PCtxtHandle                 phContext,          // Existing context (OPT)
-       PSecBufferDesc              pInput,             // Input buffer
-           unsigned long               fContextReq,        // Context Requirements
-           unsigned long               TargetDataRep,      // Target Data Rep
-    PCtxtHandle                 phNewContext,       // (out) New context handle
-    PSecBufferDesc              pOutput,            // (inout) Output buffers
-          unsigned long *     pfContextAttr,      // (out) Context attributes
-       PTimeStamp                  ptsExpiry           // (out) Life span (OPT)
-    );
-
 
 static const int SASL_OPTION_SEND_SIZE      = 1;       // Maximum size to send to peer
 static const int SASL_OPTION_RECV_SIZE      = 2;       // Maximum size willing to receive
@@ -2097,25 +1173,8 @@ typedef enum _SASL_AUTHZID_STATE {
     Sasl_AuthZIDProcessed             // AuthZID Strings processed by Application or SSP
 } SASL_AUTHZID_STATE ;
 
-SECURITY_STATUS
-SaslSetContextOption(
-    PCtxtHandle ContextHandle,
-    ULONG Option,
-    PVOID Value,
-    ULONG Size);
-
-
-SECURITY_STATUS
-SaslGetContextOption(
-    PCtxtHandle ContextHandle,
-    ULONG Option,
-    PVOID Value,
-    ULONG Size,
-    PULONG Needed);
 ]]
 end
-
-
 
 --
 -- This is the legacy credentials structure.
@@ -2302,10 +1361,7 @@ static const int  SEC_WINNT_AUTH_IDENTITY_FLAGS_VALID_SSPIPFC_FLAGS   =(SEC_WINN
 end -- _AUTH_IDENTITY_INFO_DEFINED
 
 if not _SSPIPFC_NONE_ then
-ffi.cdef[[
-// the public view
-typedef PVOID PSEC_WINNT_AUTH_IDENTITY_OPAQUE; // the credential structure is opaque
-]]
+
 else 
 ffi.cdef[[
 // the internal view
@@ -2532,35 +1588,7 @@ SspiUnmarshalCredUIContext(
 end -- _SEC_WINNT_AUTH_TYPES
 
 
-ffi.cdef[[
-SECURITY_STATUS
-SspiPrepareForCredRead(
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE AuthIdentity,
-    PCWSTR pszTargetName,
-    PULONG pCredmanCredentialType,
-    PCWSTR* ppszCredmanTargetName
-    );
 
-SECURITY_STATUS
-SspiPrepareForCredWrite(
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE AuthIdentity,
-    PCWSTR pszTargetName, // supply NULL for username-target credentials
-    PULONG pCredmanCredentialType,
-    PCWSTR* ppszCredmanTargetName,
-    PCWSTR* ppszCredmanUserName,
-    PUCHAR *ppCredentialBlob,
-    PULONG pCredentialBlobSize
-    );
-
-SECURITY_STATUS
-SspiEncryptAuthIdentity(PSEC_WINNT_AUTH_IDENTITY_OPAQUE AuthData);
-
-SECURITY_STATUS
-SspiDecryptAuthIdentity(PSEC_WINNT_AUTH_IDENTITY_OPAQUE EncryptedAuthData);
-
-BOOLEAN
-SspiIsAuthIdentityEncrypted(PSEC_WINNT_AUTH_IDENTITY_OPAQUE EncryptedAuthData);
-]]
 	
 ffi.cdef[[
 //
@@ -2578,99 +1606,52 @@ ffi.cdef[[
 // free the returned memory using SspiLocalFree()
 //
 
-SECURITY_STATUS
-SspiEncodeAuthIdentityAsStrings(
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE pAuthIdentity,
-    PCWSTR* ppszUserName,
-    PCWSTR* ppszDomainName,
-    PCWSTR* ppszPackedCredentialsString
-    );
 
-SECURITY_STATUS
-SspiValidateAuthIdentity(
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE AuthData
-    );
+
+
 
 //
 // free the returned memory using SspiFreeAuthIdentity()
 //
 
-SECURITY_STATUS
-SspiCopyAuthIdentity(
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE AuthData,
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE* AuthDataCopy
-    );
+
 
 //
 // use only for the memory returned by SspiCopyAuthIdentity().
 // Internally calls SspiZeroAuthIdentity().
 //
 
-void SspiFreeAuthIdentity(PSEC_WINNT_AUTH_IDENTITY_OPAQUE AuthData);
 
-void SspiZeroAuthIdentity(PSEC_WINNT_AUTH_IDENTITY_OPAQUE AuthData);
 
-void SspiLocalFree(PVOID DataBuffer);
 
 //
 // call SspiFreeAuthIdentity to free the returned AuthIdentity 
 // which zeroes out the credentials blob before freeing it
 //
 
-SECURITY_STATUS
-SspiEncodeStringsAsAuthIdentity(
-    PCWSTR pszUserName,
-    PCWSTR pszDomainName,
-    PCWSTR pszPackedCredentialsString,
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE* ppAuthIdentity
-    );
 
-SECURITY_STATUS
-SspiCompareAuthIdentities(
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE AuthIdentity1,
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE AuthIdentity2,
-     PBOOLEAN SameSuppliedUser,
-     PBOOLEAN SameSuppliedIdentity
-    );
+
+
 
 //
 // zero out the returned AuthIdentityByteArray then
 // free the returned memory using SspiLocalFree()
 //
 
-SECURITY_STATUS
-SspiMarshalAuthIdentity(
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE AuthIdentity,
-    unsigned long* AuthIdentityLength,
-    char** AuthIdentityByteArray
-    );
+
 
 //
 // free the returned auth identity using SspiFreeAuthIdentity()
 //
 
-SECURITY_STATUS
-SspiUnmarshalAuthIdentity(
-    unsigned long AuthIdentityLength,
-    char* AuthIdentityByteArray,
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE* ppAuthIdentity
-    );
+
 
 BOOLEAN
 SspiIsPromptingNeeded(unsigned long ErrorOrNtStatus);
 
-SECURITY_STATUS
-SspiGetTargetHostName(
-    PCWSTR pszTargetName,
-    PWSTR* pszHostName
-    );
 
-SECURITY_STATUS
-SspiExcludePackage(
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE AuthIdentity,
-    PCWSTR pszPackageName,
-    PSEC_WINNT_AUTH_IDENTITY_OPAQUE* ppNewAuthIdentity
-    );
+
+
 
 
 //
@@ -2685,43 +1666,11 @@ static const int SEC_WINNT_AUTH_IDENTITY_ONLY           = 0x8;     // these cred
 
 ]]
 
-ffi.cdef[[
-//
-// Routines for manipulating packages
-//
 
-typedef struct _SECURITY_PACKAGE_OPTIONS {
-    unsigned long   Size;
-    unsigned long   Type;
-    unsigned long   Flags;
-    unsigned long   SignatureSize;
-    void *  Signature;
-} SECURITY_PACKAGE_OPTIONS, * PSECURITY_PACKAGE_OPTIONS;
-]]
 
-ffi.cdef[[
-static const int SECPKG_OPTIONS_TYPE_UNKNOWN =0;
-static const int SECPKG_OPTIONS_TYPE_LSA     =1;
-static const int SECPKG_OPTIONS_TYPE_SSPI    =2;
 
-static const int SECPKG_OPTIONS_PERMANENT    =0x00000001;
-]]
 
-ffi.cdef[[
-SECURITY_STATUS
-AddSecurityPackageA(LPSTR pszPackageName, PSECURITY_PACKAGE_OPTIONS pOptions);
 
-SECURITY_STATUS
-AddSecurityPackageW(LPWSTR pszPackageName, PSECURITY_PACKAGE_OPTIONS pOptions);
-]]
-
-ffi.cdef[[
-SECURITY_STATUS
-DeleteSecurityPackageA(LPSTR pszPackageName);
-
-SECURITY_STATUS
-DeleteSecurityPackageW(LPWSTR pszPackageName);
-]]
 
 
 ffi.cdef[[
@@ -2756,17 +1705,5 @@ end
 
 
 
---[[
-//+---------------------------------------------------------------------------
-//
-//  Microsoft Windows
-//  Copyright (C) Microsoft Corporation, 1992-1999.
-//
-//  File:       sspi.h
-//
-//  Contents:   Security Support Provider Interface
-//              Prototypes and structure definitions
-//
-//  Functions:  Security Support Provider API
-//
---]]
+require("sspicli");
+

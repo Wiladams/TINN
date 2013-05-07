@@ -604,3 +604,286 @@ typedef struct _LUID {
     LONG HighPart;
 } LUID, *PLUID;
 ]]
+
+ffi.cdef[[
+typedef struct _SID_AND_ATTRIBUTES {
+    PSID Sid;
+    DWORD Attributes;
+} SID_AND_ATTRIBUTES, * PSID_AND_ATTRIBUTES;
+]]
+
+ffi.cdef[[
+static const int TOKEN_SOURCE_LENGTH = 8;
+
+typedef struct _TOKEN_SOURCE {
+    CHAR SourceName[TOKEN_SOURCE_LENGTH];
+    LUID SourceIdentifier;
+} TOKEN_SOURCE, *PTOKEN_SOURCE;
+]]
+
+
+ffi.cdef[[
+typedef struct _QUOTA_LIMITS {
+    SIZE_T PagedPoolLimit;
+    SIZE_T NonPagedPoolLimit;
+    SIZE_T MinimumWorkingSetSize;
+    SIZE_T MaximumWorkingSetSize;
+    SIZE_T PagefileLimit;
+    LARGE_INTEGER TimeLimit;
+} QUOTA_LIMITS, *PQUOTA_LIMITS;
+]]
+
+ffi.cdef[[
+typedef DWORD ACCESS_MASK;
+typedef ACCESS_MASK *PACCESS_MASK;
+
+//
+//  These are the generic rights.
+//
+
+static const int GENERIC_READ                    = (0x80000000);
+static const int GENERIC_WRITE                   = (0x40000000);
+static const int GENERIC_EXECUTE                 = (0x20000000);
+static const int GENERIC_ALL                     = (0x10000000);
+
+typedef struct _GENERIC_MAPPING {
+    ACCESS_MASK GenericRead;
+    ACCESS_MASK GenericWrite;
+    ACCESS_MASK GenericExecute;
+    ACCESS_MASK GenericAll;
+} GENERIC_MAPPING;
+typedef GENERIC_MAPPING *PGENERIC_MAPPING;
+]]
+
+ffi.cdef[[
+typedef struct _LUID_AND_ATTRIBUTES {
+    LUID Luid;
+    DWORD Attributes;
+    } LUID_AND_ATTRIBUTES, * PLUID_AND_ATTRIBUTES;
+typedef LUID_AND_ATTRIBUTES LUID_AND_ATTRIBUTES_ARRAY[ANYSIZE_ARRAY];
+typedef LUID_AND_ATTRIBUTES_ARRAY *PLUID_AND_ATTRIBUTES_ARRAY;
+]]
+
+ffi.cdef[[
+typedef struct _PRIVILEGE_SET {
+    DWORD PrivilegeCount;
+    DWORD Control;
+    LUID_AND_ATTRIBUTES Privilege[ANYSIZE_ARRAY];
+    } PRIVILEGE_SET, * PPRIVILEGE_SET;
+]]
+
+ffi.cdef[[
+typedef struct _OBJECT_TYPE_LIST {
+    WORD   Level;
+    WORD   Sbz;
+    GUID *ObjectType;
+} OBJECT_TYPE_LIST, *POBJECT_TYPE_LIST;
+]]
+
+ffi.cdef[[
+typedef enum _AUDIT_EVENT_TYPE {
+    AuditEventObjectAccess,
+    AuditEventDirectoryServiceAccess
+} AUDIT_EVENT_TYPE, *PAUDIT_EVENT_TYPE;
+]]
+
+ffi.cdef[[
+typedef struct _TOKEN_GROUPS {
+    DWORD GroupCount;
+    SID_AND_ATTRIBUTES Groups[ANYSIZE_ARRAY];
+} TOKEN_GROUPS, *PTOKEN_GROUPS;
+
+typedef struct _TOKEN_PRIVILEGES {
+    DWORD PrivilegeCount;
+    LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY];
+} TOKEN_PRIVILEGES, *PTOKEN_PRIVILEGES;
+
+]]
+
+ffi.cdef[[
+typedef struct _SID_IDENTIFIER_AUTHORITY {
+    BYTE  Value[6];
+} SID_IDENTIFIER_AUTHORITY, *PSID_IDENTIFIER_AUTHORITY;
+]]
+
+ffi.cdef[[
+//
+// Well known SID definitions for lookup.
+//
+
+typedef enum {
+
+    WinNullSid                                  = 0,
+    WinWorldSid                                 = 1,
+    WinLocalSid                                 = 2,
+    WinCreatorOwnerSid                          = 3,
+    WinCreatorGroupSid                          = 4,
+    WinCreatorOwnerServerSid                    = 5,
+    WinCreatorGroupServerSid                    = 6,
+    WinNtAuthoritySid                           = 7,
+    WinDialupSid                                = 8,
+    WinNetworkSid                               = 9,
+    WinBatchSid                                 = 10,
+    WinInteractiveSid                           = 11,
+    WinServiceSid                               = 12,
+    WinAnonymousSid                             = 13,
+    WinProxySid                                 = 14,
+    WinEnterpriseControllersSid                 = 15,
+    WinSelfSid                                  = 16,
+    WinAuthenticatedUserSid                     = 17,
+    WinRestrictedCodeSid                        = 18,
+    WinTerminalServerSid                        = 19,
+    WinRemoteLogonIdSid                         = 20,
+    WinLogonIdsSid                              = 21,
+    WinLocalSystemSid                           = 22,
+    WinLocalServiceSid                          = 23,
+    WinNetworkServiceSid                        = 24,
+    WinBuiltinDomainSid                         = 25,
+    WinBuiltinAdministratorsSid                 = 26,
+    WinBuiltinUsersSid                          = 27,
+    WinBuiltinGuestsSid                         = 28,
+    WinBuiltinPowerUsersSid                     = 29,
+    WinBuiltinAccountOperatorsSid               = 30,
+    WinBuiltinSystemOperatorsSid                = 31,
+    WinBuiltinPrintOperatorsSid                 = 32,
+    WinBuiltinBackupOperatorsSid                = 33,
+    WinBuiltinReplicatorSid                     = 34,
+    WinBuiltinPreWindows2000CompatibleAccessSid = 35,
+    WinBuiltinRemoteDesktopUsersSid             = 36,
+    WinBuiltinNetworkConfigurationOperatorsSid  = 37,
+    WinAccountAdministratorSid                  = 38,
+    WinAccountGuestSid                          = 39,
+    WinAccountKrbtgtSid                         = 40,
+    WinAccountDomainAdminsSid                   = 41,
+    WinAccountDomainUsersSid                    = 42,
+    WinAccountDomainGuestsSid                   = 43,
+    WinAccountComputersSid                      = 44,
+    WinAccountControllersSid                    = 45,
+    WinAccountCertAdminsSid                     = 46,
+    WinAccountSchemaAdminsSid                   = 47,
+    WinAccountEnterpriseAdminsSid               = 48,
+    WinAccountPolicyAdminsSid                   = 49,
+    WinAccountRasAndIasServersSid               = 50,
+    WinNTLMAuthenticationSid                    = 51,
+    WinDigestAuthenticationSid                  = 52,
+    WinSChannelAuthenticationSid                = 53,
+    WinThisOrganizationSid                      = 54,
+    WinOtherOrganizationSid                     = 55,
+    WinBuiltinIncomingForestTrustBuildersSid    = 56,
+    WinBuiltinPerfMonitoringUsersSid            = 57,
+    WinBuiltinPerfLoggingUsersSid               = 58,
+    WinBuiltinAuthorizationAccessSid            = 59,
+    WinBuiltinTerminalServerLicenseServersSid   = 60,
+    WinBuiltinDCOMUsersSid                      = 61,
+    WinBuiltinIUsersSid                         = 62,
+    WinIUserSid                                 = 63,
+    WinBuiltinCryptoOperatorsSid                = 64,
+    WinUntrustedLabelSid                        = 65,
+    WinLowLabelSid                              = 66,
+    WinMediumLabelSid                           = 67,
+    WinHighLabelSid                             = 68,
+    WinSystemLabelSid                           = 69,
+    WinWriteRestrictedCodeSid                   = 70,
+    WinCreatorOwnerRightsSid                    = 71,
+    WinCacheablePrincipalsGroupSid              = 72,
+    WinNonCacheablePrincipalsGroupSid           = 73,
+    WinEnterpriseReadonlyControllersSid         = 74,
+    WinAccountReadonlyControllersSid            = 75,
+    WinBuiltinEventLogReadersGroup              = 76,
+    WinNewEnterpriseReadonlyControllersSid      = 77,
+    WinBuiltinCertSvcDComAccessGroup            = 78,
+    WinMediumPlusLabelSid                       = 79,
+    WinLocalLogonSid                            = 80,
+    WinConsoleLogonSid                          = 81,
+    WinThisOrganizationCertificateSid           = 82,
+} WELL_KNOWN_SID_TYPE;
+]]
+
+
+ffi.cdef[[
+typedef enum _SECURITY_IMPERSONATION_LEVEL {
+    SecurityAnonymous,
+    SecurityIdentification,
+    SecurityImpersonation,
+    SecurityDelegation
+    } SECURITY_IMPERSONATION_LEVEL, * PSECURITY_IMPERSONATION_LEVEL;
+]]
+
+--[[
+#define SECURITY_MAX_IMPERSONATION_LEVEL SecurityDelegation
+#define SECURITY_MIN_IMPERSONATION_LEVEL SecurityAnonymous
+#define DEFAULT_IMPERSONATION_LEVEL SecurityImpersonation
+#define VALID_IMPERSONATION_LEVEL(L) (((L) >= SECURITY_MIN_IMPERSONATION_LEVEL) && ((L) <= SECURITY_MAX_IMPERSONATION_LEVEL))
+--]]
+
+
+ffi.cdef[[
+//
+//
+// Token Types
+//
+
+typedef enum _TOKEN_TYPE {
+    TokenPrimary = 1,
+    TokenImpersonation
+    } TOKEN_TYPE;
+typedef TOKEN_TYPE *PTOKEN_TYPE;
+
+//
+// Token elevation values describe the relative strength of a given token.
+// A full token is a token with all groups and privileges to which the principal
+// is authorized.  A limited token is one with some groups or privileges removed.
+//
+
+typedef enum _TOKEN_ELEVATION_TYPE {
+    TokenElevationTypeDefault = 1,
+    TokenElevationTypeFull,
+    TokenElevationTypeLimited,
+} TOKEN_ELEVATION_TYPE, *PTOKEN_ELEVATION_TYPE;
+]]
+
+ffi.cdef[[
+typedef enum _ACL_INFORMATION_CLASS {
+    AclRevisionInformation = 1,
+    AclSizeInformation
+} ACL_INFORMATION_CLASS;
+]]
+
+ffi.cdef[[
+//
+// Token Information Classes.
+//
+
+
+typedef enum _TOKEN_INFORMATION_CLASS {
+    TokenUser = 1,
+    TokenGroups,
+    TokenPrivileges,
+    TokenOwner,
+    TokenPrimaryGroup,
+    TokenDefaultDacl,
+    TokenSource,
+    TokenType,
+    TokenImpersonationLevel,
+    TokenStatistics,
+    TokenRestrictedSids,
+    TokenSessionId,
+    TokenGroupsAndPrivileges,
+    TokenSessionReference,
+    TokenSandBoxInert,
+    TokenAuditPolicy,
+    TokenOrigin,
+    TokenElevationType,
+    TokenLinkedToken,
+    TokenElevation,
+    TokenHasRestrictions,
+    TokenAccessInformation,
+    TokenVirtualizationAllowed,
+    TokenVirtualizationEnabled,
+    TokenIntegrityLevel,
+    TokenUIAccess,
+    TokenMandatoryPolicy,
+    TokenLogonSid,
+    MaxTokenInfoClass  // MaxTokenInfoClass should always be the last enum
+} TOKEN_INFORMATION_CLASS, *PTOKEN_INFORMATION_CLASS;
+]]

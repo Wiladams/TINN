@@ -3,7 +3,8 @@
 
 local ffi = require("ffi");
 --local k32Lib = ffi.load("kernel32");
-local k32Lib = ffi.load("api-ms-win-core-libraryloader-l1-1-1");
+local k32Lib = ffi.load("kernel32");
+local u32Lib = ffi.load("user32");
 
 ffi.cdef[[
 static const int  RESOURCE_ENUM_LN              = (0x0001);
@@ -244,8 +245,8 @@ return {
 	LoadLibraryExA = k32Lib.LoadLibraryExA,
 	LoadLibraryExW = k32Lib.LoadLibraryExW,
 	LoadResource = k32Lib.LoadResource,
-	LoadStringA = k32Lib.LoadStringA,
-	LoadStringW = k32Lib.LoadStringW,
+	LoadStringA = u32Lib.LoadStringA,
+	LoadStringW = u32Lib.LoadStringW,
 	LockResource = k32Lib.LockResource,
 	--QueryOptionalDelayLoadedAPI
 	--RemoveDllDirectory

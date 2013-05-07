@@ -2,12 +2,12 @@
 
 local ffi = require("ffi");
 
-require ("core_processenvironment");
-local kernel32 = require("win_kernel32");
-local k32Lib = kernel32.Lib;
+local core_procenv = require ("core_processenvironment");
+local core_errorhandling = require("core_errorhandling_l1_1_1");
+
 
 local GetCommandLine = function()
-	local cmdline = k32Lib.GetCommandLineA();
+	local cmdline = core_procenv.GetCommandLineA();
 	if cmdline ~= nil then
 		return ffi.string(cmdline);
 	end
@@ -17,9 +17,9 @@ end
 
 local GetCurrentDirectory = function()
 	local lpBuffer = ffi.new("char[?]", ffi.C.MAX_PATH+1);
-	local res = k32Lib.GetCurrentDirectoryA(ffi.C.MAX_PATH, lpBuffer);
+	local res = core_procenv.GetCurrentDirectoryA(ffi.C.MAX_PATH, lpBuffer);
 	if res == 0 then
-		return false, k32Lib.GetLastError();
+		return false, core_errorhandling.GetLastError();
 	end
 
 	return ffi.string(lpBuffer);

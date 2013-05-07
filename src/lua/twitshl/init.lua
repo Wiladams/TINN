@@ -5,7 +5,7 @@ include = function(name)
 	local module = require(name);
 
 	if module then
-		langutils.makeGlobal(module, name);
+		langutils.importGlobal(module, name);
 	end
 end
 
@@ -15,7 +15,7 @@ import = function(name)
 --print("Module: ", module);
 
 	if module then
-		langutils.makeGlobal(module);
+		langutils.importGlobal(module);
 	end
 end
 

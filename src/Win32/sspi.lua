@@ -5,7 +5,7 @@ local bor = bit.bor;
 local band = require("bit").band;
 
 
-local sspi_ffi = require("sspi_ffi");
+local sspi_cli = require("sspicli");
 local SecError = require ("SecError");
 local sspilib = ffi.load("secur32");
 local schannel = require("schannel");
@@ -413,6 +413,21 @@ end
 --]]
 
 
+local function getUserName(format)
+	format = format or ffi.C.NameFullyQualifiedDN;
+	local buffSize = 256;
+	local pBuffSize = ffi.new("DWORD[1]", buffSize);
+	local nameBuffer = ffi.new("char[?]", buffSize);
+
+	local status = sspilib.GetUserNameExA(format, nameBuffer, pBuffSize);
+
+	if status == 0 then
+		return false, core_errorhandling.GetLastError();
+	end
+
+	return ffi.string(nameBuffer);
+end
+
 
 return {
 	schannel = schannel;
@@ -420,4 +435,6 @@ return {
 	SecurityInterface = SecurityInterface;
 	SecurityPackage = SecurityPackage;
 	Credentials = CredHandle;
+
+	getUserName = getUserName,
 }

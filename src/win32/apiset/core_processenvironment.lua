@@ -2,6 +2,9 @@
 --api-ms-win-core-processenvironment-l1-2-0.dll	
 
 local ffi = require("ffi");
+local k32Lib = ffi.load("kernel32");
+local WTypes = require("WTypes");
+
 
 ffi.cdef[[
 static const int STD_INPUT_HANDLE    = ((DWORD)-10);
@@ -43,6 +46,14 @@ ffi.cdef[[
 HANDLE
 GetStdHandle(DWORD nStdHandle);
 ]]
+
+return {
+	GetCommandLineA = k32Lib.GetCommandLineA,
+	GetCommandLineW = k32Lib.GetCommandLineW,
+	GetCurrentDirectoryA = k32Lib.GetCurrentDirectoryA,
+	GetCurrentDirectoryW = k32Lib.GetCurrentDirectoryW,
+	GetStdHandle = k32Lib.GetStdHandle,
+}
 
 --[[
 NeedCurrentDirectoryForExePathA

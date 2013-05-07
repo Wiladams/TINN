@@ -1,5 +1,5 @@
 
-local makeGlobal = function(thing, name)
+local importGlobal = function(thing, name)
 	if name and thing then
 		_G[name] = thing;
 	elseif type(thing) == "table" then
@@ -16,5 +16,5 @@ local makeGlobal = function(thing, name)
 end
 
 return {
-	makeGlobal = makeGlobal;
+	importGlobal = importGlobal;
 }

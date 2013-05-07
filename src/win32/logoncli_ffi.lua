@@ -12,6 +12,7 @@ local Lib = ffi.load("logoncli"); -- logoncli.dll
 require("WTypes");
 require("ntstatus");
 local winsock = require("win_socket");
+require("SubAuth");
 
 ffi.cdef[[
 typedef DWORD NET_API_STATUS;
@@ -176,20 +177,7 @@ typedef struct _DOMAIN_CONTROLLER_INFOW {
 ]]
 
 ffi.cdef[[
-typedef struct _UNICODE_STRING {
-    USHORT Length;
-    USHORT MaximumLength;
-    PWSTR Buffer;
-} UNICODE_STRING, *PUNICODE_STRING;
 
-typedef struct _STRING {
-    USHORT Length;
-    USHORT MaximumLength;
-    PCHAR Buffer;
-} STRING, *PSTRING;
-
-typedef UNICODE_STRING LSA_UNICODE_STRING, *PLSA_UNICODE_STRING;
-typedef STRING LSA_STRING, *PLSA_STRING;
 
 typedef enum {
 

@@ -1,8 +1,10 @@
--- datetime.lua
+-- core_datetime_l1_1_1.lua
 -- api-ms-win-core-datetime-l1-1-1.dll	
 
 local ffi = require("ffi");
 require("WTypes");
+local k32Lib = ffi.load("kernel32");
+
 
 ffi.cdef[[
 // For Windows Vista and above GetTimeFormatEx is preferred
@@ -66,3 +68,11 @@ GetDateFormatEx(
 );
 ]]
 
+return {
+    GetDateFormatA = k32Lib.GetDateFormatA,
+    GetDateFormatEx = k32Lib.GetDateFormatEx,
+    GetDateFormatW = k32Lib.GetDateFormatW,
+    GetTimeFormatA = k32Lib.GetTimeFormatA,
+    GetTimeFormatEx = k32Lib.GetTimeFormatEx,
+    GetTimeFormatW = k32Lib.GetTimeFormatW,
+}
