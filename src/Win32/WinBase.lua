@@ -361,7 +361,25 @@ typedef LPSTARTUPINFOEXA LPSTARTUPINFOEX;
 ]]
 end -- UNICODE
 
+ffi.cdef[[
+//
+// Logon Support APIs
+//
 
+static const int LOGON32_LOGON_INTERACTIVE     =  2;
+static const int LOGON32_LOGON_NETWORK         =  3;
+static const int LOGON32_LOGON_BATCH           =  4;
+static const int LOGON32_LOGON_SERVICE         =  5;
+static const int LOGON32_LOGON_UNLOCK          =  7;
+static const int LOGON32_LOGON_NETWORK_CLEARTEXT =8;
+static const int LOGON32_LOGON_NEW_CREDENTIALS   =9;
+
+static const int LOGON32_PROVIDER_DEFAULT    =0;
+static const int LOGON32_PROVIDER_WINNT35    =1;
+static const int LOGON32_PROVIDER_WINNT40    =2;
+static const int LOGON32_PROVIDER_WINNT50    =3;
+static const int LOGON32_PROVIDER_VIRTUAL    =4;
+]]
 
 ffi.cdef[[
 //

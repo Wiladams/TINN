@@ -137,46 +137,7 @@ typedef WORD			ATOM;
 typedef DWORD			LCID;
 typedef USHORT			LANGID;
 
-// Various Handles
-typedef void *			HANDLE;
-typedef HANDLE			*PHANDLE;
-typedef HANDLE			LPHANDLE;
-typedef void *			HBITMAP;
-typedef void *			HBRUSH;
-typedef void *			HICON;
-typedef HICON			HCURSOR;
-typedef HANDLE			HDC;
-typedef void *			HDESK;
-typedef HANDLE			HDROP;
-typedef HANDLE			HDWP;
-typedef HANDLE			HENHMETAFILE;
-typedef INT				HFILE;
-typedef HANDLE			HFONT;
-typedef void *			HGDIOBJ;
-typedef HANDLE			HGLOBAL;
-typedef HANDLE 			HGLRC;
-typedef HANDLE			HHOOK;
-typedef void *			HINSTANCE;
-typedef void *			HKEY;
-typedef HKEY *      PHKEY;
-typedef void *			HKL;
-typedef HANDLE			HLOCAL;
-typedef void *			HMEMF;
-typedef HANDLE			HMENU;
-typedef HANDLE			HMETAFILE;
-typedef void			HMF;
-typedef HINSTANCE		HMODULE;
-typedef HANDLE			HMONITOR;
-typedef HANDLE			HPALETTE;
-typedef void *			HPEN;
-typedef LONG			HRESULT;
-typedef HANDLE			HRGN;
-typedef void *			HRSRC;
-typedef void *			HSTR;
-typedef HANDLE			HSZ;
-typedef void *			HTASK;
-typedef void *			HWINSTA;
-typedef HANDLE			HWND;
+
 
 // Ole Automation
 typedef WCHAR			OLECHAR;
@@ -203,6 +164,68 @@ typedef LONG FXPT2DOT30, *LPFXPT2DOT30;
 ]]
 
 
+if STRICT then
+    ffi.cdef[[
+        typedef void *HANDLE;
+    ]]
+
+    function DECLARE_HANDLE(name) 
+        ffi.cdef(string.format("struct %s__{int unused;}; typedef struct %s__ *%s", name, name, name));
+    end
+else
+    ffi.cdef[[
+        typedef PVOID HANDLE;
+    ]]
+    
+    function DECLARE_HANDLE(name) 
+        ffi.cdef(string.format("typedef HANDLE %s",name));
+    end
+end
+
+ffi.cdef[[
+typedef HANDLE *PHANDLE;
+]]
+
+ffi.cdef[[
+// Various Handles
+typedef HANDLE       *  LPHANDLE;
+typedef void *          HBITMAP;
+typedef void *          HBRUSH;
+typedef void *          HICON;
+typedef HICON           HCURSOR;
+typedef HANDLE          HDC;
+typedef void *          HDESK;
+typedef HANDLE          HDROP;
+typedef HANDLE          HDWP;
+typedef HANDLE          HENHMETAFILE;
+typedef INT             HFILE;
+typedef HANDLE          HFONT;
+typedef void *          HGDIOBJ;
+typedef HANDLE          HGLOBAL;
+typedef HANDLE          HGLRC;
+typedef HANDLE          HHOOK;
+typedef void *          HINSTANCE;
+typedef void *          HKEY;
+typedef HKEY *      PHKEY;
+typedef void *          HKL;
+typedef HANDLE          HLOCAL;
+typedef void *          HMEMF;
+typedef HANDLE          HMENU;
+typedef HANDLE          HMETAFILE;
+typedef void            HMF;
+typedef HINSTANCE       HMODULE;
+typedef HANDLE          HMONITOR;
+typedef HANDLE          HPALETTE;
+typedef void *          HPEN;
+typedef LONG            HRESULT;
+typedef HANDLE          HRGN;
+typedef void *          HRSRC;
+typedef void *          HSTR;
+typedef HANDLE          HSZ;
+typedef void *          HTASK;
+typedef void *          HWINSTA;
+typedef HANDLE          HWND;
+]]
 
 require "guiddef"
 

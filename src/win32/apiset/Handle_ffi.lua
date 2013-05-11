@@ -2,6 +2,7 @@
 local ffi = require("ffi");
 
 require("WTypes");
+local k32Lib = ffi.load("kernel32");
 
 ffi.cdef[[
 BOOL CloseHandle(HANDLE hObject);
@@ -23,3 +24,10 @@ static const int HANDLE_FLAG_INHERIT            = 0x00000001;
 static const int HANDLE_FLAG_PROTECT_FROM_CLOSE = 0x00000002;
 ]]
 
+return {
+	CloseHandle = k32Lib.CloseHandle,
+	DuplicateHandle = k32Lib.DuplicateHandle,
+	GetHandleInformation = k32Lib.GetHandleInformation,
+	SetHandleInformation = k32Lib.SetHandleInformation,
+
+}

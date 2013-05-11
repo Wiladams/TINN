@@ -6,6 +6,7 @@ require("WTypes");
 require("WinNT");
 require("SubAuth");
 require("NTSecAPI");
+local advapiLib = ffi.load("AdvApi32");
 
 
 if not __SECSTATUS_DEFINED__ then
@@ -1498,7 +1499,7 @@ typedef PSecurityFunctionTableW (* INIT_SECURITY_INTERFACE_W)(void);
 ]]
 
 
-
+return {
 --[[
 AcceptSecurityContext
 AcquireCredentialsHandleA
@@ -1530,7 +1531,11 @@ InitializeSecurityContextA
 InitializeSecurityContextW
 InitSecurityInterfaceA
 InitSecurityInterfaceW
---LogonUserExExW
+--]]
+
+    LogonUserExA = advapiLib.LogonUserExA,
+
+--[[
 LsaCallAuthenticationPackage
 LsaConnectUntrusted
 LsaDeregisterLogonProcess
@@ -1589,3 +1594,4 @@ SspiZeroAuthIdentity
 --UnsealMessage
 VerifySignature
 --]]
+}

@@ -60,7 +60,8 @@
 @set NETLIB=CoSocketIo.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj mime.obj peg_http.obj StaticService.obj url.obj utils.obj WebSocketStream.obj 
 
 @rem Core windows API set
-%LUAC% Win32/apiset/core_console.lua core_console.obj
+%LUAC% Win32/apiset/core_console_l1_1_0.lua core_console_l1_1_0.obj
+%LUAC% Win32/apiset/core_console_l2_1_0.lua core_console_l2_1_0.obj
 %LUAC% Win32/apiset/core_datetime_l1_1_1.lua core_datetime_l1_1_1.obj
 %LUAC% Win32/apiset/core_errorhandling_l1_1_1.lua core_errorhandling_l1_1_1.obj
 %LUAC% Win32/apiset/core_interlocked.lua core_interlocked.obj
@@ -73,17 +74,21 @@
 %LUAC% Win32/apiset/Heap_ffi.lua Heap_ffi.obj
 %LUAC% Win32/apiset/NTSecAPI.lua NTSecAPI.obj
 %LUAC% Win32/apiset/power_base_l1_1_0.lua power_base_l1_1_0.obj
+%LUAC% Win32/apiset/security_base_l1_2_0.lua security_base_l1_2_0.obj
 %LUAC% Win32/apiset/security_lsalookup_l2_1_0.lua security_lsalookup_l2_1_0.obj
 %LUAC% Win32/apiset/security_sddl_l1_1_0.lua security_sddl_l1_1_0.obj
+%LUAC% Win32/apiset/service_core_l1_1_1.lua service_core_l1_1_1.obj
+%LUAC% Win32/apiset/service_management_l1_1_0.lua service_management_l1_1_0.obj
 %LUAC% Win32/apiset/sspicli.lua sspicli.obj
 %LUAC% Win32/apiset/SubAuth.lua SubAuth.obj
 %LUAC% Win32/apiset/SysInfo_ffi.lua SysInfo_ffi.obj
 %LUAC% Win32/apiset/UMS_ffi.lua UMS_ffi.obj
 %LUAC% Win32/apiset/Util_ffi.lua Util_ffi.obj
 %LUAC% Win32/apiset/WinBer_ffi.lua WinBer_ffi.obj
+%LUAC% Win32/apiset/WinCon.lua WinCon.obj
 %LUAC% Win32/apiset/wldap32_ffi.lua wldap32_ffi.obj
 
-@set WINCOREAPI=core_console.obj core_datetime_l1_1_1.obj core_errorhandling_l1_1_1.obj core_interlocked.obj core_libraryloader_l1_1_1.obj core_processenvironment.obj core_processthreads_l1_1_1.obj core_profile_l1_1_0.obj core_string_l1_1_0.obj Handle_ffi.obj Heap_ffi.obj NTSecAPI.obj power_base_l1_1_0.obj security_lsalookup_l2_1_0.obj security_sddl_l1_1_0.obj sspicli.obj SubAuth.obj SysInfo_ffi.obj UMS_ffi.obj Util_ffi.obj WinBer_ffi.obj wldap32_ffi.obj
+@set WINCOREAPI=core_console_l1_1_0.obj core_console_l2_1_0.obj core_datetime_l1_1_1.obj core_errorhandling_l1_1_1.obj core_interlocked.obj core_libraryloader_l1_1_1.obj core_processenvironment.obj core_processthreads_l1_1_1.obj core_profile_l1_1_0.obj core_string_l1_1_0.obj Handle_ffi.obj Heap_ffi.obj NTSecAPI.obj power_base_l1_1_0.obj security_base_l1_2_0.obj security_lsalookup_l2_1_0.obj security_sddl_l1_1_0.obj service_core_l1_1_1.obj service_management_l1_1_0.obj sspicli.obj SubAuth.obj SysInfo_ffi.obj UMS_ffi.obj Util_ffi.obj WinBer_ffi.obj WinCon.obj wldap32_ffi.obj
 
 
 @rem Create the Win32 specific stuff
@@ -107,6 +112,7 @@
 %LUAC% Win32/ntstatus.lua ntstatus.obj
 %LUAC% Win32/OSModule.lua OSModule.obj
 %LUAC% Win32/processenvironment.lua processenvironment.obj
+%LUAC% Win32/SCManager.lua SCManager.obj
 %LUAC% Win32/SocketIoPool.lua SocketIoPool.obj
 %LUAC% Win32/SocketPool.lua SocketPool.obj
 %LUAC% Win32/SocketUtils.lua SocketUtils.obj
@@ -128,7 +134,7 @@
 %LUAC% Win32/WinSock_Utils.lua WinSock_Utils.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=console.obj BCrypt.obj BCryptUtils.obj datetime.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj KeyMouse.obj NativeSocket.obj NetStream.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj processenvironment.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj UIOSimulator.obj  WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinNT.obj WinSock_Utils.obj WTypes.obj
+@set WIN32LIB=console.obj BCrypt.obj BCryptUtils.obj datetime.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj KeyMouse.obj NativeSocket.obj NetStream.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj processenvironment.obj SCManager.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj UIOSimulator.obj  WebApp.obj win_error.obj win_kernel32.obj win_socket.obj WinBase.obj WinCrypt.obj WinNT.obj WinSock_Utils.obj WTypes.obj
  
 @rem Create the graphics specific stuff
 %LUAC% graphics/math_matrix.lua math_matrix.obj

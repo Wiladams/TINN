@@ -2,6 +2,7 @@
 -- api-ms-win-security-base-l1-2-0.dll	
 local ffi = require("ffi");
 local WTypes = require("WTypes");
+local advapiLib = ffi.load("AdvApi32");
 
 ffi.cdef[[
 BOOL
@@ -439,18 +440,18 @@ FreeSid(
 
 BOOL
 GetAce (
-           PACL pAcl,
-           DWORD dwAceIndex,
-    LPVOID *pAce
-    );
+  PACL pAcl,
+  DWORD dwAceIndex,
+  LPVOID *pAce
+  );
 
 BOOL
 GetAclInformation (
-    PACL pAcl,
-    LPVOID pAclInformation,
-    DWORD nAclInformationLength,
-    ACL_INFORMATION_CLASS dwAclInformationClass
-    );
+  PACL pAcl,
+  LPVOID pAclInformation,
+  DWORD nAclInformationLength,
+  ACL_INFORMATION_CLASS dwAclInformationClass
+  );
 
 BOOL
 GetFileSecurityW (
@@ -826,6 +827,7 @@ SetTokenInformation (
     );
 ]]
 
+return {
 --[[
 AccessCheck
 AccessCheckAndAuditAlarmW
@@ -891,11 +893,15 @@ GetSidIdentifierAuthority
 GetSidLengthRequired
 GetSidSubAuthority
 GetSidSubAuthorityCount
-GetTokenInformation
-GetWindowsAccountDomainSid
-ImpersonateAnonymousToken
-ImpersonateLoggedOnUser
-ImpersonateSelf
+--]]
+
+GetTokenInformation = advapiLib.GetTokenInformation,
+GetWindowsAccountDomainSid = advapiLib.GetWindowsAccountDomainSid,
+ImpersonateAnonymousToken = advapiLib.ImpersonateAnonymousToken,
+ImpersonateLoggedOnUser = advapiLib.ImpersonateLoggedOnUser,
+ImpersonateSelf = advapiLib.ImpersonateSelf,
+
+--[[
 InitializeAcl
 InitializeSecurityDescriptor
 InitializeSid
@@ -930,4 +936,4 @@ SetSecurityDescriptorRMControl
 SetSecurityDescriptorSacl
 SetTokenInformation
 --]]
-
+}

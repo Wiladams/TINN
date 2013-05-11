@@ -109,7 +109,7 @@ local	FILETIME = ffi.typeof("FILETIME");
 
 OSProcess.getTimes = function(self)
 	local lpCreationTime = FILETIME();
-	local lpExitTime = FILETIME)();
+	local lpExitTime = FILETIME();
 	local lpKernelTime = FILETIME();
 	local lpUserTime = FILETIME();
 

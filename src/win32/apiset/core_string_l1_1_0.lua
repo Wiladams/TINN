@@ -51,11 +51,12 @@ local function toUnicode(in_Src, nsrcBytes)
 end
 
 local function toAnsi(in_Src, nsrcBytes)
-	nsrcBytes = nsrcBytes
 	local srcShorts = ffi.cast("const uint16_t *", in_Src)
 
 	-- find out how many characters needed
 	local bytesneeded = k32Lib.WideCharToMultiByte(ffi.C.CP_ACP, 0, srcShorts, -1, nil, 0, nil, nil);
+
+print("BN: ", bytesneeded);
 
 	if bytesneeded <= 0 then
 		return nil;

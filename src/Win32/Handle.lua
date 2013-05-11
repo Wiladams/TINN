@@ -5,7 +5,8 @@ local bit = require("bit");
 local band = bit.band;
 
 local Handle_ffi = require("Handle_ffi");
-local k32Lib = ffi.load("kernel32");
+local error_handling = require("core_errorhandling_l1_1_1");
+
 
 --[[
 In Windows, the HANDLE alias is used to represent quite a lot of 
@@ -49,7 +50,7 @@ local Handle_mt = {
 	-- A Win32 OS Handle should be properly closed when it 
 	-- is no longer being used.
 	__gc = function(self)
-		k32Lib.CloseHandle(self.Handle);
+		Handle_ffi.CloseHandle(self.Handle);
 	end,
 
 	__new = function(ct, ...)
@@ -64,9 +65,9 @@ ffi.metatype(Handle, Handle_mt);
 Handle_t.getHandleInformation = function(self)
 	local lpdwFlags = ffi.new("DWORD[1]");
 
-	local res = k32Lib.GetHandleInformation(self.Handle, lpdwFlags);
+	local res = Handle_ffi.GetHandleInformation(self.Handle, lpdwFlags);
 	if res == 0 then
-		return false, k32Lib.GetLastError();
+		return false, error_handling.GetLastError();
 	end
 
 	return lpdwFlags[0];
@@ -78,10 +79,10 @@ Handle_t.setHandleInformation = function(self, which, turnon)
 		dwFlags = which;
 	end
 
-	local res = k32Lib.SetHandleInformation(self.Handle, which, dwFlags)
+	local res = Handle_ffi.SetHandleInformation(self.Handle, which, dwFlags)
 
 	if res == 0 then
-		return false, k32Lib.GetLastError();
+		return false, error_handling.GetLastError();
 	end
 
 	return true;

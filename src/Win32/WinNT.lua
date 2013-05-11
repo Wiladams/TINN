@@ -1,6 +1,7 @@
 local ffi = require("ffi")
 
 local _WIN64 = ffi.os == "Windows" and ffi.abi("64bit");
+
 require("WTypes");
 
 
@@ -886,4 +887,36 @@ typedef enum _TOKEN_INFORMATION_CLASS {
     TokenLogonSid,
     MaxTokenInfoClass  // MaxTokenInfoClass should always be the last enum
 } TOKEN_INFORMATION_CLASS, *PTOKEN_INFORMATION_CLASS;
+
+
+typedef struct _TOKEN_USER {
+    SID_AND_ATTRIBUTES User;
+} TOKEN_USER, *PTOKEN_USER;
+
+]]
+
+ffi.cdef[[
+//
+// Service Types (Bit Mask)
+//
+static const int SERVICE_KERNEL_DRIVER         = 0x00000001;
+static const int SERVICE_FILE_SYSTEM_DRIVER    = 0x00000002;
+static const int SERVICE_ADAPTER               = 0x00000004;
+static const int SERVICE_RECOGNIZER_DRIVER     = 0x00000008;
+
+static const int SERVICE_DRIVER                = (SERVICE_KERNEL_DRIVER | \
+                                        SERVICE_FILE_SYSTEM_DRIVER | \
+                                        SERVICE_RECOGNIZER_DRIVER);
+
+static const int SERVICE_WIN32_OWN_PROCESS     = 0x00000010;
+static const int SERVICE_WIN32_SHARE_PROCESS   = 0x00000020;
+static const int SERVICE_WIN32                 = (SERVICE_WIN32_OWN_PROCESS | \
+                                        SERVICE_WIN32_SHARE_PROCESS);
+
+static const int SERVICE_INTERACTIVE_PROCESS   = 0x00000100;
+
+static const int SERVICE_TYPE_ALL              = (SERVICE_WIN32  | \
+                                        SERVICE_ADAPTER | \
+                                        SERVICE_DRIVER  | \
+                                        SERVICE_INTERACTIVE_PROCESS);
 ]]

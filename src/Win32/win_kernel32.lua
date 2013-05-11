@@ -95,6 +95,9 @@ return {
 	Lib = kernel32,
 
 	-- Local functions
+	Sleep = kernel32.Sleep,
+	SleepEx = kernel32.SleepEx,
+	
 	CreateEvent = kernel32.CreateEventA;
 	GetLastError = coure_errorhandling.GetLastError;
 }
