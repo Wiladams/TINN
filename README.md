@@ -13,13 +13,17 @@ One thing is for sure though
 TINN is like a Swiss army knife for coding on the Windows platform.  With TINN, you can create any number
 of interesting applications from somewhat scalable web services to collaborative video games.
 
-TINN is based on the LuaJIT compiler.  As such, the programs you write for TINN are actually normal looking Lua scripts.
+TINN is based on the LuaJIT compiler.  As such, the programs you write for TINN are actually normal looking LuaJIT scripts.
 
 Included in the box with TINN are some basic modules  
 *	lpeg - for interesting text parsing and manipulation  
 *	zlib - because you'll want to compress some stuff  
 *	networking - because you'll want to talk to other things  
-*	win32 - User32, GDI32, Kernel32, BCrypt, so you can easily put Windows based stuff together  
+*	win32 - User32, GDI32, Kernel32, BCrypt, so you can easily put Windows based stuff together
+
+As TINN is focused on Windows development, there is quite a lot available in the windows bindings.
+There is the concept of api sets, which reflect the layering of APIs since Windows 7.  Within the api sets
+you will find items such as ldap, sspi, libraryloader, processthreads, security_base, etc.
 
 In addition to the basics, TINN includes a fairly simple, but useful, event scheduler.  
 This scheduler supports a cooperative multi-tasking networking module, as well as a general 
@@ -53,6 +57,39 @@ Using TINN
 Run the tinn.exe program, and pass it the name of the script you want to run:
 
 tinn.exe test_network.lua
+
+
+TINN introduces a couple of fairly useful constructs.  'include' and 'use'.
+
+the "require()" function is native the the Lua language.  'include' builds upon this by making a global variable with
+the same name as the required module.
+
+include('dsrole')
+
+This will make available a global variable with the name 'dsrole'.  This gives you a ready handle on the module.  Really
+it's different than simply calling 'require' where it is needed, as the system also maintains a handle on the module.
+
+use('dsrole')
+
+The 'use()' function is slightly different.  It will also perform a 'require' on the module, but it will also make global anything that is returned from the call.  This assumes that what is returned from the call is a table.  This is useful for
+quickly turning a module into a set of globally accessible functions.  So, if you have a module that looks like the following:
+
+-- dsrole.lua
+local dsrole = {
+    DsRoleFreeMemory = Lib.DsRoleFreeMemory,
+    DsRoleGetPrimaryDomainInformation = Lib.DsRoleGetPrimaryDomainInformation,    
+};
+
+return dsrole
+
+If you then call:
+
+use("dsrole")
+
+The functions, DsRoleFreeMemory, and DsRoleGetPrimaryDomainInformation will become functions in the global namespace.
+this is very convenient from the programmer's perspective as it make coding look very similar to what you would do 
+if you were simply programming in 'C' using these APIs.  At the same time, you are not forced to use this mechanism.
+If you prefer to maintain functions in their modular scoped spaces, then you can simply use the regular 'require' function.
 
 Examples
 --------
