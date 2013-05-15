@@ -2,10 +2,12 @@
 -- 
 
 local ffi = require("ffi");
+
 require("WTypes");
 require("WinNT");
 require("SubAuth");
 require("NTSecAPI");
+
 local advapiLib = ffi.load("AdvApi32");
 
 

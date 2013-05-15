@@ -31,6 +31,10 @@ int WideCharToMultiByte(UINT CodePage,
 
 
 local function toUnicode(in_Src, nsrcBytes)
+	if in_Src == nil then
+		return nil;
+	end
+	
 	nsrcBytes = nsrcBytes or #in_Src
 
 	-- find out how many characters needed
@@ -51,12 +55,16 @@ local function toUnicode(in_Src, nsrcBytes)
 end
 
 local function toAnsi(in_Src, nsrcBytes)
+	if in_Src == nil then 
+		return nil;
+	end
+
 	local srcShorts = ffi.cast("const uint16_t *", in_Src)
 
 	-- find out how many characters needed
 	local bytesneeded = k32Lib.WideCharToMultiByte(ffi.C.CP_ACP, 0, srcShorts, -1, nil, 0, nil, nil);
 
-print("BN: ", bytesneeded);
+--print("BN: ", bytesneeded);
 
 	if bytesneeded <= 0 then
 		return nil;

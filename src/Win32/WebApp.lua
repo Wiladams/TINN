@@ -36,7 +36,7 @@ WebApp_t.Run = function(self, requestHandler)
 				end
 			end
 
-			coroutine.yield();
+			self.Scheduler:Yield();
 		end
 	end
 

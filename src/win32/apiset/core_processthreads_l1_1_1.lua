@@ -1,12 +1,11 @@
 -- core_processthreads_l1_1_1.lua
 -- api-ms-win-core-processthreads-l1-1-1.dll	
 local ffi = require("ffi");
-require("WinNT");
-require("WinBase");
 
 local kernel32 = require("win_kernel32");
 local k32Lib = kernel32.Lib;
 local advLib = ffi.load("Advapi32");
+require("WinBase");
 local WinNT = require("WinNT");
 
 

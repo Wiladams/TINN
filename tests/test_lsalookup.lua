@@ -1,54 +1,15 @@
 
 local ffi = require("ffi");
-local lsalookup = require("security_lsalookup_l2_1_0");
-local sddl = require("security_sddl_l1_1_0");
 
 local WinError = require("win_error");
 local k32 = require("win_kernel32");
+
+local lsalookup = require("security_lsalookup_l2_1_0");
 local core_string = require("core_string_l1_1_0");
 local L = core_string.toUnicode;
+local SID = require("SID");
 
 
-
-local SID = {}
-setmetatable(SID, {
-	__call = function(self, ...)
-		return self:new(...);
-	end,
-});
-
-local SID_mt = {
-	__index = SID;
-
-	__tostring = function(self)
-		return self:asString();
-	end,
-}
-
-SID.new = function(self, sid)
-	--print("SID.new");
-	local obj = {
-		Handle = sid;
-	}
-	setmetatable(obj, SID_mt);
-
-	return obj;
-end
-
-SID.asString = function(self)
-	if self.AsString then
-		return self.AsString;
-	end
-
-	-- convert sid to string representation
-	local StringSid = ffi.new("WCHAR *[1]");
-	local status = sddl.ConvertSidToStringSidW(self.Handle, StringSid);
-
-	-- convert the string the ansi 
-	self.AsString = core_string.toAnsi(StringSid[0]);
-
-	return self.AsString;
-end
 
 
 local function lookupAccountName(accountName, lpSystemName)

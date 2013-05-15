@@ -1,78 +1,49 @@
 
+local ffi = require("ffi");
+local bit = require("bit");
+local bor = bit.bor;
+
+
 local SCManager = require("SCManager");
-local JSON = require("dkjson");
 
 
 
 
-local query = function(params)
-	if not params or not params.source then
-		return false, "source not specified";
+
+
+
+
+local test_servicecontrol = function()
+	local mgr, err = SCManager();
+
+	if not mgr then
+		print("Error: ", err);
+		return false, err;
 	end
 
-	local nextRecord = params.source;
-	local filter = params.filter;
-	local projection = params.projection;
-
-
-	local function closure()
-		local record;
-
-		if filter then
-			while true do
-				record = nextRecord();	
+	local access = bor(
+		ffi.C.SERVICE_INTERROGATE,
+		ffi.C.SERVICE_STOP, 
+		ffi.C.SERVICE_PAUSE_CONTINUE, 
+		ffi.C.SERVICE_ENUMERATE_DEPENDENTS);
 	
-				if not record then
-					return nil;
-				end
-				
-				record = filter(self, record);
+	local servicehandle, err = mgr:openService("WSearch", access);
 
-				if record then
-					break;
-				end
-			end
-		else
-			record = nextRecord();
-		end
+	print("ServiceHandle: ", servicehandle, err);
 
-		if not record then
-			return nil;
-		end
-
-		if projection then
-			return projection(self, record);
-		end
-
-		return record;
-	end
-
-	return closure;
-end
-
-local mgr, err = SCManager();
-
-local res = {}
-
-for record in query {
-	source = mgr:services(), 
+	if servicehandle then
+		--print("PAUSE")
+		--print(servicehandle:pause());
 	
-	projection = function(self, record)
-		return {name=record.ServiceName, description=record.DisplayName, };
-	end,
+		print("STOP")
+		print(servicehandle:stop());
 
-	filter = function(self, record)
-		if record.Status.ServiceFlags > 0 then
-			return record;
-		end
+		-- servicehandle:resume();
 	end
-	} do
-
-	table.insert(res, record);
 end
 
 
-local jsonstr = JSON.encode(res, {indent=true});
 
-print(jsonstr);
+--test_query();
 
+test_servicecontrol();

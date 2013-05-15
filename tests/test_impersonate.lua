@@ -11,7 +11,6 @@ local Token = require("Token");
 
 
 
-
 --[[
 	Test case
 --]]

@@ -3,11 +3,9 @@
 local ffi = require "ffi"
 
 require ("WTypes");
-require ("Handle_ffi");
-require ("Heap_ffi");
-require ("SysInfo_ffi");
-require ("UMS_ffi");
-require ("Util_ffi");
+--require ("Handle_ffi");
+--require ("Heap_ffi");
+--require ("SysInfo_ffi");
 require ("ntstatus");
 
 -- Winnt.h

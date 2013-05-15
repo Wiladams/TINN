@@ -9,6 +9,7 @@ local sspi_cli = require("sspicli");
 local SecError = require ("SecError");
 local sspilib = ffi.load("secur32");
 local schannel = require("schannel");
+local errorhandling = require("core_errorhandling_l1_1_1");
 
 
 --[[
@@ -422,7 +423,7 @@ local function getUserName(format)
 	local status = sspilib.GetUserNameExA(format, nameBuffer, pBuffSize);
 
 	if status == 0 then
-		return false, core_errorhandling.GetLastError();
+		return false, errorhandling.GetLastError();
 	end
 
 	return ffi.string(nameBuffer);

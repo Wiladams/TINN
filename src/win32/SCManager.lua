@@ -15,6 +15,66 @@ local WinError = require("win_error");
 
 
 
+
+ffi.cdef[[
+typedef struct {
+	HANDLE 	Handle;
+} SCServiceHandle;
+]]
+
+local SCServiceHandle = ffi.typeof("SCServiceHandle");
+local SCServiceHandle_t = {};
+local SCServiceHandle_mt = {
+	__gc = function(self)
+		service_manager.CloseServiceHandle(self.Handle);
+	end,
+
+	__new = function(ct, ...)
+		local obj = ffi.new(ct);
+
+		if type(select(1, ...)) == 'cdata' then
+			obj.Handle = select(1,...);
+		end
+
+		return obj;
+	end,
+
+	__index = SCServiceHandle_t,
+}
+ffi.metatype(SCServiceHandle, SCServiceHandle_mt);
+
+SCServiceHandle_t.control = function(self, dwControl, reason)
+	reason = reason or bor(
+		ffi.C.SERVICE_STOP_REASON_FLAG_PLANNED, 
+		ffi.C.SERVICE_STOP_REASON_MAJOR_NONE, 
+		ffi.C.SERVICE_STOP_REASON_MINOR_NONE);
+
+	local dwInfoLevel = ffi.C.SERVICE_CONTROL_STATUS_REASON_INFO;
+	local pControlParams = ffi.new("SERVICE_CONTROL_STATUS_REASON_PARAMSW");
+	pControlParams.dwReason = reason;
+
+	local status = service_manager.ControlServiceExW(self.Handle, dwControl, dwInfoLevel, pControlParams);
+
+	if status == 0 then
+		return false, error_handling.GetLastError();
+	end
+
+	return true;
+end
+
+SCServiceHandle_t.pause = function(self, reason)
+	return self:control(ffi.C.SERVICE_CONTROL_PAUSE);
+end
+
+SCServiceHandle_t.resume = function(self, reason)
+	return self:control(ffi.C.SERVICE_CONTROL_CONTINUE);
+end
+
+SCServiceHandle_t.stop = function(self, reason)
+	return self:control(ffi.C.SERVICE_CONTROL_STOP, reason);
+end
+
+
 local serviceType = {
 	[ffi.C.SERVICE_KERNEL_DRIVER] = "KERNEL_DRIVER",
 	[ffi.C.SERVICE_FILE_SYSTEM_DRIVER] = "FILE_SYSTEM_DRIVER",
@@ -69,6 +129,8 @@ local openServiceManager = function(dwDesiredAccess)
 end
 
 
+
+
 local SCManager = {}
 setmetatable(SCManager, {
 	__call = function(self, ...)
@@ -92,6 +154,22 @@ SCManager.new = function(self, desiredAccess)
 	setmetatable(obj, SCManager_mt);
 
 	return obj;
+end
+
+SCManager.openService = function(self, serviceName, dwDesiredAccess)
+	if not serviceName then
+		return false, "no service name specified";
+	end
+
+	dwDesiredAccess = dwDesiredAccess or bor(ffi.C.SERVICE_PAUSE_CONTINUE, ffi.C.SERVICE_STOP, ffi.C.SERVICE_ENUMERATE_DEPENDENTS);
+	local lpServiceName = core_string.toUnicode(serviceName);
+
+	local status = service_manager.OpenServiceW(self.Handle, lpServiceName,dwDesiredAccess);
+	if status == nil then
+		return false, error_handling.GetLastError();
+	end
+
+	return SCServiceHandle(status);
 end
 
 SCManager.services = function(self, dwServiceType)
@@ -129,7 +207,6 @@ SCManager.services = function(self, dwServiceType)
 	-- so allocate it and make the call again
 	cbBufSize = pcbBytesNeeded[0];
 	lpServices = ffi.new("uint8_t[?]", cbBufSize);
-print("cbBufSize: ", cbBufSize);
 
 	local status = service_core.EnumServicesStatusExA(
             self.Handle,
@@ -150,15 +227,6 @@ print("cbBufSize: ", cbBufSize);
 	
 	local nServices = lpServicesReturned[0];
 
---	print("Services Returned: ", nServices);
---	print("Size of Struct: ", 
---		ffi.sizeof("ENUM_SERVICE_STATUS_PROCESSW"), 
---		ffi.sizeof("ENUM_SERVICE_STATUS_PROCESSW")*nServices, 
---		cbBufSize);
-
---	print("Resume Handle: ", lpResumeHandle[0]);
-
-
 	local idx = -1;
 
 	local function closure()
@@ -169,35 +237,26 @@ print("cbBufSize: ", cbBufSize);
 
 		local res = {};
 
+
 		local services = ffi.cast("ENUM_SERVICE_STATUS_PROCESSA *", lpServices);
 
 		if services[idx].lpServiceName ~= nil then
-			--res.ServiceName = toAnsi(lpServices[idx].lpServiceName);
 			res.ServiceName = ffi.string(services[idx].lpServiceName);
-
-			--print("Service: ", res.ServiceName);
 		else
 			return nil;
 		end
 
-		if ffi.cast("ENUM_SERVICE_STATUS_PROCESSA *", lpServices)[idx].lpDisplayName ~= nil then
-			--print("Display: ",lpServices[idx].lpDisplayName);
-
-			res.DisplayName = ffi.string(ffi.cast("ENUM_SERVICE_STATUS_PROCESSA *", lpServices)[idx].lpDisplayName);
+		if services[idx].lpDisplayName ~= nil then
+			res.DisplayName = ffi.string(services[idx].lpDisplayName);
 		end
 
---print(res.ServiceName, res.DisplayName);
-
-		local procStatus = {
-			State = serviceState[services[idx].ServiceStatusProcess.dwCurrentState] or "UNKNOWN",
-			ServiceType = getServiceType(services[idx].ServiceStatusProcess.dwServiceType),
-			ProcessId = services[idx].ServiceStatusProcess.dwProcessId,
-			ServiceFlags = services[idx].ServiceStatusProcess.dwServiceFlags,
-		}
-		res.Status = procStatus;
+		-- Running Service Status
+		res.State = serviceState[services[idx].ServiceStatusProcess.dwCurrentState] or "UNKNOWN";
+		res.ServiceType = getServiceType(services[idx].ServiceStatusProcess.dwServiceType);
+		res.ProcessId = services[idx].ServiceStatusProcess.dwProcessId;
+		res.ServiceFlags = services[idx].ServiceStatusProcess.dwServiceFlags;
 
 		return res;
-
 	end
 
 	return closure;

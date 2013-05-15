@@ -493,7 +493,8 @@ static int handle_luainit(lua_State *L)
   const char *init = getenv(LUA_INIT);
 #endif
 
-  dostring(L, "require'Runtime'", "=");
+  //dostring(L, "require'Runtime'", "=");
+  dostring(L, "require'init'", "=");
 
   if (init == NULL)
     return 0;  /* status OK */
