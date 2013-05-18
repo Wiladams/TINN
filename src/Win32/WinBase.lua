@@ -7,6 +7,8 @@ require ("WTypes");
 --require ("Heap_ffi");
 --require ("SysInfo_ffi");
 require ("ntstatus");
+local advapiLib = ffi.load("AdvApi32");
+
 
 -- Winnt.h
 MAXIMUM_WAIT_OBJECTS = 64     -- Maximum number of wait objects
@@ -60,15 +62,6 @@ FILE_GENERIC_READ          =
             FILE_EXECUTE             |
             SYNCHRONIZE,
 --]]
-
-
-
-
-
-
-
-
-
 
 
 
@@ -384,8 +377,8 @@ ffi.cdef[[
 // LogonFlags
 //
 static const int LOGON_WITH_PROFILE            =  0x00000001;
-static const int  LOGON_NETCREDENTIALS_ONLY    =   0x00000002;
-static const int  LOGON_ZERO_PASSWORD_BUFFER   =   0x80000000;
+static const int  LOGON_NETCREDENTIALS_ONLY    =  0x00000002;
+static const int  LOGON_ZERO_PASSWORD_BUFFER   =  0x80000000;
 
 BOOL
 CreateProcessWithLogonW(
@@ -417,3 +410,8 @@ CreateProcessWithTokenW(
     );
 ]]
 
+
+return {
+    CreateProcessWithLogonW = advapiLib.CreateProcessWithLogonW,
+    CreateProcessWithTokenW = advapiLib.CreateProcessWithTokenW,
+}

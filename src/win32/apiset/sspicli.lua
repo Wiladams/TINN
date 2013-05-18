@@ -11,12 +11,14 @@ require("NTSecAPI");
 local advapiLib = ffi.load("AdvApi32");
 
 
+--[=[
 if not __SECSTATUS_DEFINED__ then
 ffi.cdef[[
 typedef LONG SECURITY_STATUS;
 ]]
 __SECSTATUS_DEFINED__ = true;
 end
+--]=]
 
 ffi.cdef[[
 typedef WCHAR SEC_WCHAR;
@@ -1531,9 +1533,10 @@ ImportSecurityContextA
 ImportSecurityContextW
 InitializeSecurityContextA
 InitializeSecurityContextW
-InitSecurityInterfaceA
-InitSecurityInterfaceW
 --]]
+
+    InitSecurityInterfaceA = advapiLib.InitSecurityInterfaceA,
+    InitSecurityInterfaceW = advapiLib.InitSecurityInterfaceW,
 
     LogonUserExA = advapiLib.LogonUserExA,
 

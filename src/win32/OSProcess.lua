@@ -51,6 +51,33 @@ setmetatable(OSProcess,
 
 			return closure;
 		end,
+
+		processes = function(self)
+			local nextRecord = self:processIds()
+
+			local closure = function()
+				while true do
+					local processId = nextRecord();
+
+					-- ran out of process ids
+					if not processId then return nil end
+
+					local process = OSProcess:open(processId);
+				
+					if process then
+						return {
+							id = process:getId(), 
+							filename = process:getImageName(),
+							priorityClass = process:getPriorityClass(),
+							sessionId = process:getSessionId(),
+							isActive = process:isActive(),
+						};
+					end
+				end
+			end
+
+			return closure;
+		end,
 	},
 });
 

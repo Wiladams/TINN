@@ -36,8 +36,6 @@ ConvertStringSidToSidW(
 ]]
 
 return {
-	Lib = advapiLib,
-
 	ConvertSecurityDescriptorToStringSecurityDescriptorW = advapiLib.ConvertSecurityDescriptorToStringSecurityDescriptorW,
 	ConvertSidToStringSidW = advapiLib.ConvertSidToStringSidW,
 	ConvertStringSecurityDescriptorToSecurityDescriptorW= advapiLib.ConvertStringSecurityDescriptorToSecurityDescriptorW,

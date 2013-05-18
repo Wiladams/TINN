@@ -176,12 +176,6 @@ end -- not(_PROVIDER_STRUCTS_DEFINED)
 -- INC
 
 
---
--- Default values for parameters that do not exist in the Win 3.1
--- compatible APIs.
---
-
-WIN31_CLASS                 = nil;
 
 ffi.cdef[[
 //
@@ -237,11 +231,7 @@ RegConnectRegistryW (
     );
 ]]
 
-if UNICODE then
-RegConnectRegistry  = RegConnectRegistryW
-else
-RegConnectRegistry  = RegConnectRegistryA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -263,11 +253,6 @@ RegConnectRegistryExW (
 ]]
 
 
-if UNICODE then
-RegConnectRegistryEx  = RegConnectRegistryExW
-else
-RegConnectRegistryEx  = RegConnectRegistryExA
-end -- !UNICODE
 
 ffi.cdef[[
 
@@ -287,11 +272,7 @@ RegCreateKeyW (
 ]]
 
 
-if UNICODE then
-RegCreateKey  = RegCreateKeyW
-else
-RegCreateKey  = RegCreateKeyA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -324,11 +305,7 @@ RegCreateKeyExW (
 ]]
 
 
-if UNICODE then
-RegCreateKeyEx  = RegCreateKeyExW
-else
-RegCreateKeyEx  = RegCreateKeyExA
-end -- !UNICODE
+
 
 
 ffi.cdef[[
@@ -367,11 +344,7 @@ RegCreateKeyTransactedW (
 ]]
 
 
-if UNICODE then
-RegCreateKeyTransacted  = RegCreateKeyTransactedW
-else
-RegCreateKeyTransacted  = RegCreateKeyTransactedA
-end -- !UNICODE
+
 
 
 ffi.cdef[[
@@ -391,12 +364,6 @@ RegDeleteKeyW (
     );
 ]]
 
-
-if UNICODE then
-RegDeleteKey = RegDeleteKeyW
-else
-RegDeleteKey = RegDeleteKeyA
-end -- !UNICODE
 
 
 ffi.cdef[[
@@ -421,11 +388,6 @@ RegDeleteKeyExW (
 ]]
 
 
-if UNICODE then
-RegDeleteKeyEx = RegDeleteKeyExW
-else
-RegDeleteKeyEx = RegDeleteKeyExA
-end -- !UNICODE
 
 
 ffi.cdef[[
@@ -454,11 +416,7 @@ RegDeleteKeyTransactedW (
 ]]
 
 
-if UNICODE then
-RegDeleteKeyTransacted = RegDeleteKeyTransactedW
-else
-RegDeleteKeyTransacted = RegDeleteKeyTransactedA
-end -- !UNICODE
+
 
 
 ffi.cdef[[
@@ -496,11 +454,7 @@ RegDeleteValueW (
 ]]
 
 
-if UNICODE then
-RegDeleteValue = RegDeleteValueW
-else
-RegDeleteValue = RegDeleteValueA
-end -- !UNICODE
+
 
 
 ffi.cdef[[
@@ -523,11 +477,7 @@ RegEnumKeyW (
 ]]
 
 
-if UNICODE then
-RegEnumKey = RegEnumKeyW
-else
-RegEnumKey = RegEnumKeyA
-end -- !UNICODE
+
 
 
 ffi.cdef[[
@@ -560,11 +510,7 @@ RegEnumKeyExW (
 ]]
 
 
-if UNICODE then
-RegEnumKeyEx = RegEnumKeyExW
-else
-RegEnumKeyEx = RegEnumKeyExA
-end -- !UNICODE
+
 
 
 ffi.cdef[[
@@ -596,17 +542,11 @@ RegEnumValueW (
 ]]
 
 
-if UNICODE then
-RegEnumValue  = RegEnumValueW
-else
-RegEnumValue  = RegEnumValueA
-end -- !UNICODE
 
 
 ffi.cdef[[
 
 LSTATUS
-
 RegFlushKey (
     HKEY hKey
     );
@@ -622,7 +562,6 @@ RegFlushKey (
 
 
 LSTATUS
-
 RegLoadKeyA (
     HKEY    hKey,
     LPCSTR  lpSubKey,
@@ -630,7 +569,6 @@ RegLoadKeyA (
     );
 
 LSTATUS
-
 RegLoadKeyW (
     HKEY    hKey,
     LPCWSTR  lpSubKey,
@@ -639,11 +577,6 @@ RegLoadKeyW (
 ]]
 
 
-if UNICODE then
-RegLoadKey = RegLoadKeyW
-else
-RegLoadKey = RegLoadKeyA
-end -- !UNICODE
 
 
 ffi.cdef[[
@@ -674,11 +607,6 @@ RegOpenKeyW (
 ]]
 
 
-if UNICODE then
-RegOpenKey = RegOpenKeyW
-else
-RegOpenKey = RegOpenKeyA
-end -- !UNICODE
 
 
 ffi.cdef[[
@@ -704,11 +632,7 @@ RegOpenKeyExW (
 ]]
 
 
-if UNICODE then
-RegOpenKeyEx = RegOpenKeyExW
-else
-RegOpenKeyEx = RegOpenKeyExA
-end -- !UNICODE
+
 
 
 ffi.cdef[[
@@ -739,11 +663,7 @@ RegOpenKeyTransactedW (
 ]]
 
 
-if UNICODE then
-RegOpenKeyTransacted = RegOpenKeyTransactedW
-else
-RegOpenKeyTransacted = RegOpenKeyTransactedA
-end -- !UNICODE
+
 
 
 ffi.cdef[[
@@ -783,11 +703,6 @@ RegQueryInfoKeyW (
 ]]
 
 
-if UNICODE then
-RegQueryInfoKey = RegQueryInfoKeyW
-else
-RegQueryInfoKey = RegQueryInfoKeyA
-end -- !UNICODE
 
 
 ffi.cdef[[
@@ -812,11 +727,7 @@ RegQueryValueW (
 ]]
 
 
-if UNICODE then
-RegQueryValue = RegQueryValueW
-else
-RegQueryValue = RegQueryValueA
-end -- !UNICODE
+
 
 
 
@@ -843,11 +754,7 @@ RegQueryMultipleValuesW (
     );
 ]]
 
-if UNICODE then
-RegQueryMultipleValues = RegQueryMultipleValuesW
-else
-RegQueryMultipleValues = RegQueryMultipleValuesA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -872,11 +779,7 @@ RegQueryValueExW (
     );
 ]]
 
-if UNICODE then
-RegQueryValueEx  = RegQueryValueExW
-else
-RegQueryValueEx  = RegQueryValueExA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -898,11 +801,7 @@ RegReplaceKeyW (
     );
 ]]
 
-if UNICODE then
-RegReplaceKey = RegReplaceKeyW
-else
-RegReplaceKey = RegReplaceKeyA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -924,11 +823,7 @@ RegRestoreKeyW (
 ]]
 
 
-if UNICODE then
-RegRestoreKey = RegRestoreKeyW
-else
-RegRestoreKey = RegRestoreKeyA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -962,11 +857,7 @@ RegSaveKeyW (
 ]]
 
 
-if UNICODE then
-RegSaveKey = RegSaveKeyW
-else
-RegSaveKey = RegSaveKeyA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -1000,11 +891,7 @@ RegSetValueW (
 ]]
 
 
-if UNICODE then
-RegSetValue = RegSetValueW
-else
-RegSetValue = RegSetValueA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -1032,11 +919,7 @@ RegSetValueExW (
 ]]
 
 
-if UNICODE then
-RegSetValueEx = RegSetValueExW
-else
-RegSetValueEx = RegSetValueExA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -1055,11 +938,7 @@ RegUnLoadKeyW (
     );
 ]]
 
-if UNICODE then
-RegUnLoadKey = RegUnLoadKeyW
-else
-RegUnLoadKey = RegUnLoadKeyA
-end -- !UNICODE
+
 
 ffi.cdef[[
 //
@@ -1085,11 +964,7 @@ RegDeleteKeyValueW (
 ]]
 
 
-if UNICODE then
-RegDeleteKeyValue = RegDeleteKeyValueW
-else
-RegDeleteKeyValue = RegDeleteKeyValueA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -1117,11 +992,7 @@ RegSetKeyValueW (
 ]]
 
 
-if UNICODE then
-RegSetKeyValue = RegSetKeyValueW
-else
-RegSetKeyValue = RegSetKeyValueA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -1140,11 +1011,7 @@ RegDeleteTreeW (
     );
 ]]
 
-if UNICODE then
-RegDeleteTree = RegDeleteTreeW
-else
-RegDeleteTree = RegDeleteTreeA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -1165,11 +1032,7 @@ RegCopyTreeW (
     );
 ]]
 
-if UNICODE then
-RegCopyTree = RegCopyTreeW
-else
-RegCopyTree = RegCopyTreeA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -1198,11 +1061,7 @@ RegGetValueW (
     );
 ]]
 
-if UNICODE then
-RegGetValue = RegGetValueW
-else
-RegGetValue = RegGetValueA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -1231,11 +1090,7 @@ RegLoadMUIStringW (
                     );
 ]]
 
-if UNICODE then
-RegLoadMUIString = RegLoadMUIStringW
-else
-RegLoadMUIString = RegLoadMUIStringA
-end -- !UNICODE
+
 
 ffi.cdef[[
 
@@ -1262,11 +1117,6 @@ RegLoadAppKeyW (
 
 
 
-
-
-
-
-
 ffi.cdef[[
 
 LSTATUS
@@ -1285,7 +1135,3 @@ RegSaveKeyExW (
     DWORD Flags
     );
 ]]
-
-
-
-

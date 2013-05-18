@@ -691,13 +691,7 @@ BOOL SslEmptyCacheW(LPWSTR pszTargetName, DWORD  dwFlags);
 schannel.SSL_CRACK_CERTIFICATE_NAME  = K32.TEXT("SslCrackCertificate");
 schannel.SSL_FREE_CERTIFICATE_NAME   = K32.TEXT("SslFreeCertificate");
 
-if UNICODE then
-SSL_EMPTY_CACHE_FN = SSL_EMPTY_CACHE_FN_W;
-SslEmptyCache = SslEmptyCacheW;
-else
-SSL_EMPTY_CACHE_FN = SSL_EMPTY_CACHE_FN_A;
-SslEmptyCache = SslEmptyCacheA;
-end
+
 --]=]
 
 
