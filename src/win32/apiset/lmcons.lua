@@ -1,5 +1,10 @@
 
 local ffi = require("ffi");
+require("WTypes");
+
+ffi.cdef[[
+typedef DWORD NET_API_STATUS;
+]]
 
 ffi.cdef[[
 //
@@ -117,14 +122,20 @@ static const int PARMNUM_BASE_INFOLEVEL  = 1000;
 // Only the UNICODE version of the LM APIs are available on NT.
 // Non-UNICODE version on other platforms
 //
-#if defined( _WIN32_WINNT ) || defined( WINNT ) || defined( __midl ) \
-    || defined( FORCE_UNICODE )
-static const int LMSTR   LPWSTR
-static const int LMCSTR  LPCWSTR
-#else
-static const int LMSTR   LPSTR
-static const int LMCSTR  LPCSTR
-#endif
+--]]
+
+--if defined( _WIN32_WINNT ) || defined( WINNT ) || defined( __midl ) \
+--    || defined( FORCE_UNICODE )
+ffi.cdef[[
+typedef   LPWSTR LMSTR;
+typedef   LPCWSTR LMCSTR;
+]]
+--else
+--ffi.cdef[[
+--typedef LPSTR  LMSTR;
+--typedef LPCSTR LMCSTR;
+--]]
+--end
 --]]
 
 --[[

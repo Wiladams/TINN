@@ -248,6 +248,9 @@ typedef struct _ULARGE_INTEGER
 {
     ULONGLONG QuadPart;
 } 	ULARGE_INTEGER;
+
+typedef ULARGE_INTEGER *PULARGE_INTEGER;
+
 ]]
 
 

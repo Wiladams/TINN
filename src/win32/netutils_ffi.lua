@@ -3,10 +3,11 @@
 
 local ffi = require("ffi");
 local netutils = ffi.load('netutils');
+local lmcons = require("lmcons");
+
 require ("WTypes");
 
 ffi.cdef[[
-typedef DWORD NET_API_STATUS;
 
 static const int NERR_Success =        0;       /* Success */
 

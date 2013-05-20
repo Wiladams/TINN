@@ -82,6 +82,14 @@ local irecords = function(tbl)
 	return closure	
 end
 
+local collect = function(iterator)
+	for record in iterator() do
+		table.insert(res, record);
+	end
+	return res;
+end
+
+
 -- given a key/value record, and a filter table
 -- pass the record if every field in the filtertable
 -- matches a field in the record.

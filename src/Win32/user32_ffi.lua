@@ -162,7 +162,6 @@ local user32_ffi = {
 	MWMO_INPUTAVAILABLE	= 0x0004,
 
       WAIT_OBJECT_0 	= 0x00000000,
-      INFINITE 			=  0xFFFFFFFF,
 
 	HWND_DESKTOP    	= 0x0000,
 	HWND_BROADCAST  	= 0xffff,

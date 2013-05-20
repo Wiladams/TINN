@@ -1044,3 +1044,35 @@ static const int SERVICE_TYPE_ALL              = (SERVICE_WIN32  | \
                                         SERVICE_DRIVER  | \
                                         SERVICE_INTERACTIVE_PROCESS);
 ]]
+
+
+ffi.cdef[[
+//typedef __ptr64 POINTER_64;
+
+typedef void * __ptr64 PVOID64;
+
+
+typedef union _FILE_SEGMENT_ELEMENT {
+    PVOID64 Buffer;
+    ULONGLONG Alignment;
+}FILE_SEGMENT_ELEMENT, *PFILE_SEGMENT_ELEMENT;
+]]
+
+
+ffi.cdef[[
+static const int FILE_ATTRIBUTE_READONLY             = 0x00000001;  
+static const int FILE_ATTRIBUTE_HIDDEN               = 0x00000002;  
+static const int FILE_ATTRIBUTE_SYSTEM               = 0x00000004;  
+static const int FILE_ATTRIBUTE_DIRECTORY            = 0x00000010;  
+static const int FILE_ATTRIBUTE_ARCHIVE              = 0x00000020;  
+static const int FILE_ATTRIBUTE_DEVICE               = 0x00000040;  
+static const int FILE_ATTRIBUTE_NORMAL               = 0x00000080;  
+static const int FILE_ATTRIBUTE_TEMPORARY            = 0x00000100;  
+static const int FILE_ATTRIBUTE_SPARSE_FILE          = 0x00000200;  
+static const int FILE_ATTRIBUTE_REPARSE_POINT        = 0x00000400;  
+static const int FILE_ATTRIBUTE_COMPRESSED           = 0x00000800;  
+static const int FILE_ATTRIBUTE_OFFLINE              = 0x00001000;  
+static const int FILE_ATTRIBUTE_NOT_CONTENT_INDEXED  = 0x00002000;  
+static const int FILE_ATTRIBUTE_ENCRYPTED            = 0x00004000;  
+static const int FILE_ATTRIBUTE_VIRTUAL              = 0x00010000;  
+]]

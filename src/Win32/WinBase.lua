@@ -80,7 +80,9 @@ PURGE_RXCLEAR = 0x08;
 
 ERROR_IO_PENDING = 0x03E5; -- 997
 
-INFINITE = 0xFFFFFFFF;
+ffi.cdef[[
+static const int INFINITE = 0xFFFFFFFF;
+]]
 
 
 -- Access Rights
@@ -196,6 +198,10 @@ static const int STILL_ACTIVE =             STATUS_PENDING;
  THREAD_MODE_BACKGROUND_END      0x00020000
 --]]
 
+ffi.cdef[[
+typedef DWORD (* PTHREAD_START_ROUTINE)(LPVOID lpThreadParameter);
+typedef PTHREAD_START_ROUTINE LPTHREAD_START_ROUTINE;
+]]
 
 ffi.cdef[[
 typedef struct _OVERLAPPED {
@@ -410,6 +416,41 @@ CreateProcessWithTokenW(
     );
 ]]
 
+-- File System Specific
+ffi.cdef[[
+typedef enum _GET_FILEEX_INFO_LEVELS {
+    GetFileExInfoStandard,
+    GetFileExMaxInfoLevel
+} GET_FILEEX_INFO_LEVELS;
+
+typedef enum _FILE_INFO_BY_HANDLE_CLASS {
+    FileBasicInfo,
+    FileStandardInfo,
+    FileNameInfo,
+    FileRenameInfo,
+    FileDispositionInfo,
+    FileAllocationInfo,
+    FileEndOfFileInfo,
+    FileStreamInfo,
+    FileCompressionInfo,
+    FileAttributeTagInfo,
+    FileIdBothDirectoryInfo,
+    FileIdBothDirectoryRestartInfo,
+    FileIoPriorityHintInfo,
+    FileRemoteProtocolInfo, 
+    MaximumFileInfoByHandleClass
+} FILE_INFO_BY_HANDLE_CLASS, *PFILE_INFO_BY_HANDLE_CLASS;
+
+typedef WCHAR *PWCHAR, *LPWCH, *PWCH;
+typedef const WCHAR *LPCWCH, *PCWCH;
+
+typedef
+void (* LPOVERLAPPED_COMPLETION_ROUTINE)(
+    DWORD dwErrorCode,
+    DWORD dwNumberOfBytesTransfered,
+    LPOVERLAPPED lpOverlapped
+    );
+]]
 
 return {
     CreateProcessWithLogonW = advapiLib.CreateProcessWithLogonW,

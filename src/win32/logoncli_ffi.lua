@@ -13,10 +13,9 @@ require("WTypes");
 require("ntstatus");
 local winsock = require("win_socket");
 require("SubAuth");
+require("lmcons");
 
-ffi.cdef[[
-typedef DWORD NET_API_STATUS;
-]]
+
 
 ffi.cdef[[
 //

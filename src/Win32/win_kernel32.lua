@@ -42,9 +42,6 @@ HFILE WINAPI OpenFile(LPCSTR lpFileName,
 */
 ]]
 
-ffi.cdef[[
-typedef DWORD  (*LPTHREAD_START_ROUTINE)(LPVOID lpParameter);
-]]
 
 
 
