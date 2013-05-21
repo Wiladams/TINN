@@ -7,6 +7,7 @@
 
 	From the list is implemented a queue
 --]]
+local setmetatable = setmetatable;
 
 -- The basic list type
 -- This will be used to implement queues and other things
@@ -61,8 +62,50 @@ function List:PopRight()
 	return value
 end
 
+--[[
+	Stack
+--]]
+local Stack = {}
+setmetatable(Stack,{
+	__call = function(self, ...)
+		return self:new(...);
+	end,
+});
+
+local Stack_mt = {
+	__len = function(self)
+		return self.Impl.last - self.Impl.first+1
+	end,
+
+	__index = Stack;
+}
+
+Stack.new = function(self, ...)
+	local obj = {
+		Impl = List.new();
+	}
+
+	setmetatable(obj, Stack_mt);
+
+	return obj;
+end
+
+Stack.len = function(self)
+	return self.Impl.last - self.Impl.first+1
+end
+
+Stack.push = function(self, item)
+	return self.Impl:PushRight(item);
+end
+
+Stack.pop = function(self)
+	return self.Impl:PopRight();
+end
 
 
+--[[
+	Queue
+--]]
 local Queue = {}
 local Queue_mt = {
 	__index = Queue;
@@ -120,4 +163,6 @@ end
 return {
 	List = List;
 	Queue = Queue;
+	Stack = Stack;
 }
+

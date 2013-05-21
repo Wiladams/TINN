@@ -56,3 +56,9 @@ if not token then
 end
 
 printToken(token);
+
+-- enable shutdown privilege 
+print("EnablePrivilege: ", token:enablePrivilege(Token.Privileges.SE_SHUTDOWN_NAME));
+
+print("After Enable Shutdown")
+printToken(token);

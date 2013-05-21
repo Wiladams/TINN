@@ -4,6 +4,7 @@
 local ffi = require("ffi");
 require("WTypes");
 require("WinNT");
+local Lib = ffi.load("kernel32");
 
 
 ffi.cdef[[
@@ -140,3 +141,18 @@ PSLIST_ENTRY InterlockedPushEntrySList (PSLIST_HEADER ListHead,PSLIST_ENTRY List
 ffi.cdef[[
 USHORT QueryDepthSList (PSLIST_HEADER ListHead);
 ]]
+
+return {
+    InitializeSListHead = Lib.InitializeSListHead,
+--InterlockedCompareExchange = Lib.InterlockedCompareExchange,
+--InterlockedCompareExchange64 = Lib.InterlockedCompareExchange64,
+--InterlockedDecrement = Lib.InterlockedDecrement,
+--InterlockedExchange = Lib.InterlockedExchange,
+--InterlockedExchangeAdd = Lib.InterlockedExchangeAdd,
+    InterlockedFlushSList = Lib.InterlockedFlushSList,
+--InterlockedIncrement = Lib.InterlockedIncrement,
+    InterlockedPopEntrySList = Lib.InterlockedPopEntrySList,
+    InterlockedPushEntrySList = Lib.InterlockedPushEntrySList,
+--InterlockedPushListSListEx = Lib.InterlockedPushListSListEx,
+    QueryDepthSList = Lib.QueryDepthSList,
+}

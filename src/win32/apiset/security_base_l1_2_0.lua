@@ -850,7 +850,9 @@ AddMandatoryAce
 --AddResourceAttributeAce
 --AddScopedPolicyIDAce
 AdjustTokenGroups
-AdjustTokenPrivileges
+--]]
+  AdjustTokenPrivileges = advapiLib.AdjustTokenPrivileges,
+--[[
 AllocateAndInitializeSid
 AllocateLocallyUniqueId
 AreAllAccessesGranted

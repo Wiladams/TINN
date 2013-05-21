@@ -6,6 +6,19 @@ local _WIN64 = ffi.os == "Windows" and ffi.abi("64bit");
 
 require("WTypes");
 
+
+
+MINCHAR    = 0x80;        
+MAXCHAR    = 0x7f;       
+MINSHORT   = 0x8000;      
+MAXSHORT   = 0x7fff;      
+MINLONG    = 0x80000000;  
+MAXLONG    = 0x7fffffff;  
+MAXBYTE    = 0xff;        
+MAXWORD    = 0xffff;      
+MAXDWORD   = 0xffffffff;  
+
+
 ffi.cdef[[
 static const int ANYSIZE_ARRAY = 1;       
 ]]
@@ -655,6 +668,18 @@ typedef struct _LUID_AND_ATTRIBUTES {
     } LUID_AND_ATTRIBUTES, * PLUID_AND_ATTRIBUTES;
 typedef LUID_AND_ATTRIBUTES LUID_AND_ATTRIBUTES_ARRAY[ANYSIZE_ARRAY];
 typedef LUID_AND_ATTRIBUTES_ARRAY *PLUID_AND_ATTRIBUTES_ARRAY;
+]]
+
+ffi.cdef[[
+static const int SE_PRIVILEGE_ENABLED_BY_DEFAULT =(0x00000001);
+static const int SE_PRIVILEGE_ENABLED            =(0x00000002);
+static const int SE_PRIVILEGE_REMOVED            =(0X00000004);
+static const int SE_PRIVILEGE_USED_FOR_ACCESS    =(0x80000000);
+
+static const int SE_PRIVILEGE_VALID_ATTRIBUTES   =(SE_PRIVILEGE_ENABLED_BY_DEFAULT | \
+                                         SE_PRIVILEGE_ENABLED            | \
+                                         SE_PRIVILEGE_REMOVED            | \
+                                         SE_PRIVILEGE_USED_FOR_ACCESS);
 ]]
 
 ffi.cdef[[

@@ -219,28 +219,20 @@ typedef struct _OVERLAPPED {
     HANDLE hEvent;
 } OVERLAPPED, *LPOVERLAPPED;
 
+typedef struct _OVERLAPPED_ENTRY {
+    ULONG_PTR lpCompletionKey;
+    LPOVERLAPPED lpOverlapped;
+    ULONG_PTR Internal;
+    DWORD dwNumberOfBytesTransferred;
+} OVERLAPPED_ENTRY, *LPOVERLAPPED_ENTRY;
+
+
 typedef struct _PROCESS_INFORMATION {
     HANDLE hProcess;
     HANDLE hThread;
     DWORD dwProcessId;
     DWORD dwThreadId;
 } PROCESS_INFORMATION, *PPROCESS_INFORMATION, *LPPROCESS_INFORMATION;
-
-BOOL GetQueuedCompletionStatus(
-    HANDLE CompletionPort,
-    LPDWORD lpNumberOfBytesTransferred,
-    PULONG_PTR lpCompletionKey,
-    LPOVERLAPPED *lpOverlapped,
-    DWORD dwMilliseconds
-    );
-
-BOOL PostQueuedCompletionStatus(
-	HANDLE CompletionPort,
-	DWORD dwNumberOfBytesTransferred,
-	ULONG_PTR dwCompletionKey,
-	LPOVERLAPPED lpOverlapped
-);
-
 
 typedef struct _BY_HANDLE_FILE_INFORMATION {
     DWORD dwFileAttributes;

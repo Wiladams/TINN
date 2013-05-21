@@ -7,6 +7,8 @@ local core_string = require("core_string_l1_1_0");
 local core_file = require("core_file_l1_2_0");
 local errorhandling = require("core_errorhandling_l1_1_1");
 local WinBase = require("WinBase");
+local WinNT = require("WinNT");
+local Collections = require("Collections");
 
 
 --[[
@@ -129,6 +131,7 @@ end
 FileSystemItem.items = function(self, pattern)
 	pattern = pattern or self:getFullPath().."\\*";
 	local lpFileName = core_string.toUnicode(pattern);
+	--local fInfoLevelId = ffi.C.FindExInfoStandard;
 	local fInfoLevelId = ffi.C.FindExInfoBasic;
 	local lpFindFileData = ffi.new("WIN32_FIND_DATAW");
 	local fSearchOp = ffi.C.FindExSearchNameMatch;
@@ -156,6 +159,7 @@ FileSystemItem.items = function(self, pattern)
 				Parent = self;
 				Attributes = lpFindFileData.dwFileAttributes;
 				Name = core_string.toAnsi(lpFindFileData.cFileName);
+				Size = (lpFindFileData.nFileSizeHigh * (MAXDWORD+1)) + lpFindFileData.nFileSizeLow;
 				});
 		end
 
@@ -176,5 +180,32 @@ FileSystemItem.items = function(self, pattern)
 	return closure;
 end
 
+FileSystemItem.itemsRecursive = function(self)
+	local stack = Collections.Stack();
+	local itemIter = self:items();
+
+	local closure = function()
+		while true do
+			local anItem = itemIter();
+			if anItem then
+				if (anItem.Name ~= ".") and (anItem.Name ~= "..") then
+					if anItem:isDirectory() then
+						stack:push(itemIter);
+						itemIter = anItem:items();
+					end
+
+					return anItem;
+				end
+			else
+				itemIter = stack:pop();
+				if not itemIter then
+					return nil;
+				end 
+			end
+		end 
+	end
+
+	return closure;
+end
 
 return FileSystemItem;

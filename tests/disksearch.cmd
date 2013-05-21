@@ -1,0 +1,1 @@
+tinn searchdisk.lua %1

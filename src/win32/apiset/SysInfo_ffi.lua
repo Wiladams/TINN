@@ -33,29 +33,7 @@ typedef enum _COMPUTER_NAME_FORMAT {
 } COMPUTER_NAME_FORMAT ;
 ]]
 
-ffi.cdef[[
-typedef struct _TIME_ZONE_INFORMATION {
-    LONG Bias;
-    WCHAR StandardName[ 32 ];
-    SYSTEMTIME StandardDate;
-    LONG StandardBias;
-    WCHAR DaylightName[ 32 ];
-    SYSTEMTIME DaylightDate;
-    LONG DaylightBias;
-} TIME_ZONE_INFORMATION, *PTIME_ZONE_INFORMATION, *LPTIME_ZONE_INFORMATION;
 
-typedef struct _TIME_DYNAMIC_ZONE_INFORMATION {
-    LONG Bias;
-    WCHAR StandardName[ 32 ];
-    SYSTEMTIME StandardDate;
-    LONG StandardBias;
-    WCHAR DaylightName[ 32 ];
-    SYSTEMTIME DaylightDate;
-    LONG DaylightBias;
-    WCHAR TimeZoneKeyName[ 128 ];
-    BOOLEAN DynamicDaylightTimeDisabled;
-} DYNAMIC_TIME_ZONE_INFORMATION, *PDYNAMIC_TIME_ZONE_INFORMATION;
-]]
 
 ffi.cdef[[
 typedef struct _OSVERSIONINFOA {
@@ -177,10 +155,7 @@ GetComputerNameExW (
 ]]
 
 ffi.cdef[[
-DWORD
-GetDynamicTimeZoneInformation(
-    PDYNAMIC_TIME_ZONE_INFORMATION pTimeZoneInformation
-    );
+
 
 VOID
 GetLocalTime(
@@ -255,18 +230,6 @@ GetTickCount(void);
 ULONGLONG
 GetTickCount64(void);
 
-DWORD
-GetTimeZoneInformation(
-    LPTIME_ZONE_INFORMATION lpTimeZoneInformation
-    );
-
-BOOL
-GetTimeZoneInformationForYear(
-    USHORT wYear,
-    PDYNAMIC_TIME_ZONE_INFORMATION pdtzi,
-    LPTIME_ZONE_INFORMATION ptzi
-    );
-
 DWORD GetVersion (void);
 
 BOOL GetVersionExA(LPOSVERSIONINFOA lpVersionInformation);
@@ -299,18 +262,7 @@ ffi.cdef[[
 BOOL
 SetLocalTime(const SYSTEMTIME *lpSystemTime);
 
-BOOL
-SystemTimeToFileTime(const SYSTEMTIME *lpSystemTime, LPFILETIME lpFileTime);
 
-BOOL
-SystemTimeToTzSpecificLocalTime(
-    const TIME_ZONE_INFORMATION *lpTimeZoneInformation,
-        const SYSTEMTIME *lpUniversalTime,
-       LPSYSTEMTIME lpLocalTime);
 
-BOOL
-TzSpecificLocalTimeToSystemTime(
-    const TIME_ZONE_INFORMATION *lpTimeZoneInformation,
-        const SYSTEMTIME *lpLocalTime,
-       LPSYSTEMTIME lpUniversalTime);
+
 ]]

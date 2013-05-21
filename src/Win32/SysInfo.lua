@@ -196,13 +196,7 @@ LocalFileTimeToFileTime(
     __out LPFILETIME lpFileTime
     );
 
-WINBASEAPI
-BOOL
-WINAPI
-FileTimeToSystemTime(
-    __in  CONST FILETIME *lpFileTime,
-    __out LPSYSTEMTIME lpSystemTime
-    );
+
 
 WINBASEAPI
 LONG

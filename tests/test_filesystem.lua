@@ -9,6 +9,7 @@ local WinBase = require("WinBase");
 local FileSystemItem = require("FileSystemItem");
 
 
+
 local FileSystem = {}
 
 FileSystem.volumes = function(self)
@@ -107,37 +108,23 @@ local printFileNames = function(pattern)
 end
 
 
-local depthQuery = {}
 
-depthQuery.traverseItems = function(starting, indentation, filterfunc)
-	indentation = indentation or "";
 
-	starting = starting or FileSystemItem({Name="c:"});
-
-	for item in starting:items() do
+local printFileItems = function(startat, filterfunc)
+	for item in startat:itemsRecursive() do
 		if filterfunc then
 			if filterfunc(item) then
-				if item.Name ~= '.' and item.Name ~= ".." then
-			  		io.write(indentation, item.Name, '\n');
-			  		--io.write(indentation, item:getFullPath(), '\n');
-				end
+				print(item:getFullPath());
 			end
 		else
-			if item.Name ~= '.' and item.Name ~= ".." then
-			  io.write(indentation, item.Name, '\n');
-			end
-		end
-		
-		if item:isDirectory() and item.Name ~= "." and item.Name ~= ".." then
-			depthQuery.traverseItems(item, indentation.."  ", filterfunc);
+			print(item.Name);
 		end
 	end
 end
 
+
 --printDriveCount();
 --printVolumes();
---printFileNames();
---printFileNames("c:\\tools\\*");
 
 local function passHidden(item)
 	return item:isHidden();
@@ -151,6 +138,61 @@ local function passDirectory(item)
 	return item:isDirectory();
 end
 
+local function passDevice(item)
+	return item:isDevice();
+end
+
+local function passReadOnly(item)
+	return item:isReadOnly();
+end
+
+
 --depthQuery.traverseItems(FileSystemItem({Name="c:"}), "", passDirectory);
-depthQuery.traverseItems(FileSystemItem({Name="c:"}), "", passLua);
+--depthQuery.traverseItems(FileSystemItem({Name="c:"}), "", passLua);
 --depthQuery.traverseItems(FileSystemItem({Name="c:"}), "", passHidden);
+--depthQuery.traverseItems(FileSystemItem({Name="c:"}), "", passDevice);
+--depthQuery.traverseItems(FileSystemItem({Name="c:"}), "", passReadOnly);
+
+--printFileItems(FileSystemItem({Name="c:"}), passHidden);
+--printFileItems(FileSystemItem({Name="c:"}), passDirectory);
+--printFileItems(FileSystemItem({Name="c:\\tools"}));
+
+
+
+
+local printHtml = function(pattern, filterfunc)
+	local fs = FileSystemItem({Name=pattern});
+
+io.write[[
+<html>
+	<head>
+		<title>File Directory</title>
+	</head>
+
+	<body>
+		<ul>
+]]
+	for item in fs:items() do
+		local goone = true;
+		if filterfunc then
+			if not filterfunc(item) then
+				goone = false;
+			end
+		end
+		local url = item:getFullPath();
+
+		if goone then
+			io.write([[<li><a href="]]..url..[[">]]..item.Name..[[</a></li>]]);
+			io.write('\n');
+		end
+	end
+
+io.write[[
+		</ul>
+	</body>
+</html>
+]]
+end
+
+
+printHtml("c:\\tools");

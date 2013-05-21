@@ -6,13 +6,12 @@ local WinError = require("win_error");
 
 local sspi = require("sspicli");
 local error_handling = require("core_errorhandling_l1_1_1");
-local security_base = require("security_base_l1_2_0");
 local core_process = require("core_processthreads_l1_1_1");
 local core_string = require("core_string_l1_1_0");
+local security_base = require("security_base_l1_2_0");
 local security_lookup = require("security_lsalookup_l2_1_0");
 
 local SID = require("SID");
-
 
 local tokenInfoStructs = {
 	[ffi.C.TokenUser] = {ffi.typeof("TOKEN_USER")},
@@ -45,6 +44,12 @@ local tokenInfoStructs = {
     [ffi.C.TokenLogonSid] = {ffi.typeof("TOKEN_GROUPS")},
 }
 
+
+
+
+
+
+
 local getPrivilegeName = function(lpuid)
 	local cchName = 256;
 	local pcchName = ffi.new("DWORD[1]", cchName);
@@ -59,7 +64,45 @@ local getPrivilegeName = function(lpuid)
 end
 
 
-local Token = {}
+local Token = {
+	Privileges = {
+		SE_CREATE_TOKEN_NAME              = "SeCreateTokenPrivilege";
+		SE_ASSIGNPRIMARYTOKEN_NAME        = "SeAssignPrimaryTokenPrivilege";
+		SE_LOCK_MEMORY_NAME               = "SeLockMemoryPrivilege";
+		SE_INCREASE_QUOTA_NAME            = "SeIncreaseQuotaPrivilege";
+		SE_UNSOLICITED_INPUT_NAME         = "SeUnsolicitedInputPrivilege";
+		SE_MACHINE_ACCOUNT_NAME           = "SeMachineAccountPrivilege";
+		SE_TCB_NAME                       = "SeTcbPrivilege";
+		SE_SECURITY_NAME                  = "SeSecurityPrivilege";
+		SE_TAKE_OWNERSHIP_NAME            = "SeTakeOwnershipPrivilege";
+		SE_LOAD_DRIVER_NAME               = "SeLoadDriverPrivilege";
+		SE_SYSTEM_PROFILE_NAME            = "SeSystemProfilePrivilege";
+		SE_SYSTEMTIME_NAME                = "SeSystemtimePrivilege";
+		SE_PROF_SINGLE_PROCESS_NAME       = "SeProfileSingleProcessPrivilege";
+		SE_INC_BASE_PRIORITY_NAME         = "SeIncreaseBasePriorityPrivilege";
+		SE_CREATE_PAGEFILE_NAME           = "SeCreatePagefilePrivilege";
+		SE_CREATE_PERMANENT_NAME          = "SeCreatePermanentPrivilege";
+		SE_BACKUP_NAME                    = "SeBackupPrivilege";
+		SE_RESTORE_NAME                   = "SeRestorePrivilege";
+		SE_SHUTDOWN_NAME                  = "SeShutdownPrivilege";
+		SE_DEBUG_NAME                     = "SeDebugPrivilege";
+		SE_AUDIT_NAME                     = "SeAuditPrivilege";
+		SE_SYSTEM_ENVIRONMENT_NAME        = "SeSystemEnvironmentPrivilege";
+		SE_CHANGE_NOTIFY_NAME             = "SeChangeNotifyPrivilege";
+		SE_REMOTE_SHUTDOWN_NAME           = "SeRemoteShutdownPrivilege";
+		SE_UNDOCK_NAME                    = "SeUndockPrivilege";
+		SE_SYNC_AGENT_NAME                = "SeSyncAgentPrivilege";
+		SE_ENABLE_DELEGATION_NAME         = "SeEnableDelegationPrivilege";
+		SE_MANAGE_VOLUME_NAME             = "SeManageVolumePrivilege";
+		SE_IMPERSONATE_NAME               = "SeImpersonatePrivilege";
+		SE_CREATE_GLOBAL_NAME             = "SeCreateGlobalPrivilege";
+		SE_TRUSTED_CREDMAN_ACCESS_NAME    = "SeTrustedCredManAccessPrivilege";
+		SE_RELABEL_NAME                   = "SeRelabelPrivilege";
+		SE_INC_WORKING_SET_NAME           = "SeIncreaseWorkingSetPrivilege";
+		SE_TIME_ZONE_NAME                 = "SeTimeZonePrivilege";
+		SE_CREATE_SYMBOLIC_LINK_NAME      = "SeCreateSymbolicLinkPrivilege";
+	},
+}
 setmetatable(Token, {
 	__call = function(self, ...)
 		return self:new(...);
@@ -80,6 +123,8 @@ setmetatable(Token, {
 			return Token(pTokenHandle[0]);
 		end,
 	},
+
+
 });
 
 local Token_mt = {
@@ -231,6 +276,80 @@ Token.getUser = function(self)
 	local tokUser = ffi.cast("TOKEN_USER *", tokInfo);
 
 	return SID(tokUser.User.Sid);
+end
+
+Token.getLocalPrivilege = function(self, lpName)
+	if not lpName then
+		return false, "no privilege specified"
+	end
+
+	lpSystemName = nil;
+	lpName = core_string.toUnicode(lpName);
+
+	local lpLuid = ffi.new("LUID[1]");
+	local status = security_lookup.LookupPrivilegeValueW(lpSystemName, lpName, lpLuid);
+	
+	if status == 0 then
+		return false, errorhandling.GetLastError();
+	end
+	return lpLuid[0];
+end
+
+--[[
+typedef struct _TOKEN_PRIVILEGES {
+    DWORD PrivilegeCount;
+    LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY];
+} TOKEN_PRIVILEGES, *PTOKEN_PRIVILEGES;
+
+BOOL
+AdjustTokenPrivileges (
+         HANDLE TokenHandle,
+         BOOL DisableAllPrivileges,
+     PTOKEN_PRIVILEGES NewState,
+         DWORD BufferLength,
+    PTOKEN_PRIVILEGES PreviousState,
+    PDWORD ReturnLength
+    );
+--]]
+
+Token.enablePrivilege = function(self, privilege)
+	local lpLuid, err = self:getLocalPrivilege(privilege);
+	if not lpLuid then
+		return false, err;
+	end
+
+	local tkp = ffi.new("TOKEN_PRIVILEGES");
+	tkp.PrivilegeCount = 1;
+	tkp.Privileges[0].Luid = lpLuid;
+	tkp.Privileges[0].Attributes = ffi.C.SE_PRIVILEGE_ENABLED;
+
+	local status = security_base.AdjustTokenPrivileges(self.Handle.Handle, false, tkp, 0, nil, nil);
+
+	if status == 0 then
+		return false, errorhandling.GetLastError();
+	end
+
+	return true;
+end
+
+Token.disablePrivilege = function(self, privilege)
+	local lpLuid, err = self:getLocalPrivilege(privilege);
+	if not lpLuid then
+		return false, err;
+	end
+
+	local tkp = ffi.new("TOKEN_PRIVILEGES");
+	tkp.PrivilegeCount = 1;
+	tkp.Privileges[0].Luid = lpLuid;
+	tkp.Privileges[0].Attributes = ffi.C.SE_PRIVILEGE_REMOVE;
+
+	local status = security_base.AdjustTokenPrivileges(self.Handle.Handle, false, tkp, 0, nil, nil);
+
+	if status == 0 then
+		return false, errorhandling.GetLastError();
+	end
+
+	return true;
 end
 
 return Token;

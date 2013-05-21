@@ -9,6 +9,7 @@ require("SubAuth");
 require("NTSecAPI");
 
 local advapiLib = ffi.load("AdvApi32");
+local secur32lib = ffi.load("secur32");
 
 
 --[=[
@@ -1535,8 +1536,8 @@ InitializeSecurityContextA
 InitializeSecurityContextW
 --]]
 
-    InitSecurityInterfaceA = advapiLib.InitSecurityInterfaceA,
-    InitSecurityInterfaceW = advapiLib.InitSecurityInterfaceW,
+    InitSecurityInterfaceA = secur32lib.InitSecurityInterfaceA,
+    InitSecurityInterfaceW = secur32lib.InitSecurityInterfaceW,
 
     LogonUserExA = advapiLib.LogonUserExA,
 

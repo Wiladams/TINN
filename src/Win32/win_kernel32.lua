@@ -52,10 +52,7 @@ HANDLE CreateEventA(LPSECURITY_ATTRIBUTES lpEventAttributes,
 		BOOL bManualReset, BOOL bInitialState, LPCSTR lpName);
 
 
-HANDLE CreateIoCompletionPort(HANDLE FileHandle,
-	HANDLE ExistingCompletionPort,
-	ULONG_PTR CompletionKey,
-	DWORD NumberOfConcurrentThreads);
+
 
 HANDLE CreateThread(
 	LPSECURITY_ATTRIBUTES lpThreadAttributes,
