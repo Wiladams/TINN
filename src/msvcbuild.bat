@@ -30,6 +30,8 @@
 %LUAC% core/dkjson.lua dkjson.obj
 %LUAC% core/FileStream.lua FileStream.obj
 %LUAC% core/langutils.lua langutils.obj
+%LUAC% luajit_ffi.lua luajit_ffi.obj
+%LUAC% LuaState.lua LuaState.obj
 %LUAC% core/MemoryStream.lua MemoryStream.obj
 %LUAC% core/re.lua re.obj
 %LUAC% Runtime.lua Runtime.obj
@@ -38,10 +40,11 @@
 %LUAC% SimpleFiber.lua SimpleFiber.obj
 %LUAC% core/stream.lua stream.obj
 %LUAC% core/stringzutils.lua stringzutils.obj
+%LUAC% TINNThread.lua TINNThread.obj
 %LUAC% core/Vector.lua Vector.obj
 %LUAC% vkeys.lua vkeys.obj
 %LUAC% core/zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj MemoryStream.obj re.obj Query.obj ResourceMapper.obj Runtime.obj Shell.obj SimpleFiber.obj stream.obj stringzutils.obj Vector.obj vkeys.obj zlib.obj
+@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj luajit_ffi.obj LuaState.obj MemoryStream.obj re.obj Query.obj ResourceMapper.obj Runtime.obj Shell.obj SimpleFiber.obj stream.obj stringzutils.obj TINNThread.obj Vector.obj vkeys.obj zlib.obj
 
 @rem The Net library
 %LUAC% net/CoSocketIo.lua CoSocketIo.obj
@@ -68,6 +71,7 @@
 %LUAC% Win32/apiset/core_debug_l1_1_1.lua core_debug_l1_1_1.obj
 %LUAC% Win32/apiset/core_errorhandling_l1_1_1.lua core_errorhandling_l1_1_1.obj
 %LUAC% Win32/apiset/core_file_l1_2_0.lua core_file_l1_2_0.obj
+%LUAC% Win32/apiset/core_file_l2_1_0.lua core_file_l2_1_0.obj
 %LUAC% Win32/apiset/core_firmware_l1_1_0.lua core_firmware_l1_1_0.obj
 %LUAC% Win32/apiset/core_interlocked.lua core_interlocked.obj
 %LUAC% Win32/apiset/core_io_l1_1_1.lua core_io_l1_1_1.obj
@@ -104,7 +108,7 @@
 %LUAC% Win32/apiset/wkscli.lua wkscli.obj
 %LUAC% Win32/apiset/wldap32_ffi.lua wldap32_ffi.obj
 
-@set WINCOREAPI=core_console_l1_1_0.obj core_console_l2_1_0.obj core_datetime_l1_1_1.obj core_debug_l1_1_1.obj core_errorhandling_l1_1_1.obj core_file_l1_2_0.obj core_firmware_l1_1_0.obj core_interlocked.obj core_io_l1_1_1.obj core_libraryloader_l1_1_1.obj core_namedpipe_l1_2_0.obj core_processenvironment.obj core_processthreads_l1_1_1.obj core_profile_l1_1_0.obj core_psapi_l1_1_0.obj core_shutdown_l1_1_0.obj core_string_l1_1_0.obj core_sysinfo_l1_2_0.obj core_timezone_l1_1_0.obj dsrole.obj Handle_ffi.obj Heap_ffi.obj httpapi.obj lmcons.obj NTSecAPI.obj power_base_l1_1_0.obj samcli.obj security_base_l1_2_0.obj security_credentials_l1_1_0.obj security_lsalookup_l2_1_0.obj security_sddl_l1_1_0.obj service_core_l1_1_1.obj service_management_l1_1_0.obj sspicli.obj SubAuth.obj UMS_ffi.obj Util_ffi.obj WinBer_ffi.obj WinCon.obj wkscli.obj wldap32_ffi.obj
+@set WINCOREAPI=core_console_l1_1_0.obj core_console_l2_1_0.obj core_datetime_l1_1_1.obj core_debug_l1_1_1.obj core_errorhandling_l1_1_1.obj core_file_l1_2_0.obj core_file_l2_1_0.obj core_firmware_l1_1_0.obj core_interlocked.obj core_io_l1_1_1.obj core_libraryloader_l1_1_1.obj core_namedpipe_l1_2_0.obj core_processenvironment.obj core_processthreads_l1_1_1.obj core_profile_l1_1_0.obj core_psapi_l1_1_0.obj core_shutdown_l1_1_0.obj core_string_l1_1_0.obj core_sysinfo_l1_2_0.obj core_timezone_l1_1_0.obj dsrole.obj Handle_ffi.obj Heap_ffi.obj httpapi.obj lmcons.obj NTSecAPI.obj power_base_l1_1_0.obj samcli.obj security_base_l1_2_0.obj security_credentials_l1_1_0.obj security_lsalookup_l2_1_0.obj security_sddl_l1_1_0.obj service_core_l1_1_1.obj service_management_l1_1_0.obj sspicli.obj SubAuth.obj UMS_ffi.obj Util_ffi.obj WinBer_ffi.obj WinCon.obj wkscli.obj wldap32_ffi.obj
 
 
 @rem Create the Win32 specific stuff
