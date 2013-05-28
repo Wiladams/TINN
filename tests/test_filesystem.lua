@@ -194,5 +194,8 @@ io.write[[
 ]]
 end
 
+local nodotdot = function(item)
+	return item.Name ~= "." and item.Name ~= "..";
+end
 
-printHtml("c:\\tools");
+printHtml("c:\\tools", nodotdot);

@@ -15,7 +15,7 @@ local Token = require("Token");
 	Test case
 --]]
 
-local logonUser = function(lpszUsername, lpszDomain, lpszPassword, dwLogonType, dwLogonProvider)
+local logonUser = function(lpszDomain, lpszUsername,  lpszPassword, dwLogonType, dwLogonProvider)
 	dwLogonType = dwLogonType or ffi.C.LOGON32_LOGON_INTERACTIVE;
 	dwLogonProvider = dwLogonProvider or ffi.C.LOGON32_PROVIDER_WINNT50;
 
@@ -44,7 +44,6 @@ if not token then
 	return false, err;
 end
 
-local userinfo = token:getTokenInfo();
-print("Token User Info: ",userinfo);
+print("Token User Info: ", token:getUser());
 
 

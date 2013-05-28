@@ -6,9 +6,10 @@ local rshift = bit.rshift
 local lshift = bit.lshift
 
 
-require "WTypes"
-k32 = require "win_kernel32"
+local WTypes = require("WTypes");
 local core_string = require("core_string_l1_1_0");
+local errorhandling = require("core_errorhandling_l1_1_1");
+
 
 local L = core_string.toUnicode;
 local A = core_string.toAnsi;
@@ -20,7 +21,7 @@ local BinaryStream = require "BinaryStream"
 
 local Crypt32 = ffi.load("Crypt32");
 local Advapi32 = ffi.load("Advapi32");
-local Kernel32 = k32.Lib;
+local Kernel32 = ffi.load("Kernel32");
 
 
 ALG_TYPE_ANY = 0;
@@ -30,8 +31,6 @@ ALG_CLASS_DATA_ENCRYPT = lshift(3, 13);
 ALG_SID_SHA1 = 4;
 ALG_SID_3DES = 3;
 ALG_SID_HMAC = 9;
-
-ERROR_INVALID_PARAMETER		= 87;	-- dderror
 
 
 
@@ -427,7 +426,7 @@ CryptoKey_mt = {
 				return true
 			end
 
-			return false, k32.Lib.GetLastError();
+			return false, errorhandling.GetLastError();
 		end,
 
 		SetIv = function(self, iv)
@@ -464,7 +463,7 @@ CryptoKey_mt = {
 				return pdwDataLen[0]
 			end
 
-			return nil, k32.Lib.GetLastError();
+			return nil, errorhandling.GetLastError();
 		end,
 	},
 }
@@ -481,7 +480,7 @@ function CryptGetDefaultProvider(dwProvType)
 	local err = Advapi32.CryptGetDefaultProviderA(dwProvType, nil, dwFlags, pszProvName, pcbProvName);
 
 	if err == 0 then
-		return nil, k32.Lib.GetLastError();
+		return nil, errorhandling.GetLastError();
 	end
 
 	-- Now we have the size, so allocate buffer
@@ -490,7 +489,7 @@ function CryptGetDefaultProvider(dwProvType)
 	err = Advapi32.CryptGetDefaultProviderA(dwProvType, nil, dwFlags, pszProvName, pcbProvName);
 
 	if err == 0 then
-		return nil, k32.Lib.GetLastError();
+		return nil, errorhandling.GetLastError();
 	end
 
 	return ffi.string(pszProvName, pcbProvName[0]-1);
@@ -762,7 +761,7 @@ local function CryptDecodeObject(lpszStructType, pbEncoded, cbEncoded, dwFlags)
 		pcbStructInfo);
 
 	if err == 0 then
-		return nil, k32.Lib.GetLastError();
+		return nil, errorhandling.GetLastError();
 	end
 
 	-- allocate an appropriately sized buffer
@@ -779,7 +778,7 @@ local function CryptDecodeObject(lpszStructType, pbEncoded, cbEncoded, dwFlags)
 		pcbStructInfo);
 
 	if err == 0 then
-		return nil, k32.Lib.GetLastError();
+		return nil, errorhandling.GetLastError();
 	end
 
 	return pvStructInfo, pcbStructInfo[0];
@@ -900,12 +899,12 @@ function CryptAcquireContext(pszContainer, pszProvider, dwProvType, dwFlags)
 		return phProv[0];
 	end
 
-	err = k32.Lib.GetLastError();
+	err = errorhandling.GetLastError();
 	if (err == NTE_BAD_KEYSET) then
 		err = Advapi32.CryptAcquireContextA(phProv, pszContainer, pszProvider, dwProvType, bor(dwFlags, WinCrypt.CRYPT_NEWKEYSET));
 
 		if err == 0 then
-			return nil, k32.Lib.GetLastError();
+			return nil, errorhandling.GetLastError();
 		end
 	end
 
@@ -979,7 +978,7 @@ CertificateContext.GetPrivateKey = function(self)
 		pfCallerFreeProv)
 
 	if err == 0 then
-		local winerr = k32.Lib.GetLastError();
+		local winerr = errorhandling.GetLastError();
 		print("CertificateContext:GetPrivateKey(), ERROR: ", string.format("0x%x",winerr));
 
 		return nil, winerr
@@ -1054,7 +1053,7 @@ function CryptoProvider.GetUserKey(self, KeySpec)
 	local phUserKey = ffi.new("HCRYPTKEY[1]");
 	local err = Advapi32.CryptGetUserKey(self.Handle, KeySpec, phUserKey)
 	if (err == 0) then
-		local winerr = k32.Lib.GetLastError();
+		local winerr = errorhandling.GetLastError();
 		assert(false, "CryptoProvider.GetUserKey(), Failed to get key for certificate: "..winerr);
 		--if (TicketCracker.ToUInt32(Marshal.GetLastWin32Error()) != Crypto.NTE_NO_KEY)
 		--	throw new CryptException("Failed to get user key for certificate " + certName + ".", Marshal.GetLastWin32Error());
@@ -1071,7 +1070,7 @@ function CryptoProvider.ImportKey(self, pbBlob, cbBlob, hPubKey, dwFlags)
 	local err = Advapi32.CryptImportKey(self.Handle, pbBlob, cbBlob, hPubKey, dwFlags, phKey);
 
 	if err == 0 then
-		return nil, k32.Lib.GetLastError();
+		return nil, errorhandling.GetLastError();
 	end
 
 	return phKey[0];
@@ -1114,7 +1113,7 @@ function CryptoProvider.ImportRawKey(self, derivedKey, derivedKeyLen, algId, imp
 	local result, err = self:ImportKey(blob, blobLength, nil, importFlags)
 
 	if (not result) then
-		assert(false, "Could not import raw key: "..string.format("0x%x", k32.Lib.GetLastError()));
+		assert(false, "Could not import raw key: "..string.format("0x%x", errorhandling.GetLastError()));
 	end
 
 	return CryptoKey(result);
@@ -1131,7 +1130,7 @@ function CryptoProvider.ImportPublicKey(self, pkiptr)
 		phKey);
 
 	if (err == 0) then
-		return nil, k32.Lib.GetLastError();
+		return nil, errorhandling.GetLastError();
 	end
 
 	return phKey[0];
@@ -1284,7 +1283,7 @@ CertificateStore = ffi.metatype(CertificateStore, CertificateStore_mt);
 -- Libraries
 WinCrypt.Crypt32 = Crypt32;
 WinCrypt.Advapi32 = Advapi32;
-WinCrypt.Kernel32 = k32.Lib;
+WinCrypt.Kernel32 = Kernel32;
 
 -- Functions
 WinCrypt.CryptAcquireContext = CryptAcquireContext;

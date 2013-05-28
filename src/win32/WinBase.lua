@@ -10,8 +10,6 @@ require ("ntstatus");
 local advapiLib = ffi.load("AdvApi32");
 
 
--- Winnt.h
-MAXIMUM_WAIT_OBJECTS = 64     -- Maximum number of wait objects
 
 
 INVALID_HANDLE_VALUE = ffi.cast("intptr_t", -1)
@@ -443,6 +441,25 @@ void (* LPOVERLAPPED_COMPLETION_ROUTINE)(
     LPOVERLAPPED lpOverlapped
     );
 ]]
+
+ffi.cdef[[
+typedef struct _REASON_CONTEXT {
+    ULONG Version;
+    DWORD Flags;
+    union {
+        struct {
+            HMODULE LocalizedReasonModule;
+            ULONG LocalizedReasonId;
+            ULONG ReasonStringCount;
+            LPWSTR *ReasonStrings;
+
+        } Detailed;
+
+        LPWSTR SimpleReasonString;
+    } Reason;
+} REASON_CONTEXT, *PREASON_CONTEXT;
+]]
+
 
 return {
     CreateProcessWithLogonW = advapiLib.CreateProcessWithLogonW,

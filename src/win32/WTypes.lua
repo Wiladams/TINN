@@ -14,6 +14,8 @@ ffi.cdef[[
 
 typedef uint32_t *  PDWORD;
 typedef long *    PLONG;
+typedef long            *LPLONG;
+
 ]]
 
 
@@ -294,49 +296,6 @@ typedef USHORT *PSECURITY_DESCRIPTOR_CONTROL;
 typedef LONG SECURITY_STATUS;
 
 typedef PVOID PSID;
-
-typedef struct _ACL
-{
-    UCHAR AclRevision;
-    UCHAR Sbz1;
-    USHORT AclSize;
-    USHORT AceCount;
-    USHORT Sbz2;
-} 	ACL, *PACL;
-
-
-typedef struct _SECURITY_DESCRIPTOR
-{
-    UCHAR Revision;
-    UCHAR Sbz1;
-    SECURITY_DESCRIPTOR_CONTROL Control;
-    PSID Owner;
-    PSID Group;
-    PACL Sacl;
-    PACL Dacl;
-} 	SECURITY_DESCRIPTOR, *PSECURITY_DESCRIPTOR;
-
-typedef struct _COAUTHIDENTITY
-{
-    USHORT *User;
-    ULONG UserLength;
-    USHORT *Domain;
-    ULONG DomainLength;
-    USHORT *Password;
-    ULONG PasswordLength;
-    ULONG Flags;
-} 	COAUTHIDENTITY;
-
-typedef struct _COAUTHINFO
-{
-    DWORD dwAuthnSvc;
-    DWORD dwAuthzSvc;
-    LPWSTR pwszServerPrincName;
-    DWORD dwAuthnLevel;
-    DWORD dwImpersonationLevel;
-    COAUTHIDENTITY *pAuthIdentityData;
-    DWORD dwCapabilities;
-} 	COAUTHINFO;
 
 typedef LONG SCODE;
 

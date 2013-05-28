@@ -7,7 +7,6 @@ local band = bit.band
 local bor = bit.bor
 
 local User32 = require ("User32")
-local Kernel32 = require("win_kernel32");
 
 
 

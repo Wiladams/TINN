@@ -2,10 +2,9 @@
 -- api-ms-win-core-processthreads-l1-1-1.dll	
 local ffi = require("ffi");
 
-local kernel32 = require("win_kernel32");
-local k32Lib = kernel32.Lib;
+local k32Lib = ffi.load("kernel32");
 local advLib = ffi.load("Advapi32");
-require("WinBase");
+local WinBase = require("WinBase");
 local WinNT = require("WinNT");
 
 

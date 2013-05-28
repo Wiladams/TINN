@@ -3,8 +3,7 @@
 local ffi = require("ffi");
 local procthreads = require("core_processthreads_l1_1_1");
 local Handle = require("Handle")
-local kernel32 = require("win_kernel32");
-local k32Lib = kernel32.Lib;
+local k32Lib = ffi.load("Kernel32");
 local OSProcess = require("OSProcess");
 
 

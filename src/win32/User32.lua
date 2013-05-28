@@ -3,7 +3,6 @@ local ffi = require("ffi");
 local bit = require("bit");
 local bor = bit.bor;
 
-local Kernel32 = require("win_kernel32");
 local user32_ffi = require ("user32_ffi");
 local User32Lib = ffi.load("User32");
 local core_library = require("core_libraryloader_l1_1_1");

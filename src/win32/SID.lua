@@ -1,6 +1,7 @@
 local ffi = require("ffi");
 local sddl = require("security_sddl_l1_1_0");
 local security_lookup = require("security_lsalookup_l2_1_0");
+local security_base = require("security_base_l1_2_0");
 local core_string = require("core_string_l1_1_0");
 local errorhandling = require("core_errorhandling_l1_1_1");
 
@@ -22,11 +23,70 @@ local getSidUse = function(use)
 	return "<unknown>";
 end
 
+
+ffi.cdef[[
+typedef struct {
+	HANDLE 	Handle;
+	bool 	OwnAllocation;
+} SIDHandle;
+]]
+local SIDHandle = ffi.typeof("SIDHandle");
+local SIDHandle_mt = {
+	__gc = function(self)
+		print("GC: SIDHandle");
+		if self.OwnAllocation then
+			security_base.FreeSid(self.Handle);
+		end
+	end,
+
+	__tostring = function(self)
+		-- convert sid to string representation
+		local StringSid = ffi.new("WCHAR *[1]");
+		local status = sddl.ConvertSidToStringSidW(self.Handle, StringSid);
+		-- BUGBUG, MEMORY LEAK of the StringSid
+
+		-- convert the string the ansi 
+		return core_string.toAnsi(StringSid[0]);
+	end,
+}
+
+
 local SID = {}
 setmetatable(SID, {
 	__call = function(self, ...)
 		return self:new(...);
 	end,
+
+	__index = {
+		create = function(self, pIdentifierAuthority, nSubAuthorityCount, 
+			subauth0, subauth1, subauth2, subauth3, 
+			subauth4, subauth5, subauth6,subauth7)
+
+			subauth0 = subauth0 or 0;
+			subauth1 = subauth1 or 0;
+			subauth2 = subauth2 or 0;
+			subauth3 = subauth3 or 0;
+			subauth4 = subauth4 or 0;
+			subauth5 = subauth5 or 0;
+			subauth6 = subauth6 or 0;
+			subauth7 = subauth7 or 0;
+
+			pIdentifierAuthority = pIdentifierAuthority or SIDAuthWorld;
+			local pSID = ffi.new("PSID[1]");
+			local status = security_base.AllocateAndInitializeSid(
+    			pIdentifierAuthority, 
+    			1,
+    			subauth0, subauth1, subauth2, subauth3, 
+    			subauth4, subauth5, subauth6, subauth7,
+    			pSID);
+
+			if status == 0 then
+				return false, errorhandling.GetLastError();
+			end
+
+			return SID(pSID[0], true);
+		end,
+	},
 });
 
 local SID_mt = {
@@ -35,16 +95,24 @@ local SID_mt = {
 	__tostring = function(self)
 		return self:asString();
 	end,
+
+	__eq = function(self, other)
+		return security_base.EqualSid(self:getNativeHandle(), other:getNativeHandle()) ~= 0;
+	end,
 }
 
-SID.new = function(self, sid)
+SID.new = function(self, rawhandle)
 	--print("SID.new");
 	local obj = {
-		Handle = sid;
+		Handle = SIDHandle(rawhandle);
 	}
 	setmetatable(obj, SID_mt);
 
 	return obj;
+end
+
+SID.getNativeHandle = function(self)
+	return self.Handle.Handle;
 end
 
 SID.asString = function(self)
@@ -58,18 +126,13 @@ SID.getAccountInfo = function(self)
 		return self;
 	end
 
-	-- convert sid to string representation
-	local StringSid = ffi.new("WCHAR *[1]");
-	local status = sddl.ConvertSidToStringSidW(self.Handle, StringSid);
-
-	-- convert the string the ansi 
-	self.SIDString = core_string.toAnsi(StringSid[0]);
+	self.SIDString = tostring(self.Handle);
 
 	local Name = nil;
 	local pcchName = ffi.new("DWORD[1]");
 	local pcchReferencedDomainName = ffi.new("DWORD[1]");
 	local peUse = ffi.new("SID_NAME_USE[1]");
-	local status = security_lookup.LookupAccountSidW(nil, self.Handle, Name, pcchName, ReferencedDomainName, pcchReferencedDomainName, peUse);
+	local status = security_lookup.LookupAccountSidW(nil, self:getNativeHandle(), Name, pcchName, ReferencedDomainName, pcchReferencedDomainName, peUse);
  
 	-- ERROR_NONE_MAPPED
 	if status == 0 then 
@@ -83,7 +146,7 @@ SID.getAccountInfo = function(self)
 	local ReferencedDomainName = ffi.new("WCHAR[?]", pcchReferencedDomainName[0]);
 
 	local status = security_lookup.LookupAccountSidW(nil, 
-		self.Handle, 
+		self:getNativeHandle(), 
 		Name, pcchName, 
 		ReferencedDomainName, pcchReferencedDomainName, 
 		peUse);

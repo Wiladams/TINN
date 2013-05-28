@@ -1,49 +1,34 @@
 local ffi = require("ffi");
 
-local core_interlocked = require("core_interlocked");
+local SList = require("SList");
 local SLIST_ENTRY = ffi.typeof("SLIST_ENTRY");
 
-SList = {}
-setmetatable(SList, {
-	__call = function(self, ...)
-		return self:new(...);
-	end,
-});
-SList_mt = {
-	__index = SList;
-}
+local msgQueueDef = [[
+typedef struct {
+	SLIST_ENTRY	EntryHeader;
 
-SList.new = function(self, ...)
-	local obj = {
-		ListHead = ffi.new("SLIST_HEADER");	
-	};
+	// Data specific to queue
+	int32_t		message;
+	intptr_t	Data;
+} MsgEntry;
+]]
 
-	core_interlocked.InitializeSListHead(obj.ListHead);
-
-	setmetatable(obj, SList_mt);
-
-	return obj;
-end
-
-SList.push = function(self, item)
-	core_interlocked.InterlockedPushEntrySList(self.ListHead, item);
-end
-
-SList.pop = function(self)
-	return core_interlocked.InterlockedPopEntrySList(self.ListHead);
-end
-
-SList.length = function(self)
-	return core_interlocked.QueryDepthSList(self.ListHead);
-end
-
-
+ffi.cdef(msgQueueDef);
+local MsgEntry = ffi.typeof("MsgEntry");
 
 --[[
 	Test cases
 --]]
 local alist = SList();
-alist:push(SLIST_ENTRY());
-alist:push(SLIST_ENTRY());
+alist:push(MsgEntry());
+alist:push(MsgEntry());
 
 print("depth: ", alist:length());
+
+-- Create an alias to the list
+local list2 = SList(alist.ListHead);
+list2:push(MsgEntry());
+list2:push(MsgEntry());
+
+print("Depth 1: ", alist:length());
+print("Depth 2: ", list2:length());

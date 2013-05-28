@@ -2,6 +2,8 @@
 -- api-ms-win-security-base-l1-2-0.dll	
 local ffi = require("ffi");
 local WTypes = require("WTypes");
+local WinNT = require("WinNT");
+
 local advapiLib = ffi.load("AdvApi32");
 
 ffi.cdef[[
@@ -828,114 +830,106 @@ SetTokenInformation (
 ]]
 
 return {
---[[
-AccessCheck
-AccessCheckAndAuditAlarmW
-AccessCheckByType
-AccessCheckByTypeAndAuditAlarmW
-AccessCheckByTypeResultList
-AccessCheckByTypeResultListAndAuditAlarmByHandleW
-AccessCheckByTypeResultListAndAuditAlarmW
-AddAccessAllowedAce
-AddAccessAllowedAceEx
-AddAccessAllowedObjectAce
-AddAccessDeniedAce
-AddAccessDeniedAceEx
-AddAccessDeniedObjectAce
-AddAce
-AddAuditAccessAce
-AddAuditAccessAceEx
-AddAuditAccessObjectAce
-AddMandatoryAce
---AddResourceAttributeAce
---AddScopedPolicyIDAce
-AdjustTokenGroups
---]]
-  AdjustTokenPrivileges = advapiLib.AdjustTokenPrivileges,
---[[
-AllocateAndInitializeSid
-AllocateLocallyUniqueId
-AreAllAccessesGranted
-AreAnyAccessesGranted
+AccessCheck = advapiLib.AccessCheck,
+AccessCheckAndAuditAlarmW = advapiLib.AccessCheckAndAuditAlarmW,
+AccessCheckByType = advapiLib.AccessCheckByType,
+AccessCheckByTypeAndAuditAlarmW = advapiLib.AccessCheckByTypeAndAuditAlarmW,
+AccessCheckByTypeResultList = advapiLib.AccessCheckByTypeResultList,
+AccessCheckByTypeResultListAndAuditAlarmByHandleW = advapiLib.AccessCheckByTypeResultListAndAuditAlarmByHandleW,
+AccessCheckByTypeResultListAndAuditAlarmW = advapiLib.AccessCheckByTypeResultListAndAuditAlarmW,
+AddAccessAllowedAce = advapiLib.AddAccessAllowedAce,
+AddAccessAllowedAceEx = advapiLib.AddAccessAllowedAceEx,
+AddAccessAllowedObjectAce = advapiLib.AddAccessAllowedObjectAce,
+AddAccessDeniedAce = advapiLib.AddAccessDeniedAce,
+AddAccessDeniedAceEx = advapiLib.AddAccessDeniedAceEx,
+AddAccessDeniedObjectAce = advapiLib.AddAccessDeniedObjectAce,
+AddAce = advapiLib.AddAce,
+AddAuditAccessAce = advapiLib.AddAuditAccessAce,
+AddAuditAccessAceEx = advapiLib.AddAuditAccessAceEx,
+AddAuditAccessObjectAce = advapiLib.AddAuditAccessObjectAce,
+AddMandatoryAce = advapiLib.AddMandatoryAce,
+--AddResourceAttributeAce = advapiLib.
+--AddScopedPolicyIDAce = advapiLib.
+AdjustTokenGroups = advapiLib.AdjustTokenGroups,
+AdjustTokenPrivileges = advapiLib.AdjustTokenPrivileges,
+AllocateAndInitializeSid = advapiLib.AllocateAndInitializeSid,
+AllocateLocallyUniqueId = advapiLib.AllocateLocallyUniqueId,
+AreAllAccessesGranted = advapiLib.AreAllAccessesGranted,
+AreAnyAccessesGranted = advapiLib.AreAnyAccessesGranted,
 --CheckTokenCapability
-CheckTokenMembership
+CheckTokenMembership = advapiLib.CheckTokenMembership,
 --CheckTokenMembershipEx
-ConvertToAutoInheritPrivateObjectSecurity
-CopySid
-CreatePrivateObjectSecurity
-CreatePrivateObjectSecurityEx
-CreatePrivateObjectSecurityWithMultipleInheritance
-CreateRestrictedToken
-CreateWellKnownSid
-DeleteAce
-DestroyPrivateObjectSecurity
-DuplicateToken
-DuplicateTokenEx
-EqualDomainSid
-EqualPrefixSid
-EqualSid
-FindFirstFreeAce
-FreeSid
-GetAce
-GetAclInformation
---GetAppContainerAce
---GetCachedSigningLevel
-GetFileSecurityW
-GetKernelObjectSecurity
-GetLengthSid
-GetPrivateObjectSecurity
-GetSecurityDescriptorControl
-GetSecurityDescriptorDacl
-GetSecurityDescriptorGroup
-GetSecurityDescriptorLength
-GetSecurityDescriptorOwner
-GetSecurityDescriptorRMControl
-GetSecurityDescriptorSacl
-GetSidIdentifierAuthority
-GetSidLengthRequired
-GetSidSubAuthority
-GetSidSubAuthorityCount
---]]
-
+ConvertToAutoInheritPrivateObjectSecurity = advapiLib.ConvertToAutoInheritPrivateObjectSecurity,
+CopySid = advapiLib.CopySid,
+CreatePrivateObjectSecurity = advapiLib.CreatePrivateObjectSecurity,
+CreatePrivateObjectSecurityEx = advapiLib.CreatePrivateObjectSecurityEx,
+CreatePrivateObjectSecurityWithMultipleInheritance = advapiLib.CreatePrivateObjectSecurityWithMultipleInheritance,
+CreateRestrictedToken = advapiLib.CreateRestrictedToken,
+CreateWellKnownSid = advapiLib.CreateWellKnownSid,
+DeleteAce = advapiLib.DeleteAce,
+DestroyPrivateObjectSecurity = advapiLib.DestroyPrivateObjectSecurity,
+DuplicateToken = advapiLib.DuplicateToken,
+DuplicateTokenEx = advapiLib.DuplicateTokenEx,
+EqualDomainSid = advapiLib.EqualDomainSid,
+EqualPrefixSid = advapiLib.EqualPrefixSid,
+EqualSid = advapiLib.EqualSid,
+FindFirstFreeAce = advapiLib.FindFirstFreeAce,
+FreeSid = advapiLib.FreeSid,
+GetAce = advapiLib.GetAce,
+GetAclInformation = advapiLib.GetAclInformation,
+--GetAppContainerAce = advapiLib.GetAppContainerAce,
+--GetCachedSigningLevel = advapiLib.GetCachedSigningLevel,
+GetFileSecurityW = advapiLib.GetFileSecurityW,
+GetKernelObjectSecurity = advapiLib.GetKernelObjectSecurity,
+GetLengthSid = advapiLib.GetLengthSid,
+GetPrivateObjectSecurity = advapiLib.GetPrivateObjectSecurity,
+GetSecurityDescriptorControl = advapiLib.GetSecurityDescriptorControl,
+GetSecurityDescriptorDacl = advapiLib.GetSecurityDescriptorDacl,
+GetSecurityDescriptorGroup = advapiLib.GetSecurityDescriptorGroup,
+GetSecurityDescriptorLength = advapiLib.GetSecurityDescriptorLength,
+GetSecurityDescriptorOwner = advapiLib.GetSecurityDescriptorOwner,
+GetSecurityDescriptorRMControl = advapiLib.GetSecurityDescriptorRMControl,
+GetSecurityDescriptorSacl = advapiLib.GetSecurityDescriptorSacl,
+GetSidIdentifierAuthority = advapiLib.GetSidIdentifierAuthority,
+GetSidLengthRequired = advapiLib.GetSidLengthRequired,
+GetSidSubAuthority = advapiLib.GetSidSubAuthority,
+GetSidSubAuthorityCount = advapiLib.GetSidSubAuthorityCount,
 GetTokenInformation = advapiLib.GetTokenInformation,
 GetWindowsAccountDomainSid = advapiLib.GetWindowsAccountDomainSid,
 ImpersonateAnonymousToken = advapiLib.ImpersonateAnonymousToken,
 ImpersonateLoggedOnUser = advapiLib.ImpersonateLoggedOnUser,
 ImpersonateSelf = advapiLib.ImpersonateSelf,
-
---[[
-InitializeAcl
-InitializeSecurityDescriptor
-InitializeSid
-IsTokenRestricted
-IsValidAcl
-IsValidSecurityDescriptor
-IsValidSid
-IsWellKnownSid
-MakeAbsoluteSD
-MakeSelfRelativeSD
-MapGenericMask
-ObjectCloseAuditAlarmW
-ObjectDeleteAuditAlarmW
-ObjectOpenAuditAlarmW
-ObjectPrivilegeAuditAlarmW
-PrivilegeCheck
-PrivilegedServiceAuditAlarmW
-QuerySecurityAccessMask
-RevertToSelf
-SetAclInformation
---SetCachedSigningLevel
-SetFileSecurityW
-SetKernelObjectSecurity
-SetPrivateObjectSecurity
-SetPrivateObjectSecurityEx
-SetSecurityAccessMask
-SetSecurityDescriptorControl
-SetSecurityDescriptorDacl
-SetSecurityDescriptorGroup
-SetSecurityDescriptorOwner
-SetSecurityDescriptorRMControl
-SetSecurityDescriptorSacl
-SetTokenInformation
---]]
+InitializeAcl = advapiLib.InitializeAcl,
+InitializeSecurityDescriptor = advapiLib.InitializeSecurityDescriptor,
+InitializeSid = advapiLib.InitializeSid,
+IsTokenRestricted = advapiLib.IsTokenRestricted,
+IsValidAcl = advapiLib.IsValidAcl,
+IsValidSecurityDescriptor = advapiLib.IsValidSecurityDescriptor,
+IsValidSid = advapiLib.IsValidSid,
+IsWellKnownSid = advapiLib.IsWellKnownSid,
+MakeAbsoluteSD = advapiLib.MakeAbsoluteSD,
+MakeSelfRelativeSD = advapiLib.MakeSelfRelativeSD,
+MapGenericMask = advapiLib.MapGenericMask,
+ObjectCloseAuditAlarmW = advapiLib.ObjectCloseAuditAlarmW,
+ObjectDeleteAuditAlarmW = advapiLib.ObjectDeleteAuditAlarmW,
+ObjectOpenAuditAlarmW = advapiLib.ObjectOpenAuditAlarmW,
+ObjectPrivilegeAuditAlarmW = advapiLib.ObjectPrivilegeAuditAlarmW,
+PrivilegeCheck = advapiLib.PrivilegeCheck,
+PrivilegedServiceAuditAlarmW = advapiLib.PrivilegedServiceAuditAlarmW,
+QuerySecurityAccessMask = advapiLib.QuerySecurityAccessMask,
+RevertToSelf = advapiLib.RevertToSelf,
+SetAclInformation = advapiLib.SetAclInformation,
+--SetCachedSigningLevel = advapiLib.SetCachedSigningLevel,
+SetFileSecurityW = advapiLib.SetFileSecurityW,
+SetKernelObjectSecurity = advapiLib.SetKernelObjectSecurity,
+SetPrivateObjectSecurity = advapiLib.SetPrivateObjectSecurity,
+SetPrivateObjectSecurityEx = advapiLib.SetPrivateObjectSecurityEx,
+SetSecurityAccessMask = advapiLib.SetSecurityAccessMask,
+SetSecurityDescriptorControl = advapiLib.SetSecurityDescriptorControl,
+SetSecurityDescriptorDacl = advapiLib.SetSecurityDescriptorDacl,
+SetSecurityDescriptorGroup = advapiLib.SetSecurityDescriptorGroup,
+SetSecurityDescriptorOwner = advapiLib.SetSecurityDescriptorOwner,
+SetSecurityDescriptorRMControl = advapiLib.SetSecurityDescriptorRMControl,
+  SetSecurityDescriptorSacl = advapiLib.SetSecurityDescriptorSacl,
+  SetTokenInformation = advapiLib.SetTokenInformation,
 }

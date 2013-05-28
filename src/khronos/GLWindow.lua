@@ -12,8 +12,8 @@ local rshift = bit.rshift;
 
 local Gdi32 = require ("GDI32");
 local User32 = require ("User32");
-local Kernel32 = require ("win_kernel32");
 local StopWatch = require ("StopWatch");
+local errorhandling = require("core_errorhandling_l1_1_1");
 
 local GLContext = require("GLContext");
 local core_library = require("core_libraryloader_l1_1_1");
@@ -201,7 +201,7 @@ function GLWindow_t:Register(params)
 
 	self.Registration = User32.Lib.RegisterClassExA(aClass)
 
-	assert(self.Registration ~= 0, "Registration error"..tostring(Kernel32.GetLastError()))
+	assert(self.Registration ~= 0, "Registration error"..tostring(errorhandling.GetLastError()))
 end
 
 
@@ -229,7 +229,7 @@ function GLWindow_t:CreateWindow(params)
 		nil)
 --print("GameWindow:CreateWindow - 2.0")
 
-	assert(hwnd,"unable to create window"..tostring(Kernel32.GetLastError()))
+	assert(hwnd,"unable to create window"..tostring(errorhandling.GetLastError()))
 
 	self.WindowHandle = hwnd;
 

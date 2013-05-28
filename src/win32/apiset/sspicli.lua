@@ -775,29 +775,29 @@ typedef SECURITY_STATUS
 ffi.cdef[[
 BOOL
 LogonUserExA (
-               LPCSTR lpszUsername,
-           LPCSTR lpszDomain,
-               LPCSTR lpszPassword,
-               DWORD dwLogonType,
-               DWORD dwLogonProvider,
+    LPCSTR lpszUsername,
+    LPCSTR lpszDomain,
+    LPCSTR lpszPassword,
+    DWORD dwLogonType,
+    DWORD dwLogonProvider,
     PHANDLE phToken,
     PSID  *ppLogonSid,
     PVOID *ppProfileBuffer,
-          LPDWORD pdwProfileLength,
-          PQUOTA_LIMITS pQuotaLimits
+    LPDWORD pdwProfileLength,
+    PQUOTA_LIMITS pQuotaLimits
     );
 BOOL
 LogonUserExW (
-               LPCWSTR lpszUsername,
-           LPCWSTR lpszDomain,
-               LPCWSTR lpszPassword,
-               DWORD dwLogonType,
-               DWORD dwLogonProvider,
+    LPCWSTR lpszUsername,
+    LPCWSTR lpszDomain,
+    LPCWSTR lpszPassword,
+    DWORD dwLogonType,
+    DWORD dwLogonProvider,
     PHANDLE phToken,
     PSID  *ppLogonSid,
     PVOID *ppProfileBuffer,
-          LPDWORD pdwProfileLength,
-          PQUOTA_LIMITS pQuotaLimits
+    LPDWORD pdwProfileLength,
+    PQUOTA_LIMITS pQuotaLimits
     );
 ]]
 

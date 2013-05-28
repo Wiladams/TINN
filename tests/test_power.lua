@@ -1,6 +1,7 @@
+-- test_power.lua
+
 local ffi = require("ffi");
-local kernel32 = require("win_kernel32");
-local k32Lib = kernel32.Lib;
+local k32Lib = ffi.load("Kernel32");
 local Lib = ffi.load("PowrProf");
 
 require("power_base_l1_1_0");

@@ -3,7 +3,6 @@
 local bit = require("bit");
 local bor = bit.bor;
 
-local Kernel32 = require("win_kernel32");
 local User32 = require("User32");
 local GDI32 = require("GDI32");
 

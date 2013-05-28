@@ -18,6 +18,9 @@ MAXBYTE    = 0xff;
 MAXWORD    = 0xffff;      
 MAXDWORD   = 0xffffffff;  
 
+ffi.cdef[[
+static const int MAXIMUM_WAIT_OBJECTS = 64;
+]]
 
 ffi.cdef[[
 static const int ANYSIZE_ARRAY = 1;       
@@ -560,11 +563,11 @@ ffi.cdef[[
 //  The following are masks for the predefined standard access types
 //
 
-static const int DELETE                          = (0x00010000);
-static const int READ_CONTROL                    = (0x00020000);
-static const int WRITE_DAC                       = (0x00040000);
-static const int WRITE_OWNER                     = (0x00080000);
-static const int SYNCHRONIZE                     = (0x00100000);
+static const int DELETE                          =  (0x00010000);
+static const int READ_CONTROL                    =  (0x00020000);
+static const int WRITE_DAC                       =  (0x00040000);
+static const int WRITE_OWNER                     =  (0x00080000);
+static const int SYNCHRONIZE                     =  (0x00100000);
 
 static const int STANDARD_RIGHTS_REQUIRED        = 0x000F0000;
 
@@ -576,23 +579,25 @@ static const int STANDARD_RIGHTS_ALL             = 0x001F0000;
 static const int SPECIFIC_RIGHTS_ALL             = 0x0000FFFF;
 
 
-static const int PROCESS_TERMINATE                  = (0x0001);
-static const int PROCESS_CREATE_THREAD              = (0x0002); 
-static const int PROCESS_SET_SESSIONID              = (0x0004); 
-static const int PROCESS_VM_OPERATION               = (0x0008); 
-static const int PROCESS_VM_READ                    = (0x0010); 
-static const int PROCESS_VM_WRITE                   = (0x0020); 
-static const int PROCESS_DUP_HANDLE                 = (0x0040); 
-static const int PROCESS_CREATE_PROCESS             = (0x0080); 
-static const int PROCESS_SET_QUOTA                  = (0x0100); 
-static const int PROCESS_SET_INFORMATION            = (0x0200); 
-static const int PROCESS_QUERY_INFORMATION          = (0x0400); 
-static const int PROCESS_SUSPEND_RESUME             = (0x0800); 
-static const int PROCESS_QUERY_LIMITED_INFORMATION  = (0x1000); 
+static const int PROCESS_TERMINATE                  =  (0x0001);
+static const int PROCESS_CREATE_THREAD              =  (0x0002); 
+static const int PROCESS_SET_SESSIONID              =  (0x0004); 
+static const int PROCESS_VM_OPERATION               =  (0x0008); 
+static const int PROCESS_VM_READ                    =  (0x0010); 
+static const int PROCESS_VM_WRITE                   =  (0x0020); 
+static const int PROCESS_DUP_HANDLE                 =  (0x0040); 
+static const int PROCESS_CREATE_PROCESS             =  (0x0080); 
+static const int PROCESS_SET_QUOTA                  =  (0x0100); 
+static const int PROCESS_SET_INFORMATION            =  (0x0200); 
+static const int PROCESS_QUERY_INFORMATION          =  (0x0400); 
+static const int PROCESS_SUSPEND_RESUME             =  (0x0800); 
+static const int PROCESS_QUERY_LIMITED_INFORMATION  =  (0x1000); 
 static const int PROCESS_ALL_ACCESS        = (STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0xFFFF);
 ]]
 
 ffi.cdef[[
+static const int SECURITY_DESCRIPTOR_REVISION    = 1;
+
 typedef DWORD SECURITY_INFORMATION, *PSECURITY_INFORMATION;
 
 typedef enum _SID_NAME_USE {
@@ -619,12 +624,296 @@ typedef struct _LUID {
 ]]
 
 ffi.cdef[[
+typedef struct _SID_IDENTIFIER_AUTHORITY {
+    BYTE  Value[6];
+} SID_IDENTIFIER_AUTHORITY, *PSID_IDENTIFIER_AUTHORITY;
+]]
+
+ffi.cdef[[
 typedef struct _SID_AND_ATTRIBUTES {
     PSID Sid;
     DWORD Attributes;
 } SID_AND_ATTRIBUTES, * PSID_AND_ATTRIBUTES;
 ]]
 
+ffi.cdef[[
+/////////////////////////////////////////////////////////////////////////////
+//                                                                         //
+// Universal well-known SIDs                                               //
+//                                                                         //
+//     Null SID                     S-1-0-0                                //
+//     World                        S-1-1-0                                //
+//     Local                        S-1-2-0                                //
+//     Creator Owner ID             S-1-3-0                                //
+//     Creator Group ID             S-1-3-1                                //
+//     Creator Owner Server ID      S-1-3-2                                //
+//     Creator Group Server ID      S-1-3-3                                //
+//                                                                         //
+//     (Non-unique IDs)             S-1-4                                  //
+//                                                                         //
+/////////////////////////////////////////////////////////////////////////////
+]]
+
+local createAuthority = function(b1, b2, b3, b4, b5, b6)
+    local auth = ffi.new("SID_IDENTIFIER_AUTHORITY");
+    auth.Value[0] = b1;
+    auth.Value[1] = b2;
+    auth.Value[2] = b3;
+    auth.Value[3] = b4;
+    auth.Value[4] = b5;
+    auth.Value[5] = b6;
+    return auth;
+end
+
+SECURITY_NULL_SID_AUTHORITY        = createAuthority(0,0,0,0,0,0);
+SECURITY_WORLD_SID_AUTHORITY       = createAuthority(0,0,0,0,0,1);
+SECURITY_LOCAL_SID_AUTHORITY       = createAuthority(0,0,0,0,0,2);
+SECURITY_CREATOR_SID_AUTHORITY     = createAuthority(0,0,0,0,0,3);
+SECURITY_NON_UNIQUE_AUTHORITY      = createAuthority(0,0,0,0,0,4);
+SECURITY_RESOURCE_MANAGER_AUTHORITY= createAuthority(0,0,0,0,0,9);
+
+
+ffi.cdef[[
+static const int SECURITY_NULL_RID                 = (0x00000000);
+static const int SECURITY_WORLD_RID                = (0x00000000);
+static const int SECURITY_LOCAL_RID                = (0x00000000);
+static const int SECURITY_LOCAL_LOGON_RID          = (0x00000001);
+
+static const int SECURITY_CREATOR_OWNER_RID        = (0x00000000);
+static const int SECURITY_CREATOR_GROUP_RID        = (0x00000001);
+
+static const int SECURITY_CREATOR_OWNER_SERVER_RID = (0x00000002);
+static const int SECURITY_CREATOR_GROUP_SERVER_RID = (0x00000003);
+
+static const int SECURITY_CREATOR_OWNER_RIGHTS_RID = (0x00000004);
+]]
+
+--[[
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// NT well-known SIDs                                                        //
+//                                                                           //
+//     NT Authority            S-1-5                                         //
+//     Dialup                  S-1-5-1                                       //
+//                                                                           //
+//     Network                 S-1-5-2                                       //
+//     Batch                   S-1-5-3                                       //
+//     Interactive             S-1-5-4                                       //
+//     (Logon IDs)             S-1-5-5-X-Y                                   //
+//     Service                 S-1-5-6                                       //
+//     AnonymousLogon          S-1-5-7       (aka null logon session)        //
+//     Proxy                   S-1-5-8                                       //
+//     Enterprise DC (EDC)     S-1-5-9       (aka domain controller account) //
+//     Self                    S-1-5-10      (self RID)                      //
+//     Authenticated User      S-1-5-11      (Authenticated user somewhere)  //
+//     Restricted Code         S-1-5-12      (Running restricted code)       //
+//     Terminal Server         S-1-5-13      (Running on Terminal Server)    //
+//     Remote Logon            S-1-5-14      (Remote Interactive Logon)      //
+//     This Organization       S-1-5-15                                      //
+//                                                                           //
+//     IUser                   S-1-5-17
+//     Local System            S-1-5-18                                      //
+//     Local Service           S-1-5-19                                      //
+//     Network Service         S-1-5-20                                      //
+//                                                                           //
+//     (NT non-unique IDs)     S-1-5-0x15-... (NT Domain Sids)               //
+//                                                                           //
+//     (Built-in domain)       S-1-5-0x20                                    //
+//                                                                           //
+//     (Security Package IDs)  S-1-5-0x40                                    //
+//     NTLM Authentication     S-1-5-0x40-10                                 //
+//     SChannel Authentication S-1-5-0x40-14                                 //
+//     Digest Authentication   S-1-5-0x40-21                                 //
+//                                                                           //
+//     Other Organization      S-1-5-1000    (>=1000 can not be filtered)    //
+//                                                                           //
+//                                                                           //
+// NOTE: the relative identifier values (RIDs) determine which security      //
+//       boundaries the SID is allowed to cross.  Before adding new RIDs,    //
+//       a determination needs to be made regarding which range they should  //
+//       be added to in order to ensure proper "SID filtering"               //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+--]]
+
+SECURITY_NT_AUTHORITY           = createAuthority(0,0,0,0,0,5);   -- ntifs
+
+ffi.cdef[[
+static const int SECURITY_DIALUP_RID             = (0x00000001);
+static const int SECURITY_NETWORK_RID            = (0x00000002);
+static const int SECURITY_BATCH_RID              = (0x00000003);
+static const int SECURITY_INTERACTIVE_RID        = (0x00000004);
+static const int SECURITY_LOGON_IDS_RID          = (0x00000005);
+static const int SECURITY_LOGON_IDS_RID_COUNT    = (3);
+static const int SECURITY_SERVICE_RID            = (0x00000006);
+static const int SECURITY_ANONYMOUS_LOGON_RID    = (0x00000007);
+static const int SECURITY_PROXY_RID              = (0x00000008);
+static const int SECURITY_ENTERPRISE_CONTROLLERS_RID = (0x00000009);
+static const int SECURITY_SERVER_LOGON_RID       = SECURITY_ENTERPRISE_CONTROLLERS_RID;
+static const int SECURITY_PRINCIPAL_SELF_RID     = (0x0000000A);
+static const int SECURITY_AUTHENTICATED_USER_RID = (0x0000000B);
+static const int SECURITY_RESTRICTED_CODE_RID    = (0x0000000C);
+static const int SECURITY_TERMINAL_SERVER_RID    = (0x0000000D);
+static const int SECURITY_REMOTE_LOGON_RID       = (0x0000000E);
+static const int SECURITY_THIS_ORGANIZATION_RID  = (0x0000000F);
+static const int SECURITY_IUSER_RID              = (0x00000011);
+static const int SECURITY_LOCAL_SYSTEM_RID       = (0x00000012);
+static const int SECURITY_LOCAL_SERVICE_RID      = (0x00000013);
+static const int SECURITY_NETWORK_SERVICE_RID    = (0x00000014);
+
+static const int SECURITY_NT_NON_UNIQUE          = (0x00000015);
+static const int SECURITY_NT_NON_UNIQUE_SUB_AUTH_COUNT  = (3);
+
+static const int SECURITY_ENTERPRISE_READONLY_CONTROLLERS_RID = (0x00000016);
+
+static const int SECURITY_BUILTIN_DOMAIN_RID     = (0x00000020);
+static const int SECURITY_WRITE_RESTRICTED_CODE_RID = (0x00000021);
+
+
+static const int SECURITY_PACKAGE_BASE_RID       = (0x00000040);
+static const int SECURITY_PACKAGE_RID_COUNT      = (2);
+static const int SECURITY_PACKAGE_NTLM_RID       = (0x0000000A);
+static const int SECURITY_PACKAGE_SCHANNEL_RID   = (0x0000000E);
+static const int SECURITY_PACKAGE_DIGEST_RID     = (0x00000015);
+
+static const int SECURITY_CRED_TYPE_BASE_RID             = (0x00000041);
+static const int SECURITY_CRED_TYPE_RID_COUNT            = (2);
+static const int SECURITY_CRED_TYPE_THIS_ORG_CERT_RID    = (0x00000001);
+
+static const int SECURITY_MIN_BASE_RID           = (0x00000050);
+
+static const int SECURITY_SERVICE_ID_BASE_RID    = (0x00000050);
+static const int SECURITY_SERVICE_ID_RID_COUNT   = (6);
+
+static const int SECURITY_RESERVED_ID_BASE_RID   = (0x00000051);
+
+static const int SECURITY_APPPOOL_ID_BASE_RID    = (0x00000052);
+static const int SECURITY_APPPOOL_ID_RID_COUNT   = (6);
+
+static const int SECURITY_VIRTUALSERVER_ID_BASE_RID    = (0x00000053);
+static const int SECURITY_VIRTUALSERVER_ID_RID_COUNT   = (6);
+
+static const int SECURITY_USERMODEDRIVERHOST_ID_BASE_RID  = (0x00000054);
+static const int SECURITY_USERMODEDRIVERHOST_ID_RID_COUNT = (6);
+
+static const int SECURITY_CLOUD_INFRASTRUCTURE_SERVICES_ID_BASE_RID  = (0x00000055);
+static const int SECURITY_CLOUD_INFRASTRUCTURE_SERVICES_ID_RID_COUNT = (6);
+
+static const int SECURITY_WMIHOST_ID_BASE_RID  = (0x00000056);
+static const int SECURITY_WMIHOST_ID_RID_COUNT = (6);
+
+static const int SECURITY_TASK_ID_BASE_RID                 = (0x00000057);
+
+static const int SECURITY_NFS_ID_BASE_RID        = (0x00000058);
+
+static const int SECURITY_COM_ID_BASE_RID        = (0x00000059);
+
+static const int SECURITY_VIRTUALACCOUNT_ID_RID_COUNT   = (6);
+
+static const int SECURITY_MAX_BASE_RID       = (0x0000006F);
+static const int SECURITY_MAX_ALWAYS_FILTERED    = (0x000003E7);
+static const int SECURITY_MIN_NEVER_FILTERED     = (0x000003E8);
+
+static const int SECURITY_OTHER_ORGANIZATION_RID = (0x000003E8);
+
+//
+//Service SID type RIDs are in the range 0x50- 0x6F.  Therefore, we are giving  the next available RID to Windows Mobile team.
+//
+static const int SECURITY_WINDOWSMOBILE_ID_BASE_RID = (0x00000070);
+]]
+
+
+ffi.cdef[[
+/////////////////////////////////////////////////////////////////////////////
+//                                                                         //
+// well-known domain relative sub-authority values (RIDs)...               //
+//                                                                         //
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+static const int DOMAIN_GROUP_RID_ENTERPRISE_READONLY_DOMAIN_CONTROLLERS = (0x000001F2);
+
+static const int FOREST_USER_RID_MAX            = (0x000001F3);
+
+// Well-known users ...
+
+static const int DOMAIN_USER_RID_ADMIN          = (0x000001F4);
+static const int DOMAIN_USER_RID_GUEST          = (0x000001F5);
+static const int DOMAIN_USER_RID_KRBTGT         = (0x000001F6);
+
+static const int DOMAIN_USER_RID_MAX            = (0x000003E7);
+
+
+// well-known groups ...
+
+static const int DOMAIN_GROUP_RID_ADMINS        = (0x00000200);
+static const int DOMAIN_GROUP_RID_USERS         = (0x00000201);
+static const int DOMAIN_GROUP_RID_GUESTS        = (0x00000202);
+static const int DOMAIN_GROUP_RID_COMPUTERS     = (0x00000203);
+static const int DOMAIN_GROUP_RID_CONTROLLERS   = (0x00000204);
+static const int DOMAIN_GROUP_RID_CERT_ADMINS   = (0x00000205);
+static const int DOMAIN_GROUP_RID_SCHEMA_ADMINS = (0x00000206);
+static const int DOMAIN_GROUP_RID_ENTERPRISE_ADMINS = (0x00000207);
+static const int DOMAIN_GROUP_RID_POLICY_ADMINS = (0x00000208);
+static const int DOMAIN_GROUP_RID_READONLY_CONTROLLERS = (0x00000209);
+
+// well-known aliases ...
+
+static const int DOMAIN_ALIAS_RID_ADMINS                         = (0x00000220);
+static const int DOMAIN_ALIAS_RID_USERS                          = (0x00000221);
+static const int DOMAIN_ALIAS_RID_GUESTS                         = (0x00000222);
+static const int DOMAIN_ALIAS_RID_POWER_USERS                    = (0x00000223);
+
+static const int DOMAIN_ALIAS_RID_ACCOUNT_OPS                    = (0x00000224);
+static const int DOMAIN_ALIAS_RID_SYSTEM_OPS                     = (0x00000225);
+static const int DOMAIN_ALIAS_RID_PRINT_OPS                      = (0x00000226);
+static const int DOMAIN_ALIAS_RID_BACKUP_OPS                     = (0x00000227);
+
+static const int DOMAIN_ALIAS_RID_REPLICATOR                     = (0x00000228);
+static const int DOMAIN_ALIAS_RID_RAS_SERVERS                    = (0x00000229);
+static const int DOMAIN_ALIAS_RID_PREW2KCOMPACCESS               = (0x0000022A);
+static const int DOMAIN_ALIAS_RID_REMOTE_DESKTOP_USERS           = (0x0000022B);
+static const int DOMAIN_ALIAS_RID_NETWORK_CONFIGURATION_OPS      = (0x0000022C);
+static const int DOMAIN_ALIAS_RID_INCOMING_FOREST_TRUST_BUILDERS = (0x0000022D);
+
+static const int DOMAIN_ALIAS_RID_MONITORING_USERS               = (0x0000022E);
+static const int DOMAIN_ALIAS_RID_LOGGING_USERS                  = (0x0000022F);
+static const int DOMAIN_ALIAS_RID_AUTHORIZATIONACCESS            = (0x00000230);
+static const int DOMAIN_ALIAS_RID_TS_LICENSE_SERVERS             = (0x00000231);
+static const int DOMAIN_ALIAS_RID_DCOM_USERS                     = (0x00000232);
+static const int DOMAIN_ALIAS_RID_IUSERS                         = (0x00000238);
+static const int DOMAIN_ALIAS_RID_CRYPTO_OPERATORS               = (0x00000239);
+static const int DOMAIN_ALIAS_RID_CACHEABLE_PRINCIPALS_GROUP     = (0x0000023B);
+static const int DOMAIN_ALIAS_RID_NON_CACHEABLE_PRINCIPALS_GROUP = (0x0000023C);
+static const int DOMAIN_ALIAS_RID_EVENT_LOG_READERS_GROUP        = (0x0000023D);
+static const int DOMAIN_ALIAS_RID_CERTSVC_DCOM_ACCESS_GROUP      = (0x0000023E);
+]]
+
+SECURITY_MANDATORY_LABEL_AUTHORITY    =      createAuthority(0,0,0,0,0,16);
+
+ffi.cdef[[
+static const int SECURITY_MANDATORY_UNTRUSTED_RID            = (0x00000000);
+static const int SECURITY_MANDATORY_LOW_RID                  = (0x00001000);
+static const int SECURITY_MANDATORY_MEDIUM_RID               = (0x00002000);
+static const int SECURITY_MANDATORY_MEDIUM_PLUS_RID          = (SECURITY_MANDATORY_MEDIUM_RID + 0x100);
+static const int SECURITY_MANDATORY_HIGH_RID                 = (0x00003000);
+static const int SECURITY_MANDATORY_SYSTEM_RID               = (0x00004000);
+static const int SECURITY_MANDATORY_PROTECTED_PROCESS_RID    = (0x00005000);
+]]
+
+ffi.cdef[[
+//
+// SECURITY_MANDATORY_MAXIMUM_USER_RID is the highest RID that
+// can be set by a usermode caller.
+//
+
+static const int SECURITY_MANDATORY_MAXIMUM_USER_RID  = SECURITY_MANDATORY_SYSTEM_RID;
+]]
+
+MANDATORY_LEVEL_TO_MANDATORY_RID = function(I)
+    return (I * 0x1000);
+end
 
 
 
@@ -647,10 +936,10 @@ typedef ACCESS_MASK *PACCESS_MASK;
 //  These are the generic rights.
 //
 
-static const int GENERIC_READ                    = (0x80000000);
-static const int GENERIC_WRITE                   = (0x40000000);
-static const int GENERIC_EXECUTE                 = (0x20000000);
-static const int GENERIC_ALL                     = (0x10000000);
+static const int GENERIC_READ                    =  (0x80000000);
+static const int GENERIC_WRITE                   =  (0x40000000);
+static const int GENERIC_EXECUTE                 =  (0x20000000);
+static const int GENERIC_ALL                     =  (0x10000000);
 
 typedef struct _GENERIC_MAPPING {
     ACCESS_MASK GenericRead;
@@ -671,10 +960,10 @@ typedef LUID_AND_ATTRIBUTES_ARRAY *PLUID_AND_ATTRIBUTES_ARRAY;
 ]]
 
 ffi.cdef[[
-static const int SE_PRIVILEGE_ENABLED_BY_DEFAULT =(0x00000001);
-static const int SE_PRIVILEGE_ENABLED            =(0x00000002);
-static const int SE_PRIVILEGE_REMOVED            =(0X00000004);
-static const int SE_PRIVILEGE_USED_FOR_ACCESS    =(0x80000000);
+static const int SE_PRIVILEGE_ENABLED_BY_DEFAULT = (0x00000001);
+static const int SE_PRIVILEGE_ENABLED            = (0x00000002);
+static const int SE_PRIVILEGE_REMOVED            = (0x00000004);
+static const int SE_PRIVILEGE_USED_FOR_ACCESS    = (0x80000000);
 
 static const int SE_PRIVILEGE_VALID_ATTRIBUTES   =(SE_PRIVILEGE_ENABLED_BY_DEFAULT | \
                                          SE_PRIVILEGE_ENABLED            | \
@@ -706,11 +995,7 @@ typedef enum _AUDIT_EVENT_TYPE {
 ]]
 
 
-ffi.cdef[[
-typedef struct _SID_IDENTIFIER_AUTHORITY {
-    BYTE  Value[6];
-} SID_IDENTIFIER_AUTHORITY, *PSID_IDENTIFIER_AUTHORITY;
-]]
+
 
 ffi.cdef[[
 //
@@ -828,14 +1113,140 @@ typedef enum _ACL_INFORMATION_CLASS {
     AclRevisionInformation = 1,
     AclSizeInformation
 } ACL_INFORMATION_CLASS;
+
+//
+//  This record is returned/sent if the user is requesting/setting the
+//  AclRevisionInformation
+//
+
+typedef struct _ACL_REVISION_INFORMATION {
+    DWORD AclRevision;
+} ACL_REVISION_INFORMATION;
+typedef ACL_REVISION_INFORMATION *PACL_REVISION_INFORMATION;
+
+//
+//  This record is returned if the user is requesting AclSizeInformation
+//
+
+typedef struct _ACL_SIZE_INFORMATION {
+    DWORD AceCount;
+    DWORD AclBytesInUse;
+    DWORD AclBytesFree;
+} ACL_SIZE_INFORMATION;
+typedef ACL_SIZE_INFORMATION *PACL_SIZE_INFORMATION;
+
+]]
+
+ffi.cdef[[
+static const int ACL_REVISION     = 2;
+static const int ACL_REVISION_DS  = 4;
+
+// This is the history of ACL revisions.  Add a new one whenever
+// ACL_REVISION is updated
+
+static const int ACL_REVISION1   = 1;
+static const int ACL_REVISION2   = 2;
+static const int ACL_REVISION3   = 3;
+static const int ACL_REVISION4   = 4;
+static const int MIN_ACL_REVISION = ACL_REVISION2;
+static const int MAX_ACL_REVISION = ACL_REVISION4;
+]]
+
+ffi.cdef[[
+typedef struct _ACL
+{
+    UCHAR AclRevision;
+    UCHAR Sbz1;
+    USHORT AclSize;
+    USHORT AceCount;
+    USHORT Sbz2;
+}   ACL, *PACL;
+]]
+
+ffi.cdef[[
+typedef struct _SECURITY_DESCRIPTOR
+{
+    UCHAR Revision;
+    UCHAR Sbz1;
+    SECURITY_DESCRIPTOR_CONTROL Control;
+    PSID Owner;
+    PSID Group;
+    PACL Sacl;
+    PACL Dacl;
+}   SECURITY_DESCRIPTOR, *PSECURITY_DESCRIPTOR;
+
+typedef struct _COAUTHIDENTITY
+{
+    USHORT *User;
+    ULONG UserLength;
+    USHORT *Domain;
+    ULONG DomainLength;
+    USHORT *Password;
+    ULONG PasswordLength;
+    ULONG Flags;
+}   COAUTHIDENTITY;
+
+typedef struct _COAUTHINFO
+{
+    DWORD dwAuthnSvc;
+    DWORD dwAuthzSvc;
+    LPWSTR pwszServerPrincName;
+    DWORD dwAuthnLevel;
+    DWORD dwImpersonationLevel;
+    COAUTHIDENTITY *pAuthIdentityData;
+    DWORD dwCapabilities;
+}   COAUTHINFO;
 ]]
 
 ffi.cdef[[
 //
 // Token Information Classes.
 //
+typedef enum _TOKEN_INFORMATION_CLASS { 
+  TokenUser                             = 1,
+  TokenGroups,
+  TokenPrivileges,
+  TokenOwner,
+  TokenPrimaryGroup,
+  TokenDefaultDacl,
+  TokenSource,
+  TokenType,
+  TokenImpersonationLevel,
+  TokenStatistics,
+  TokenRestrictedSids,
+  TokenSessionId,
+  TokenGroupsAndPrivileges,
+  TokenSessionReference,
+  TokenSandBoxInert,
+  TokenAuditPolicy,
+  TokenOrigin,
+  TokenElevationType,
+  TokenLinkedToken,
+  TokenElevation,
+  TokenHasRestrictions,
+  TokenAccessInformation,
+  TokenVirtualizationAllowed,
+  TokenVirtualizationEnabled,
+  TokenIntegrityLevel,
+  TokenUIAccess,
+  TokenMandatoryPolicy,
+  TokenLogonSid,
+  TokenIsAppContainer,
+  TokenCapabilities,
+  TokenAppContainerSid,
+  TokenAppContainerNumber,
+  TokenUserClaimAttributes,
+  TokenDeviceClaimAttributes,
+  TokenRestrictedUserClaimAttributes,
+  TokenRestrictedDeviceClaimAttributes,
+  TokenDeviceGroups,
+  TokenRestrictedDeviceGroups,
+  TokenSecurityAttributes,
+  TokenIsRestricted,
+  MaxTokenInfoClass
+} TOKEN_INFORMATION_CLASS, *PTOKEN_INFORMATION_CLASS;
 
-
+/*
 typedef enum _TOKEN_INFORMATION_CLASS {
     TokenUser = 1,
     TokenGroups,
@@ -867,6 +1278,7 @@ typedef enum _TOKEN_INFORMATION_CLASS {
     TokenLogonSid,
     MaxTokenInfoClass  // MaxTokenInfoClass should always be the last enum
 } TOKEN_INFORMATION_CLASS, *PTOKEN_INFORMATION_CLASS;
+*/
 ]]
 
 ffi.cdef[[
@@ -874,15 +1286,15 @@ ffi.cdef[[
 // Token Specific Access Rights.
 //
 
-static const int TOKEN_ASSIGN_PRIMARY    =(0x0001);
-static const int TOKEN_DUPLICATE         =(0x0002);
-static const int TOKEN_IMPERSONATE       =(0x0004);
-static const int TOKEN_QUERY             =(0x0008);
-static const int TOKEN_QUERY_SOURCE      =(0x0010);
-static const int TOKEN_ADJUST_PRIVILEGES =(0x0020);
-static const int TOKEN_ADJUST_GROUPS     =(0x0040);
-static const int TOKEN_ADJUST_DEFAULT    =(0x0080);
-static const int TOKEN_ADJUST_SESSIONID  =(0x0100);
+static const int TOKEN_ASSIGN_PRIMARY    = (0x0001);
+static const int TOKEN_DUPLICATE         = (0x0002);
+static const int TOKEN_IMPERSONATE       = (0x0004);
+static const int TOKEN_QUERY             = (0x0008);
+static const int TOKEN_QUERY_SOURCE      = (0x0010);
+static const int TOKEN_ADJUST_PRIVILEGES = (0x0020);
+static const int TOKEN_ADJUST_GROUPS     = (0x0040);
+static const int TOKEN_ADJUST_DEFAULT    = (0x0080);
+static const int TOKEN_ADJUST_SESSIONID  = (0x0100);
 
 static const int TOKEN_ALL_ACCESS_P =(STANDARD_RIGHTS_REQUIRED  |\
                           TOKEN_ASSIGN_PRIMARY      |\
@@ -1100,4 +1512,8 @@ static const int FILE_ATTRIBUTE_OFFLINE              = 0x00001000;
 static const int FILE_ATTRIBUTE_NOT_CONTENT_INDEXED  = 0x00002000;  
 static const int FILE_ATTRIBUTE_ENCRYPTED            = 0x00004000;  
 static const int FILE_ATTRIBUTE_VIRTUAL              = 0x00010000;  
+]]
+
+ffi.cdef[[
+static const int MAXIMUM_ALLOWED                 = 0x02000000;
 ]]

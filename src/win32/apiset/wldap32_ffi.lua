@@ -44,7 +44,6 @@ Environments :
 
 local ffi = require("ffi");
 
-kernel32 = require("win_kernel32");
 local core_string = require("core_string_l1_1_0");
 local L = core_string.toUnicode;
 local schannel = require("schannel");

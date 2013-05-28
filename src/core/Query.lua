@@ -110,6 +110,7 @@ local recordfilter = function(record, filtertable)
 end
 
 return {
+	collect = collect,
 	irecords = irecords,
 	recordfilter = recordfilter,
 	query = query,

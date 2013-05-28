@@ -2,36 +2,53 @@
 -- api-ms-win-core-file-l2-1-0.dll	
 
 local ffi = require("ffi");
+
 local k32Lib = ffi.load("kernel32");
 local WTypes = require("WTypes");
+local WinBase = require("WinBase");
+
+
+ffi.cdef[[
+typedef
+DWORD ( *LPPROGRESS_ROUTINE)(
+        LARGE_INTEGER TotalFileSize,
+        LARGE_INTEGER TotalBytesTransferred,
+        LARGE_INTEGER StreamSize,
+        LARGE_INTEGER StreamBytesTransferred,
+        DWORD dwStreamNumber,
+        DWORD dwCallbackReason,
+        HANDLE hSourceFile,
+        HANDLE hDestinationFile,
+    LPVOID lpData
+    );
+]]
 
 ffi.cdef[[
 BOOL
 CopyFileExW(
-        LPCWSTR lpExistingFileName,
-        LPCWSTR lpNewFileName,
+    LPCWSTR lpExistingFileName,
+    LPCWSTR lpNewFileName,
     LPPROGRESS_ROUTINE lpProgressRoutine,
     LPVOID lpData,
     LPBOOL pbCancel,
-        DWORD dwCopyFlags
+    DWORD dwCopyFlags
     );
 
 BOOL
 CreateDirectoryExW(
-        LPCWSTR lpTemplateDirectory,
-        LPCWSTR lpNewDirectory,
+    LPCWSTR lpTemplateDirectory,
+    LPCWSTR lpNewDirectory,
     LPSECURITY_ATTRIBUTES lpSecurityAttributes
     );
 
 BOOL
 CreateHardLinkW(
-          LPCWSTR lpFileName,
-          LPCWSTR lpExistingFileName,
+    LPCWSTR lpFileName,
+    LPCWSTR lpExistingFileName,
     LPSECURITY_ATTRIBUTES lpSecurityAttributes
     );
 
 BOOLEAN
-APIENTRY
 CreateSymbolicLinkW (
     LPCWSTR lpSymlinkFileName,
     LPCWSTR lpTargetFileName,
@@ -41,10 +58,10 @@ CreateSymbolicLinkW (
 
 BOOL
 GetFileInformationByHandleEx(
-     HANDLE hFile,
-     FILE_INFO_BY_HANDLE_CLASS FileInformationClass,
+    HANDLE hFile,
+    FILE_INFO_BY_HANDLE_CLASS FileInformationClass,
     LPVOID lpFileInformation,
-     DWORD dwBufferSize
+    DWORD dwBufferSize
 );
 
 

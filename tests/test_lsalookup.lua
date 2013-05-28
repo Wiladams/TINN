@@ -2,8 +2,8 @@
 local ffi = require("ffi");
 
 local WinError = require("win_error");
-local k32 = require("win_kernel32");
 
+local errorhandling = require("core_errorhandling_l1_1_1");
 local lsalookup = require("security_lsalookup_l2_1_0");
 local core_string = require("core_string_l1_1_0");
 local L = core_string.toUnicode;
@@ -32,7 +32,7 @@ local function lookupAccountName(accountName, lpSystemName)
     	peUse);
 
 	if status == 0 then
-		local err = k32.GetLastError();
+		local err = errorhandling.GetLastError();
 		if err ~= ERROR_INSUFFICIENT_BUFFER then
 			return false, err;
 		end

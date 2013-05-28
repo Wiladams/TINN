@@ -3,8 +3,6 @@ local C = ffi.C
 
 require "WTypes"
 
--- Winnt.h
-MAXIMUM_WAIT_OBJECTS = 64     -- Maximum number of wait objects
 
 local user32_ffi = {
 	CW_USEDEFAULT = 0x80000000,

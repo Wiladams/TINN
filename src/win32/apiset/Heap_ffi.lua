@@ -1,18 +1,20 @@
 local ffi = require("ffi");
 require "WTypes"
+local k32Lib = ffi.load("kernel32");
 
+ffi.cdef[[
+static const int PROCESS_HEAP_REGION             =0x0001;
+static const int PROCESS_HEAP_UNCOMMITTED_RANGE  =0x0002;
+static const int PROCESS_HEAP_ENTRY_BUSY         =0x0004;
+static const int PROCESS_HEAP_ENTRY_MOVEABLE     =0x0010;
+static const int PROCESS_HEAP_ENTRY_DDESHARE     =0x0020;
 
-PROCESS_HEAP_REGION             =0x0001;
-PROCESS_HEAP_UNCOMMITTED_RANGE  =0x0002;
-PROCESS_HEAP_ENTRY_BUSY         =0x0004;
-PROCESS_HEAP_ENTRY_MOVEABLE     =0x0010;
-PROCESS_HEAP_ENTRY_DDESHARE     =0x0020;
-
-HEAP_NO_SERIALIZE				= 0x00000001;
-HEAP_GENERATE_EXCEPTIONS		= 0x00000004;
-HEAP_ZERO_MEMORY				= 0x00000008;
-HEAP_REALLOC_IN_PLACE_ONLY		= 0x00000010;
-HEAP_CREATE_ENABLE_EXECUTE		= 0x00040000;
+static const int HEAP_NO_SERIALIZE				= 0x00000001;
+static const int HEAP_GENERATE_EXCEPTIONS		= 0x00000004;
+static const int HEAP_ZERO_MEMORY				= 0x00000008;
+static const int HEAP_REALLOC_IN_PLACE_ONLY		= 0x00000010;
+static const int HEAP_CREATE_ENABLE_EXECUTE		= 0x00040000;
+]]
 
 ffi.cdef[[
 typedef enum _HEAP_INFORMATION_CLASS {
@@ -91,3 +93,25 @@ BOOL HeapQueryInformation (HANDLE HeapHandle,
     PSIZE_T ReturnLength
     );
 ]]
+
+
+return {
+GetProcessHeap = k32Lib.GetProcessHeap,
+GetProcessHeaps = k32Lib.GetProcessHeaps,
+
+HeapAlloc = k32Lib.HeapAlloc,
+HeapCompact = k32Lib.HeapCompact,
+HeapCreate = k32Lib.HeapCreate,
+HeapDestroy = k32Lib.HeapDestroy,
+HeapFree = k32Lib.HeapFree,
+HeapLock = k32Lib.HeapLock,
+HeapReAlloc = k32Lib.HeapReAlloc,
+HeapSize = k32Lib.HeapSize,
+
+HeapUnlock = k32Lib.HeapUnlock,
+HeapValidate = k32Lib.HeapValidate,
+HeapWalk = k32Lib.HeapWalk,
+
+HeapSetInformation = k32Lib.HeapSetInformation,
+HeapQueryInformation = k32Lib.HeapQueryInformation,
+}

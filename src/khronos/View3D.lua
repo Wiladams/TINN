@@ -23,7 +23,8 @@ local global = _G;
 
 
 require ("WTypes");
-local Kernel32 = require("win_kernel32");
+local core_synch = require("core_synch_l1_2_0");
+
 local User32 = require("User32");
 local KeyMouse = require ("KeyMouse");
 local StopWatch = require("StopWatch");
@@ -155,7 +156,7 @@ function Loop(win)
 	win.IsRunning = true;
 
 
-	local timerEvent = Kernel32.CreateEvent(nil, false, false, nil)
+	local timerEvent = core_sync.CreateEvent(nil, false, false, nil)
 	-- If the timer event was not created
 	-- just return
 	if timerEvent == nil then

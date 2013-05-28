@@ -1,8 +1,8 @@
 -- core_profile_l1_1_0.lua
 -- api-ms-win-core-profile-l1-1-0.dll	
 local ffi = require("ffi");
-require("WTypes");
-
+local WTypes = require("WTypes");
+local errorhandling = require("core_errorhandling_l1_1_1");
 local k32Lib = ffi.load("kernel32");
 
 ffi.cdef[[
@@ -14,7 +14,7 @@ local function GetPerformanceFrequency(anum)
 	anum = anum or ffi.new("int64_t[1]");
 	local success = ffi.C.QueryPerformanceFrequency(anum)
 	if success == 0 then
-		return false, k32Lib.GetLastError(); 
+		return false, errorhandling.GetLastError(); 
 	end
 
 	return tonumber(anum[0])
@@ -24,7 +24,7 @@ local function GetPerformanceCounter(anum)
 	anum = anum or ffi.new("int64_t[1]")
 	local success = ffi.C.QueryPerformanceCounter(anum)
 	if success == 0 then 
-		return false, k32Lib.GetLastError();
+		return false, errorhandling.GetLastError();
 	end
 
 	return tonumber(anum[0])
@@ -34,15 +34,12 @@ local function GetCurrentTickTime()
 	local frequency = 1/GetPerformanceFrequency();
 	local currentCount = GetPerformanceCounter();
 	local seconds = currentCount * frequency;
---print(string.format("win_kernel32 - GetCurrentTickTime() - %d\n", seconds));
 
 	return seconds;
 end
 
 
 return {
-	Lib = k32Lib;
-
 	getPerformanceCounter = GetPerformanceCounter,
 	getPerformanceFrequency = GetPerformanceFrequency,
 	getCurrentTickTime = GetCurrentTickTime,

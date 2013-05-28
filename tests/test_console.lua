@@ -10,8 +10,10 @@ local core_console2 = require("core_console_l2_1_0");
 local processenviron = require("core_processenvironment");
 
 local console = require("console");
-local win_kernel32 = require("win_kernel32");
 local core_string = require("core_string_l1_1_0");
+local core_synch = require("core_synch_l1_2_0");
+
+
 
 local Console = {}
 local Console_t = {}
@@ -190,7 +192,7 @@ local bufflen = 256;
 local buff = ffi.new("char[?]", bufflen);
 
 while true do
-	win_kernel32.SleepEx(500, true);
+	core_synch.SleepEx(500, true);
 	
 	local bytesread, err = con:ReadBytes(buff, bufflen);
 

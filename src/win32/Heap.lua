@@ -1,10 +1,11 @@
 local ffi = require "ffi"
+local bit = require("bit");
+local band = bit.band;
 
+local heap_ffi = require ("Heap_ffi");
 
-local Heap_ffi = require ("Heap_ffi");
-
-local kernel32 = ffi.load("kernel32")
-
+local core_process = require("core_processthreads_l1_1_1");
+local errorhandling = require("core_errorhandling_l1_1_1");
 
 
 
@@ -12,18 +13,11 @@ local kernel32 = ffi.load("kernel32")
 
 ffi.cdef[[
 typedef struct {
-	HANDLE	Handle;
-	int		Options;
-	size_t	InitialSize;
-	size_t	MaximumSize;
-	DWORD	owningthread;
-} HEAP;
-
-typedef struct {
 	void *	Data;
 	int32_t	Size;
 	HANDLE	HeapHandle;
 	DWORD	owningthread;
+	bool	OwnAllocation;
 } HeapBlob;
 ]]
 
@@ -51,8 +45,8 @@ HeapBlob_mt = {
 	__gc = function(self)
 		if self.HeapHandle == nil or self.owningthread == 0 then return nil end
 
-		if self.owningthread == kernel32.GetCurrentThreadId() then
-			local res = kernel32.HeapFree(self.HeapHandle, 0, self.Data)
+		if self.owningthread == core_process.GetCurrentThreadId() then
+			local res = heap_ffi.HeapFree(self.HeapHandle, 0, self.Data)
 		end
 	end,
 
@@ -64,7 +58,7 @@ HeapBlob_mt = {
 				return false, "Blob has no handle"; 
 			end
 
-			local result = kernel32.HeapSize(self.HeapHandle, flags, self.Data)
+			local result = heap_ffi.HeapSize(self.HeapHandle, flags, self.Data)
 
 			return result
 		end,
@@ -76,7 +70,7 @@ HeapBlob_mt = {
 				return false,  "Blob has no handle";
 			end
 
-			local isValid = kernel32.HeapValidate(self.HeapHandle, flags, self.Data);
+			local isValid = heap_ffi.HeapValidate(self.HeapHandle, flags, self.Data);
 
 			return isValid
 		end,
@@ -86,7 +80,7 @@ HeapBlob_mt = {
 
 			if self.Heap == nil then return false end
 
-			local ptr = kernel32.HeapReAlloc(self.HeapHandle, flags, self.Data, nbytes)
+			local ptr = heap_ffi.HeapReAlloc(self.HeapHandle, flags, self.Data, nbytes)
 
 			if ptr == nil then return false end
 
@@ -103,136 +97,214 @@ HeapBlob = ffi.metatype(HeapBlob, HeapBlob_mt);
 
 
 
-Heap = ffi.typeof("HEAP")
-Heap_mt = {
-	__gc = function(self)
-		if self.Handle == nil or self.owningthread == 0 then return nil end
 
-		if self.owningthread == kernel32.GetCurrentThreadId() then
-			local success = kernel32.HeapDestroy(self.Handle) ~= 0
+ffi.cdef[[
+typedef struct {
+	HANDLE	Handle;
+	bool	OwnAllocation;
+	DWORD	Owningthread;
+} HeapHandle;
+]]
+local HeapHandle = ffi.typeof("HeapHandle");
+local HeapHandle_mt = {
+	__gc = function(self)
+		if self.Handle == nil or self.Owningthread == 0 then return false end
+
+		if self.Owningthread == core_process.GetCurrentThreadId() then
+			local status = heap_ffi.HeapDestroy(self.Handle);
 		end
 	end,
 
 	__index = {
-		Alloc = function(self, nbytes, flags)
-			flags = flags or 0
-			nbytes = nbytes or 1
 
-			local ptr = kernel32.HeapAlloc(self.Handle, flags, nbytes)
+	},
 
-			return ptr;
+}
+
+local Heap = {}
+setmetatable(Heap, {
+	__call = function(self, ...)
+		return Heap:new(...);
+	end,
+
+
+	__index = {
+
+		create = function(self, initialSize, maxSize, options)
+			local initialSize = initialSize or 0
+			local maxSize = maxSize or 0
+			local options = options or 0
+
+			-- Try to allocate the heap as specified
+			local rawhandle = heap_ffi.HeapCreate(options, initialSize, maxSize)
+
+			-- If the allocation fails
+			-- just return nil
+			if rawhandle == nil then
+				return false, "could not create heap"
+			end
+
+			local aheap = Heap(rawhandle, true, core_process.GetCurrentThreadId());
+
+			return aheap
 		end,
 
-		AllocBlob = function(self, nbytes, flags)
-			flags = flags or 0
-			nbytes = nbytes or 1
+		getProcessHeap = function()
+			local rawhandle = heap_ffi.GetProcessHeap()
 
-			local ptr = kernel32.HeapAlloc(self.Handle, flags, nbytes)
-
-			-- If the allocation failed, then just return
-			if ptr == nil then
+			-- If we couldn't get the handle to the process
+			-- heap, then just return nil
+			if rawhandle == nil then
 				return nil
 			end
 
-			-- Create a blob object, and return that to the
-			-- caller.
-			local blob = HeapBlob(ptr, nbytes, self.Handle, kernel32.GetCurrentThreadId())
+			local aheap = Heap(rawhandle)
 
-			return blob
+			return aheap;
 		end,
-
-		Compact = function(self, flags)
-			flags = flags or 0
-			local size = kernel32.HeapCompact(self.Handle, flags)
-			return size
-		end,
-
-		Lock = function(self)
-			local success = kernel32.HeapLock(self.Handle) ~= 0
-			return success
-		end,
-
-		Unlock = function(self)
-			local success = kernel32.HeapUnlock(self.Handle) ~= 0
-			return success
-		end,
-
-		StartHeapWalk = function(self)
-			local heapEntry = ffi.new("PROCESS_HEAP_ENTRY")
-			local pheapEntry = ffi.new("PROCESS_HEAP_ENTRY[1]", heapEntry)
-			local success = kernel32.HeapWalk(self.Handle, pheapEntry) ~= 0
-			--heapEntry = pheapEntry[0]
-
-			return heapEntry, success
-		end,
-
-		ContinueHeapWalk = function(self, heapEntry)
-			pheapEntry = ffi.new("PROCESS_HEAP_ENTRY[1]", heapEntry)
-			local success = kernel32.HeapWalk(self.Handle, pheapEntry) ~= 0
-			heapEntry = pheapEntry[0]
-
-			return heapEntry, success
-		end,
-
-		IsValid = function(self, flags)
-			flags = flags or 0
-
-			local isValid = kernel32.HeapValidate(self.Handle, flags, nil)
-
-			return isValid
-		end,
-
-
 	},
+});
+
+local Heap_mt = {
+	__index = Heap;
 }
-Heap = ffi.metatype("HEAP", Heap_mt)
 
 
+Heap.new = function(self, rawhandle, ownAllocation, owningThread)
+	ownAllocation = ownAllocation or false;
+	owningThread = owningThread or 0;
 
-local function HeapCreate(initialSize, maxSize, options)
-	initialSize = initialSize or 0
-	maxSize = maxSize or 0
-	options = options or 0
-
-	-- Try to allocate the heap as specified
-	local handle = kernel32.HeapCreate(options, initialSize, maxSize)
-
-	-- If the allocation fails
-	-- just return nil
-	if handle == nil then
-		return false, "could not create heap"
+	if not rawhandle then
+		return false, "now raw handle specified";
 	end
 
-	local aheap = Heap(handle, options, initialSize, maxSize)
+	local obj = {
+		Handle = HeapHandle(rawhandle, ownAllocation, owningThread);
+	}
 
-	return aheap
+	setmetatable(obj, Heap_mt);
+	return obj;
 end
 
-local function GetProcessHeap()
-	local handle = kernel32.GetProcessHeap()
+Heap.getNativeHandle = function(self)
+	return self.Handle.Handle;
+end
 
-		-- If the allocation fails
-	-- just return nil
-	if handle == nil then
-		return nil
+Heap.alloc = function(self, nbytes, flags)
+	flags = flags or 0
+	nbytes = nbytes or 1
+
+	local ptr = heap_ffi.HeapAlloc(self:getNativeHandle(), flags, nbytes);
+
+	return ptr;
+end
+
+Heap.allocBlob = function(self, nbytes, flags)
+	local ptr, err = self:alloc(nbytes, flags);
+
+	-- If the allocation failed, then just return
+	if not ptr then
+		return false;
 	end
 
-	local aheap = Heap(handle)
+	-- Create a blob object, and return that to the
+	-- caller.
+	local blob = HeapBlob(ptr, nbytes, self:getNativeHandle(), core_process.GetCurrentThreadId())
 
-	return aheap
+	return blob
 end
 
+Heap.compact = function(self, flags)
+	flags = flags or 0
+	local size = heap_ffi.HeapCompact(self:getNativeHandle(), flags)
+	return size
+end
 
+Heap.lock = function(self)
+	local status = heap_ffi.HeapLock(self:getNativeHandle());
 
+	if status == 0 then
+		return false, errorhandling.GetLastError();
+	end
 
-return {
-	-- Function calls
-	GetProcessHeap = GetProcessHeap,
-	HeapCreate = HeapCreate,
+	return true
+end
 
-	-- Classes
-	Heap = Heap,
-	HeapBlob = HeapBlob,
+Heap.unlock = function(self)
+	local status = heap_ffi.HeapUnlock(self:getNativeHandle());
 
+	if status == 0 then
+		return false, errorhandling.GetLastError();
+	end
 
-}
+	return true
+end
+
+--[[
+typedef struct _PROCESS_HEAP_ENTRY {
+    PVOID lpData;
+    DWORD cbData;
+    BYTE cbOverhead;
+    BYTE iRegionIndex;
+    WORD wFlags;
+    union {
+        struct {
+            HANDLE hMem;
+            DWORD dwReserved[ 3 ];
+        } Block;
+        struct {
+            DWORD dwCommittedSize;
+            DWORD dwUnCommittedSize;
+            LPVOID lpFirstBlock;
+            LPVOID lpLastBlock;
+        } Region;
+    } DUMMYUNIONNAME;
+} PROCESS_HEAP_ENTRY, *LPPROCESS_HEAP_ENTRY, *PPROCESS_HEAP_ENTRY;
+--]]
+Heap.entryList = function(self)
+	local heapEntry = ffi.new("PROCESS_HEAP_ENTRY", heapEntry);
+
+	local res = {};
+	self:lock();
+
+	local status = heap_ffi.HeapWalk(self:getNativeHandle(), heapEntry);
+
+	while status ~= 0 do
+		if band(heapEntry.wFlags, ffi.C.PROCESS_HEAP_ENTRY_BUSY) > 0 then
+			-- Allocated block
+			table.insert(res, {
+						Kind = "allocated",
+						Size = heapEntry.cbData,
+						});
+		elseif band(heapEntry.wFlags, ffi.C.PROCESS_HEAP_REGION) > 0 then
+			table.insert(res, {
+						Kind = "region",
+						Committed = heapEntry.DUMMYUNIONNAME.Region.dwCommittedSize, 
+						Free=heapEntry.DUMMYUNIONNAME.Region.dwUnCommittedSize});
+		elseif band(heapEntry.wFlags, ffi.C.PROCESS_HEAP_UNCOMMITTED_RANGE) > 0 then
+			table.insert(res, {
+						Kind = "uncommitted",
+						});
+		else
+			table.insert(res, {
+						Kind = "block",
+						}); 
+		end
+				
+		status = heap_ffi.HeapWalk(self:getNativeHandle(), heapEntry);
+	end
+
+	self:unlock();
+
+	return res;
+end
+
+Heap.isValid = function(self, flags)
+	flags = flags or 0
+
+	local isValid = heap_ffi.HeapValidate(self:getNativeHandle(), flags, nil);
+
+	return isValid
+end
+
+return Heap;

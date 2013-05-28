@@ -2,7 +2,6 @@
 
 local ffi = require("ffi");
 local netutils = require("netutils_ffi");
-local kernel32 = require("win_kernel32");
 local core_string = require("core_string_l1_1_0");
 
 local L = core_string.toUnicode;
@@ -78,7 +77,7 @@ local NetApiBuffer_mt = {
 		if type(select(1,...)) == "number" then
 			-- This case is used if we're creating a new
 			-- buffer from scratch
-			local buff, err = NetApiBufferAllocate(size);
+			local buff, err = NetApiBufferAllocate(select(1,...));
 			if not buff then
 				return false, err;
 			end

@@ -47,10 +47,6 @@ local enumLocalGroups = function(params)
 print("STATUS ======= ", status);
 print("32-bit: ", ffi.abi("32bit"));
 
-	if status ~= ffi.C.NERR_Success then
-		return nil, status;
-	end
-
 	print("Entries Read: ", entriesread[0]);
 	print("Total Entries: ", totalentries[0]);
 	--print("Buffptr: ", bufptr[0]);
@@ -61,6 +57,10 @@ print("32-bit: ", ffi.abi("32bit"));
 	local idx = -1;
 
 	local closure = function()
+		if status ~= ffi.C.NERR_Success then
+			return nil, status;
+		end
+
 		idx = idx + 1;
 --[[
 		if idx >= entriesread[0] then

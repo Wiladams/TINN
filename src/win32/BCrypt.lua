@@ -4,7 +4,6 @@ local ffi = require "ffi"
 local bit = require "bit"
 local band = bit.band
 
-local k32 = require "win_kernel32"
 require("ntstatus");
 local core_string = require("core_string_l1_1_0");
 

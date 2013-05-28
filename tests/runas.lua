@@ -6,8 +6,7 @@ local bor = bit.bor;
 local rshift = bit.rshift;
 local lshift = bit.lshift;
 
-local kernel32 = require("win_kernel32");
-local k32Lib = kernel32.Lib;
+local k32Lib = ffi.load("Kernel32");
 local advlib = ffi.load("AdvApi32");
 local core_string = require("core_string_l1_1_0");
 local L = core_string.toUnicode;

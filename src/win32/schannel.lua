@@ -7,13 +7,11 @@ local bit = require("bit");
 local bor = bit.bor;
 
 
-local K32 = require ("win_kernel32");
 local core_string = require("core_string_l1_1_0");
 
 local L = core_string.toUnicode;
 
-
-require ("WinCrypt");
+local WinCrypt = require ("WinCrypt");
 
 
 local schannel = {}
@@ -688,8 +686,8 @@ BOOL SslEmptyCacheW(LPWSTR pszTargetName, DWORD  dwFlags);
 
 --[=[
 
-schannel.SSL_CRACK_CERTIFICATE_NAME  = K32.TEXT("SslCrackCertificate");
-schannel.SSL_FREE_CERTIFICATE_NAME   = K32.TEXT("SslFreeCertificate");
+schannel.SSL_CRACK_CERTIFICATE_NAME  = core_string.TEXT("SslCrackCertificate");
+schannel.SSL_FREE_CERTIFICATE_NAME   = core_string.TEXT("SslFreeCertificate");
 
 
 --]=]

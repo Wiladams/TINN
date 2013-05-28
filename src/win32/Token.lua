@@ -42,6 +42,7 @@ local tokenInfoStructs = {
     [ffi.C.TokenUIAccess] = {ffi.typeof("DWORD[1]")},
     [ffi.C.TokenMandatoryPolicy] = {ffi.typeof("TOKEN_MANDATORY_POLICY")},
     [ffi.C.TokenLogonSid] = {ffi.typeof("TOKEN_GROUPS")},
+    [ffi.C.TokenCapabilities] = {ffi.typeof("TOKEN_GROUPS")},
 }
 
 
@@ -142,6 +143,27 @@ Token.new = function(self, rawhandle)
 end
 
 
+Token.duplicate = function(self, dwDesiredAccess, ImpersonationLevel, TokenType)
+	dwDesiredAccess = dwDesiredAccess or ffi.C.MAXIMUM_ALLOWED;
+	ImpersonationLevel = ImpersonationLevel or ffi.C.SecurityDelegation;
+	TokenType = TokenType or ffi.C.TokenPrimary;
+
+	local lpTokenAttributes = nil;
+	local phNewToken = ffi.new("HANDLE[1]");
+
+	local status = security_base.DuplicateTokenEx(self.Handle.Handle,
+        dwDesiredAccess,
+    	lpTokenAttributes,
+        ImpersonationLevel,
+        TokenType,
+    	phNewToken);
+
+	if status == 0 then
+		return false, errorhandling.GetLastError();
+	end
+
+	return Token(phNewToken[0]);
+end
 
 Token.getTokenInfo = function(self, TokenInformationClass)
 	TokenInformationClass = TokenInformationClass or ffi.C.TokenUser;
@@ -157,6 +179,7 @@ Token.getTokenInfo = function(self, TokenInformationClass)
 
 	if status == 0 then
 		local err = error_handling.GetLastError();
+		print("getTokenInfo - first failure", err);
 		if err ~= ERROR_INSUFFICIENT_BUFFER then
 			return false, err
 		end
@@ -186,6 +209,7 @@ Token.getTokenInfo = function(self, TokenInformationClass)
 		ReturnLength);
 
 	if status == 0 then
+		print("getTokenInfo, second failure");
 		return false, error_handling.GetLastError();
 	end
 
@@ -193,18 +217,16 @@ Token.getTokenInfo = function(self, TokenInformationClass)
 end
 
 
-
-Token.getGroups = function(self)
-	local tokInfo, err = self:getTokenInfo(ffi.C.TokenGroups);
+Token.getCapabilities = function(self)
+	local tokInfo, err = self:getTokenInfo(ffi.C.TokenCapabilities);
 
 	if not tokInfo then
 		return false, err;
 	end
 
 	local tokGroups = ffi.cast("TOKEN_GROUPS *", tokInfo);
-
 	local res = {}
-	for i=0,tokGroups.GroupCount do
+	for i=0,tokGroups.GroupCount-1 do
 		local sid = tokGroups.Groups[i].Sid;
 		local attrs = tokGroups.Groups[i].Attributes;
 		local asid = SID(sid);
@@ -219,6 +241,45 @@ Token.getGroups = function(self)
 	return res;
 end
 
+
+Token.getGroups = function(self)
+	local tokInfo, err = self:getTokenInfo(ffi.C.TokenGroups);
+
+	if not tokInfo then
+		return false, err;
+	end
+
+	local tokGroups = ffi.cast("TOKEN_GROUPS *", tokInfo);
+
+	local res = {}
+	for i=0,tokGroups.GroupCount-1 do
+		local sid = tokGroups.Groups[i].Sid;
+		local attrs = tokGroups.Groups[i].Attributes;
+		local asid = SID(sid);
+		if asid then
+			local sidstr = tostring(asid); 
+			if sidstr ~= nil then
+				res[sidstr] = {Sid = asid, Attributes = attrs};
+			end
+		end
+	end
+
+	return res;
+end
+
+Token.getImpersonationLevel = function(self)
+	local tokInfo, err = self:getTokenInfo(ffi.C.TokenImpersonationLevel);
+
+	if not tokInfo then
+		return false, err;
+	end
+
+	local level = ffi.cast("SECURITY_IMPERSONATION_LEVEL *", tokInfo);
+
+	return level[0];
+end
+
+
 Token.getPrivileges = function(self)
 	local tokInfo, err = self:getTokenInfo(ffi.C.TokenPrivileges);
 
@@ -227,7 +288,6 @@ Token.getPrivileges = function(self)
 	end
 
 	local tokPriv = ffi.cast("TOKEN_PRIVILEGES *", tokInfo);
---	print("Privilege Count: ", tokPriv.PrivilegeCount);
 	local res = {};
 
 	for i=0,tokPriv.PrivilegeCount-1 do		
@@ -251,6 +311,34 @@ Token.getSource = function(self)
 	return ffi.string(tokSource.SourceName, ffi.C.TOKEN_SOURCE_LENGTH);
 end
 
+
+Token.getStats = function(self)
+	local tokInfo, err = self:getTokenInfo(ffi.C.TokenStatistics);
+
+	if not tokInfo then
+		return false, err;
+	end
+
+	local tokStats = ffi.cast("TOKEN_STATISTICS *", tokInfo);
+
+	local res = {
+		TokenId = tokStats.TokenId;
+		AuthenticationId = tokStats.AuthenticationId;
+		ExpirationTime = tokStats.ExpirationTime;	-- need to convert to number
+		TokenType = tokStats.TokenType;
+		DynamicCharged = tokStats.DynamicCharged;
+		DynamicAvailable = tokStats.DynamicAvailable;
+		GroupCount = tokStats.GroupCount;
+		PrivilegeCount = tokStats.PrivilegeCount;
+		ModifiedId = tokStats.ModifiedId;
+	};
+	if res.TokenType ~= ffi.C.TokenPrimary then
+		res.ImpersonationLevel = tokStats.ImpersonationLevel;
+	end
+
+	return res;
+end
+
 Token.getTokenType = function(self)
 	local tokInfo, err = self:getTokenInfo(ffi.C.TokenType);
 
@@ -259,7 +347,7 @@ Token.getTokenType = function(self)
 	end
 
 	local tokType = ffi.cast("TOKEN_TYPE *", tokInfo);
-	if tokType == ffi.C.TokenPrimary then 
+	if tokType[0] == ffi.C.TokenPrimary then 
 		return "Primary"
 	end
 
@@ -283,7 +371,7 @@ Token.getLocalPrivilege = function(self, lpName)
 		return false, "no privilege specified"
 	end
 
-	lpSystemName = nil;
+	local lpSystemName = nil;
 	lpName = core_string.toUnicode(lpName);
 
 	local lpLuid = ffi.new("LUID[1]");
@@ -295,22 +383,7 @@ Token.getLocalPrivilege = function(self, lpName)
 	return lpLuid[0];
 end
 
---[[
-typedef struct _TOKEN_PRIVILEGES {
-    DWORD PrivilegeCount;
-    LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY];
-} TOKEN_PRIVILEGES, *PTOKEN_PRIVILEGES;
 
-BOOL
-AdjustTokenPrivileges (
-         HANDLE TokenHandle,
-         BOOL DisableAllPrivileges,
-     PTOKEN_PRIVILEGES NewState,
-         DWORD BufferLength,
-    PTOKEN_PRIVILEGES PreviousState,
-    PDWORD ReturnLength
-    );
---]]
 
 Token.enablePrivilege = function(self, privilege)
 	local lpLuid, err = self:getLocalPrivilege(privilege);
