@@ -234,6 +234,11 @@ require "guiddef"
 
 
 ffi.cdef[[
+// Update Sequence Number
+
+typedef LONGLONG USN;
+
+
 typedef union _LARGE_INTEGER {
 	struct {
 		DWORD LowPart;

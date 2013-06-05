@@ -18,3 +18,9 @@ for _,entry in ipairs(entries) do
 end
 
 
+local blob1 = h1:allocBlob(3600);
+
+print(blob1);
+
+
+

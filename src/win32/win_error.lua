@@ -4,6 +4,8 @@ ERROR_SUCCESS	= 0;
 
 ERROR_INVALID_FUNCTION          = 1;    
 
+ERROR_FILE_NOT_FOUND            = 2;
+
 ERROR_ACCESS_DENIED             = 5;
 
 ERROR_INVALID_HANDLE            = 6;
@@ -17,6 +19,8 @@ ERROR_NOT_SUPPORTED             = 50;
 ERROR_INVALID_PARAMETER         = 87;
 
 ERROR_INSUFFICIENT_BUFFER       = 122;
+
+ERROR_INVALID_NAME              = 123;
 
 ERROR_ALREADY_EXISTS    		= 183;
 

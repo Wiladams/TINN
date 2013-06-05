@@ -3299,26 +3299,26 @@ return {
 
     ldap_search = ldlib.ldap_search,
 --[[
-ldap_search_abandon_page
-ldap_search_ext
-ldap_search_ext_s
-ldap_search_ext_sA
-ldap_search_ext_sW
-ldap_search_extA
-ldap_search_extW
-ldap_search_init_page
-ldap_search_init_pageA
-ldap_search_init_pageW
-ldap_search_s
+ldap_search_abandon_page = ldlib
+ldap_search_ext = ldlib
+ldap_search_ext_s = ldlib
+ldap_search_ext_sA = ldlib
+ldap_search_ext_sW = ldlib
+ldap_search_extA = ldlib
+ldap_search_extW = ldlib
+ldap_search_init_page = ldlib
+ldap_search_init_pageA = ldlib
+ldap_search_init_pageW = ldlib
+ldap_search_s = ldlib
 --]]
     ldap_search_sA = ldlib.ldap_search_sA,
 --[[
-ldap_search_st
-ldap_search_stA
-ldap_search_stW
-ldap_search_sW
-ldap_searchA
-ldap_searchW
+ldap_search_st = ldlib
+ldap_search_stA = ldlib
+ldap_search_stW = ldlib
+ldap_search_sW = ldlib
+ldap_searchA = ldlib
+ldap_searchW = ldlib
 --]]
     ldap_set_option = ldlib.ldap_set_option,
     --ldap_set_optionA = ldlib.ldap_set_optionA,
@@ -3332,209 +3332,210 @@ ldap_searchW
     LdapUnicodeToUTF8 = ldlib.LdapUnicodeToUTF8,
     LdapUTF8ToUnicode = ldlib.LdapUTF8ToUnicode,
 
-}
 
 --[[
 
-cldap_open
-cldap_openA
-cldap_openW
-ldap_abandon
-ldap_add
-ldap_add_ext
-ldap_add_ext_s
-ldap_add_ext_sA
-ldap_add_ext_sW
-ldap_add_extA
-ldap_add_extW
-ldap_add_s
-ldap_add_sA
-ldap_add_sW
-ldap_addA
-ldap_addW
-ldap_bind
-ldap_bind_s
-ldap_bind_sA
-ldap_bind_sW
-ldap_bindA
-ldap_bindW
-ldap_check_filterA
-ldap_check_filterW
-ldap_cleanup
-ldap_close_extended_op
-ldap_compare
-ldap_compare_ext
-ldap_compare_ext_s
-ldap_compare_ext_sA
-ldap_compare_ext_sW
-ldap_compare_extA
-ldap_compare_extW
-ldap_compare_s
-ldap_compare_sA
-ldap_compare_sW
-ldap_compareA
-ldap_compareW
-ldap_control_free
-ldap_control_freeA
-ldap_control_freeW
-ldap_controls_free
-ldap_controls_freeA
-ldap_controls_freeW
-ldap_count_entries
-ldap_count_references
-ldap_count_values
-ldap_count_values_len
-ldap_count_valuesA
-ldap_count_valuesW
-ldap_create_page_control
-ldap_create_page_controlA
-ldap_create_page_controlW
-ldap_create_sort_control
-ldap_create_sort_controlA
-ldap_create_sort_controlW
-ldap_create_vlv_controlA
-ldap_create_vlv_controlW
-ldap_delete
-ldap_delete_ext
-ldap_delete_ext_s
-ldap_delete_ext_sA
-ldap_delete_ext_sW
-ldap_delete_extA
-ldap_delete_extW
-ldap_delete_s
-ldap_delete_sA
-ldap_delete_sW
-ldap_deleteA
-ldap_deleteW
-ldap_dn2ufn
-ldap_dn2ufnA
-ldap_dn2ufnW
-ldap_encode_sort_controlA
-ldap_encode_sort_controlW
-ldap_err2string
-ldap_err2stringA
-ldap_err2stringW
-ldap_escape_filter_element
-ldap_escape_filter_elementA
-ldap_escape_filter_elementW
-ldap_explode_dn
-ldap_explode_dnA
-ldap_explode_dnW
-ldap_extended_operation
-ldap_extended_operation_sA
-ldap_extended_operation_sW
-ldap_extended_operationA
-ldap_extended_operationW
-ldap_first_attribute
-ldap_first_attributeA
-ldap_first_attributeW
-ldap_first_entry
-ldap_first_reference
-ldap_free_controls
-ldap_free_controlsA
-ldap_free_controlsW
-ldap_get_dn
-ldap_get_dnA
-ldap_get_dnW
-ldap_get_next_page
-ldap_get_next_page_s
-ldap_get_option
-ldap_get_optionA
-ldap_get_optionW
-ldap_get_paged_count
-ldap_get_values
-ldap_get_values_len
-ldap_get_values_lenA
-ldap_get_values_lenW
-ldap_get_valuesA
-ldap_get_valuesW
-ldap_memfree
-ldap_memfreeA
-ldap_memfreeW
-ldap_modify
-ldap_modify_ext
-ldap_modify_ext_s
-ldap_modify_ext_sA
-ldap_modify_ext_sW
-ldap_modify_extA
-ldap_modify_extW
-ldap_modify_s
-ldap_modify_sA
-ldap_modify_sW
-ldap_modifyA
-ldap_modifyW
-ldap_modrdn
-ldap_modrdn_s
-ldap_modrdn_sA
-ldap_modrdn_sW
-ldap_modrdn2
-ldap_modrdn2_s
-ldap_modrdn2_sA
-ldap_modrdn2_sW
-ldap_modrdn2A
-ldap_modrdn2W
-ldap_modrdnA
-ldap_modrdnW
-ldap_msgfree
-ldap_next_attribute
-ldap_next_attributeA
-ldap_next_attributeW
-ldap_next_entry
-ldap_next_reference
-ldap_open
-ldap_openA
-ldap_openW
-ldap_parse_extended_resultA
-ldap_parse_extended_resultW
-ldap_parse_page_control
-ldap_parse_page_controlA
-ldap_parse_page_controlW
-ldap_parse_reference
-ldap_parse_referenceA
-ldap_parse_referenceW
-ldap_parse_result
-ldap_parse_resultA
-ldap_parse_resultW
-ldap_parse_sort_control
-ldap_parse_sort_controlA
-ldap_parse_sort_controlW
-ldap_parse_vlv_controlA
-ldap_parse_vlv_controlW
-ldap_perror
-ldap_rename_ext
-ldap_rename_ext_s
-ldap_rename_ext_sA
-ldap_rename_ext_sW
-ldap_rename_extA
-ldap_rename_extW
-ldap_result
-ldap_result2error
-ldap_sasl_bind_sA
-ldap_sasl_bind_sW
-ldap_sasl_bindA
-ldap_sasl_bindW
+cldap_open = ldlib
+cldap_openA = ldlib
+cldap_openW = ldlib
+ldap_abandon = ldlib
+ldap_add = ldlib
+ldap_add_ext = ldlib
+ldap_add_ext_s = ldlib
+ldap_add_ext_sA = ldlib
+ldap_add_ext_sW = ldlib
+ldap_add_extA = ldlib
+ldap_add_extW = ldlib
+ldap_add_s = ldlib
+ldap_add_sA = ldlib
+ldap_add_sW = ldlib
+ldap_addA = ldlib
+ldap_addW = ldlib
+ldap_bind = ldlib
+ldap_bind_s = ldlib
+ldap_bind_sA = ldlib
+ldap_bind_sW = ldlib
+ldap_bindA = ldlib
+ldap_bindW = ldlib
+ldap_check_filterA = ldlib
+ldap_check_filterW = ldlib
+ldap_cleanup = ldlib
+ldap_close_extended_op = ldlib
+ldap_compare = ldlib
+ldap_compare_ext = ldlib
+ldap_compare_ext_s = ldlib
+ldap_compare_ext_sA = ldlib
+ldap_compare_ext_sW = ldlib
+ldap_compare_extA = ldlib
+ldap_compare_extW = ldlib
+ldap_compare_s = ldlib
+ldap_compare_sA = ldlib
+ldap_compare_sW = ldlib
+ldap_compareA = ldlib
+ldap_compareW = ldlib
+ldap_control_free = ldlib
+ldap_control_freeA = ldlib
+ldap_control_freeW = ldlib
+ldap_controls_free = ldlib
+ldap_controls_freeA = ldlib
+ldap_controls_freeW = ldlib
+ldap_count_entries = ldlib
+ldap_count_references = ldlib
+ldap_count_values = ldlib
+ldap_count_values_len = ldlib
+ldap_count_valuesA = ldlib
+ldap_count_valuesW = ldlib
+ldap_create_page_control = ldlib
+ldap_create_page_controlA = ldlib
+ldap_create_page_controlW = ldlib
+ldap_create_sort_control = ldlib
+ldap_create_sort_controlA = ldlib
+ldap_create_sort_controlW = ldlib
+ldap_create_vlv_controlA = ldlib
+ldap_create_vlv_controlW = ldlib
+ldap_delete = ldlib
+ldap_delete_ext = ldlib
+ldap_delete_ext_s = ldlib
+ldap_delete_ext_sA = ldlib
+ldap_delete_ext_sW = ldlib
+ldap_delete_extA = ldlib
+ldap_delete_extW = ldlib
+ldap_delete_s = ldlib
+ldap_delete_sA = ldlib
+ldap_delete_sW = ldlib
+ldap_deleteA = ldlib
+ldap_deleteW = ldlib
+ldap_dn2ufn = ldlib
+ldap_dn2ufnA = ldlib
+ldap_dn2ufnW = ldlib
+ldap_encode_sort_controlA = ldlib
+ldap_encode_sort_controlW = ldlib
+ldap_err2string = ldlib
+ldap_err2stringA = ldlib
+ldap_err2stringW = ldlib
+ldap_escape_filter_element = ldlib
+ldap_escape_filter_elementA = ldlib
+ldap_escape_filter_elementW = ldlib
+ldap_explode_dn = ldlib
+ldap_explode_dnA = ldlib
+ldap_explode_dnW = ldlib
+ldap_extended_operation = ldlib
+ldap_extended_operation_sA = ldlib
+ldap_extended_operation_sW = ldlib
+ldap_extended_operationA = ldlib
+ldap_extended_operationW = ldlib
+ldap_first_attribute = ldlib
+ldap_first_attributeA = ldlib
+ldap_first_attributeW = ldlib
+ldap_first_entry = ldlib
+ldap_first_reference = ldlib
+ldap_free_controls = ldlib
+ldap_free_controlsA = ldlib
+ldap_free_controlsW = ldlib
+ldap_get_dn = ldlib
+ldap_get_dnA = ldlib
+ldap_get_dnW = ldlib
+ldap_get_next_page = ldlib
+ldap_get_next_page_s = ldlib
+ldap_get_option = ldlib
+ldap_get_optionA = ldlib
+ldap_get_optionW = ldlib
+ldap_get_paged_count = ldlib
+ldap_get_values = ldlib
+ldap_get_values_len = ldlib
+ldap_get_values_lenA = ldlib
+ldap_get_values_lenW = ldlib
+ldap_get_valuesA = ldlib
+ldap_get_valuesW = ldlib
+ldap_memfree = ldlib
+ldap_memfreeA = ldlib
+ldap_memfreeW = ldlib
+ldap_modify = ldlib
+ldap_modify_ext = ldlib
+ldap_modify_ext_s = ldlib
+ldap_modify_ext_sA = ldlib
+ldap_modify_ext_sW = ldlib
+ldap_modify_extA = ldlib
+ldap_modify_extW = ldlib
+ldap_modify_s = ldlib
+ldap_modify_sA = ldlib
+ldap_modify_sW = ldlib
+ldap_modifyA = ldlib
+ldap_modifyW = ldlib
+ldap_modrdn = ldlib
+ldap_modrdn_s = ldlib
+ldap_modrdn_sA = ldlib
+ldap_modrdn_sW = ldlib
+ldap_modrdn2 = ldlib
+ldap_modrdn2_s = ldlib
+ldap_modrdn2_sA = ldlib
+ldap_modrdn2_sW = ldlib
+ldap_modrdn2A = ldlib
+ldap_modrdn2W = ldlib
+ldap_modrdnA = ldlib
+ldap_modrdnW = ldlib
+ldap_msgfree = ldlib
+ldap_next_attribute = ldlib
+ldap_next_attributeA = ldlib
+ldap_next_attributeW = ldlib
+ldap_next_entry = ldlib
+ldap_next_reference = ldlib
+ldap_open = ldlib
+ldap_openA = ldlib
+ldap_openW = ldlib
+ldap_parse_extended_resultA = ldlib
+ldap_parse_extended_resultW = ldlib
+ldap_parse_page_control = ldlib
+ldap_parse_page_controlA = ldlib
+ldap_parse_page_controlW = ldlib
+ldap_parse_reference = ldlib
+ldap_parse_referenceA = ldlib
+ldap_parse_referenceW = ldlib
+ldap_parse_result = ldlib
+ldap_parse_resultA = ldlib
+ldap_parse_resultW = ldlib
+ldap_parse_sort_control = ldlib
+ldap_parse_sort_controlA = ldlib
+ldap_parse_sort_controlW = ldlib
+ldap_parse_vlv_controlA = ldlib
+ldap_parse_vlv_controlW = ldlib
+ldap_perror = ldlib
+ldap_rename_ext = ldlib
+ldap_rename_ext_s = ldlib
+ldap_rename_ext_sA = ldlib
+ldap_rename_ext_sW = ldlib
+ldap_rename_extA = ldlib
+ldap_rename_extW = ldlib
+ldap_result = ldlib
+ldap_result2error = ldlib
+ldap_sasl_bind_sA = ldlib
+ldap_sasl_bind_sW = ldlib
+ldap_sasl_bindA = ldlib
+ldap_sasl_bindW = ldlib
 
-ldap_set_dbg_flags
-ldap_set_dbg_routine
-ldap_simple_bind
-ldap_simple_bind_s
-ldap_simple_bind_sA
-ldap_simple_bind_sW
-ldap_simple_bindA
-ldap_simple_bindW
-ldap_sslinit
-ldap_sslinitA
-ldap_sslinitW
-ldap_start_tls_sA
-ldap_start_tls_sW
-ldap_startup
-ldap_stop_tls_s
-ldap_ufn2dn
-ldap_ufn2dnA
-ldap_ufn2dnW
+ldap_set_dbg_flags = ldlib
+ldap_set_dbg_routine = ldlib
+ldap_simple_bind = ldlib
+ldap_simple_bind_s = ldlib
+ldap_simple_bind_sA = ldlib
+ldap_simple_bind_sW = ldlib
+ldap_simple_bindA = ldlib
+ldap_simple_bindW = ldlib
+ldap_sslinit = ldlib
+ldap_sslinitA = ldlib
+ldap_sslinitW = ldlib
+ldap_start_tls_sA = ldlib
+ldap_start_tls_sW = ldlib
+ldap_startup = ldlib
+ldap_stop_tls_s = ldlib
+ldap_ufn2dn = ldlib
+ldap_ufn2dnA = ldlib
+ldap_ufn2dnW = ldlib
 
-ldap_value_free
-ldap_value_free_len
-ldap_value_freeA
-ldap_value_freeW
+ldap_value_free = ldlib
+ldap_value_free_len = ldlib
+ldap_value_freeA = ldlib
+ldap_value_freeW = ldlib
 --]]
+
+}

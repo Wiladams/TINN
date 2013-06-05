@@ -4,6 +4,8 @@ local ffi = require("ffi");
 local security_base = require("security_base_l1_2_0");
 local errorhandling = require("core_errorhandling_l1_1_1");
 local SID = require("SID");
+local SecurityAcl = require("SecurityAcl");
+
 local WinError = require("win_error");
 
 --[[
@@ -25,22 +27,29 @@ setmetatable(SecurityDescriptor, {
 	__call = function(self, ...)
 		return self:new(...);
 	end,
-	});
+
+	__index = {
+		create = function(self)
+			local Descriptor = ffi.new("SECURITY_DESCRIPTOR");
+			if not Descriptor then
+				return nil;
+			end
+			security_base.InitializeSecurityDescriptor(Descriptor, ffi.C.SECURITY_DESCRIPTOR_REVISION);
+
+			return SecurityDescriptor:new(Descriptor);
+		end,
+	},
+});
 
 local SecurityDescriptor_mt = {
 	__index = SecurityDescriptor;
 }
 
 
-SecurityDescriptor.new = function(self, ...)
-	local Descriptor = ffi.new("SECURITY_DESCRIPTOR");
-	if not Descriptor then
-		return nil;
-	end
-	security_base.InitializeSecurityDescriptor(Descriptor, ffi.C.SECURITY_DESCRIPTOR_REVISION);
+SecurityDescriptor.new = function(self, Descriptor)
 
 	local obj = {
-		Descriptor = Descriptor;
+		Descriptor = ffi.cast("PSECURITY_DESCRIPTOR",Descriptor);
 	};
 
 	setmetatable(obj, SecurityDescriptor_mt);
@@ -48,6 +57,25 @@ SecurityDescriptor.new = function(self, ...)
 	return obj;
 end
 
+SecurityDescriptor.accessAllowed = function(self, ClientToken, DesiredAccess)
+	local GenericMapping = nil;
+	local PrivilegeSet = nil;
+	local PrivilegeSetLength = ffi.new("DWORD[1]",0);
+	local GrantedAccess = ffi.new("DWORD[1]");
+	local AccessStatus = ffi.new("BOOL[1]");
+
+--[[
+local status = security_base.AccessCheck(ffi.cast("PSECURITY_DESCRIPTOR",self.Descriptor),
+  _In_       HANDLE ClientToken,
+  _In_       DWORD DesiredAccess,
+  _In_       PGENERIC_MAPPING GenericMapping,
+  _Out_opt_  PPRIVILEGE_SET PrivilegeSet,
+  _Inout_    LPDWORD PrivilegeSetLength,
+  _Out_      LPDWORD GrantedAccess,
+  _Out_      LPBOOL AccessStatus
+);
+--]]
+end
 
 SecurityDescriptor.getControlInfo = function(self)
 	local pControl = ffi.new("SECURITY_DESCRIPTOR_CONTROL[1]");
@@ -64,7 +92,7 @@ SecurityDescriptor.getControlInfo = function(self)
 end
 
 SecurityDescriptor.isValid = function(self)
-	return security_base.IsValidSecurityDescriptor(self.Descriptor) > 0;
+	return security_base.IsValidSecurityDescriptor(ffi.cast("PSECURITY_DESCRIPTOR",self.Descriptor)) > 0;
 end
 
 --
@@ -99,7 +127,7 @@ SecurityDescriptor.getDacl = function(self)
 		return false, dacl;
 	end
 
-	return dacl;
+	return SecurityAcl:init(dacl);
 end
 
 --
@@ -134,7 +162,7 @@ SecurityDescriptor.getSacl = function(self)
 		return false, acl;
 	end
 
-	return acl;
+	return SecurityAcl:init(acl);
 end
 
 SecurityDescriptor.getGroup = function(self)

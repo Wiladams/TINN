@@ -5,17 +5,9 @@ local ffi = require("ffi");
 local advapiLib = ffi.load("advapi32");
 require("ntstatus");
 require("WinNT");
+require("NTSecAPI");
 
-ffi.cdef[[
-typedef PVOID LSA_HANDLE, *PLSA_HANDLE;
 
-//
-// LSA Enumeration Context
-//
-
-typedef ULONG LSA_ENUMERATION_HANDLE, *PLSA_ENUMERATION_HANDLE;
-
-]]
 
 ffi.cdef[[
 BOOL
@@ -75,8 +67,6 @@ LsaEnumerateTrustedDomains(
 ]]
 
 return {
-	Lib = advapiLib,
-
 	LookupAccountNameW = advapiLib.LookupAccountNameW,
 	LookupAccountSidW = advapiLib.LookupAccountSidW,
 	LookupPrivilegeDisplayNameW = advapiLib.LookupPrivilegeDisplayNameW,

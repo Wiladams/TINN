@@ -233,12 +233,7 @@ typedef enum
 } EXTENDED_NAME_FORMAT, * PEXTENDED_NAME_FORMAT ;
 ]]
 
-ffi.cdef[[
 
-
-typedef UNICODE_STRING LSA_UNICODE_STRING, *PLSA_UNICODE_STRING;
-typedef STRING LSA_STRING, *PLSA_STRING;
-]]
 
 ffi.cdef[[
 typedef struct _LSA_LAST_INTER_LOGON_INFO {

@@ -3,10 +3,16 @@
 -- http://msdn.microsoft.com/en-us/library/windows/desktop/aa446595(v=vs.85).aspx
 --
 local ffi = require('ffi');
+local bit = require("bit");
+local bor = bit.bor;
+
+local BitBang = require("BitBang");
 local WinBase = require("WinBase");
+local WinNT = require("WinNT");
 local security_base = require("security_base_l1_2_0");
 local errorhandling = require("core_errorhandling_l1_1_1");
 
+local SecurityAce = require("SecurityAce");
 local SecurityAcl = require("SecurityAcl");
 local SecurityDescriptor = require("SecurityDescriptor");
 local SID = require("SID");
@@ -24,20 +30,93 @@ local printDescriptor = function(descrip)
     print("Control Info: ", descrip:getControlInfo());
 end
 
+
+--[[
+Access Rights Mask
+Bits    Meaning
+0–15
+Specific rights. Contains the access mask specific to the object type associated with the mask.
+
+16–23
+Standard rights. Contains the object's standard access rights.
+
+24
+Access system security (ACCESS_SYSTEM_SECURITY). It is used to indicate access to a system access control list (SACL). This type of access requires the calling process to have the SE_SECURITY_NAME (Manage auditing and security log) privilege. If this flag is set in the access mask of an audit access ACE (successful or unsuccessful access), the SACL access will be audited.
+
+25
+Maximum allowed (MAXIMUM_ALLOWED).
+
+26–27
+Reserved.
+
+28
+Generic all (GENERIC_ALL).
+
+29
+Generic execute (GENERIC_EXECUTE).
+
+30
+Generic write (GENERIC_WRITE).
+
+31
+Generic read (GENERIC_READ).
+--]]
+
+local printAccessMask = function(mask)
+    local rights = {
+        specific = BitBang.getbitsvalue(mask, 0, 16);
+        standard = BitBang.getbitsvalue(mask, 16, 16);
+        ass = BitBang.getbitsvalue(mask, 24, 1);
+        maxallowed = BitBang.getbitsvalue(mask, 25, 1);
+        reserved = BitBang.getbitsvalue(mask, 26, 2);
+        generic_all = BitBang.getbitsvalue(mask, 28, 1);
+        generic_exec = BitBang.getbitsvalue(mask, 29, 1);
+        generic_write = BitBang.getbitsvalue(mask, 30, 1);
+        generic_read = BitBang.getbitsvalue(mask, 31, 1);
+    }
+
+    for k,v in pairs(rights) do
+        print(k,v);
+    end
+end
+
+
 local printAcl = function(acl)
     print("==============================");
     print("Security ACL: ", acl, err);
     print("Sizes");
     local sizes, err = acl:getSizes();
     if sizes then
+        print("==  Sizes  ==");
         for k,v in pairs(sizes) do 
             print(k,v);
         end
     end
+
+    for entry in acl:entries() do
+        print("ACE: ", tostring(entry));
+        local tbl = entry:toTable();
+        for k,v in pairs(tbl) do
+            print(k,v);
+        end
+
+--[[
+        local ace = ffi.cast("ACE_HEADER *", entry);
+        print("++ ENTRY ++")
+        print("entry: ", ace, err);
+        print("Type: ", ace.AceType);
+        print("Flags: ", string.format("0x%x", ace.AceFlags));
+        print("Size: ", ace.AceSize);
+
+        if ace.AceType == ffi.C.ACCESS_ALLOWED_ACE_TYPE then
+            local allowed = ffi.cast("ACCESS_ALLOWED_ACE *", entry);
+        end
+--]]
+    end
 end
 
 
-local descrip = SecurityDescriptor();
+local descrip = SecurityDescriptor:create();
 
 printDescriptor(descrip);
 
@@ -58,12 +137,15 @@ print("ADMIN SID: ", pAdminSID);
 
 
 
-local acl, err = SecurityAcl(4*1024);
+local acl, err = SecurityAcl:create(4*1024);
 
 printAcl(acl);
 
 
-local AccessMask = FILE_SHARE_READ;
+local AccessMask = bor(ffi.C.GENERIC_READ,
+    FILE_SHARE_READ, 
+    FILE_SHARE_WRITE, 
+    WinNT.StandardRights.Execute);
 print("AccessMask: ", AccessMask);
 
 print("Add allow Access: ", acl:addAllowAccess(pEveryoneSID, AccessMask));

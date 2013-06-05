@@ -9,6 +9,7 @@ ffi.cdef[[
 
 ffi.cdef[[
 static const int STATUS_PENDING                  = (0x00000103);    		// winnt
+static const int STATUS_ACCESS_DENIED            = ((NTSTATUS)0xC0000022);
 
 
 

@@ -11,8 +11,7 @@ local advapiLib = ffi.load("AdvApi32");
 
 
 
-
-INVALID_HANDLE_VALUE = ffi.cast("intptr_t", -1)
+INVALID_HANDLE_VALUE = ffi.cast("HANDLE",ffi.cast("LONG_PTR",-1));
 INVALID_FILE_SIZE         = (0xFFFFFFFF);
 INVALID_SET_FILE_POINTER  = (-1);
 INVALID_FILE_ATTRIBUTES   = (-1);
@@ -62,9 +61,13 @@ FILE_GENERIC_READ          =
 --]]
 
 
+CREATE_NEW         = 1;
+CREATE_ALWAYS      = 2;
+OPEN_EXISTING      = 3;
+OPEN_ALWAYS        = 4;
+TRUNCATE_EXISTING  = 5;
 
-OPEN_ALWAYS = 4;
-OPEN_EXISTING = 3;
+
 
 
 

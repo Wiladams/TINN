@@ -1,0 +1,14 @@
+
+GetSecurityInfo
+
+Local or remote files or directories on an NTFS file system
+Named pipes
+Local or remote printers
+Local or remote Windows services
+Network shares
+Registry keys
+Semaphores, events, mutexes, and waitable timers
+Processes, threads, jobs, and file-mapping objects
+Interactive service window stations and desktops
+Directory service objects
+

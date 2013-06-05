@@ -33,7 +33,7 @@ typedef struct {
 local SIDHandle = ffi.typeof("SIDHandle");
 local SIDHandle_mt = {
 	__gc = function(self)
-		print("GC: SIDHandle");
+		--print("GC: SIDHandle");
 		if self.OwnAllocation then
 			security_base.FreeSid(self.Handle);
 		end
@@ -54,7 +54,7 @@ local SIDHandle_mt = {
 local SID = {}
 setmetatable(SID, {
 	__call = function(self, ...)
-		return self:new(...);
+		return self:init(...);
 	end,
 
 	__index = {
@@ -101,7 +101,7 @@ local SID_mt = {
 	end,
 }
 
-SID.new = function(self, rawhandle)
+SID.init = function(self, rawhandle)
 	--print("SID.new");
 	local obj = {
 		Handle = SIDHandle(rawhandle);
@@ -118,7 +118,7 @@ end
 SID.asString = function(self)
 	self:getAccountInfo();
 
-	return string.format("%s => %s\\%s [%s]", self.SIDString, self.Domain, self.Name, self.Use);
+	return string.format("%s\\%s [%s]", self.Domain, self.Name, self.Use);
 end
 
 SID.getAccountInfo = function(self)

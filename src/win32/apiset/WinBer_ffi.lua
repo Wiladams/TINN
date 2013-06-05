@@ -1,22 +1,5 @@
 --[[
-
-Copyright (c) 1996-1999  Microsoft Corporation
-
-Module Name:
-
     winber.h   Basic Encoding Rules (BER) API header file
-
-Abstract:
-
-   This module is the header file for the 32 bit BER library on
-   Windows NT and Windows 95.
-
-Updates :
-
-Environments :
-
-    Win32 user mode
-
 --]]
 
 local ffi = require("ffi");

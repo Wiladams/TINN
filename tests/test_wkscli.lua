@@ -1,5 +1,7 @@
 -- test_wkscli.lua
 
+print("Arg: ", arg);
+
 local Workstation = require("Workstation");
 
 

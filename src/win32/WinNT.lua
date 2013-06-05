@@ -576,6 +576,14 @@ static const int STANDARD_RIGHTS_WRITE           = READ_CONTROL;
 static const int STANDARD_RIGHTS_EXECUTE         = READ_CONTROL;
 
 static const int STANDARD_RIGHTS_ALL             = 0x001F0000;
+
+typedef struct {
+    static const int Read = STANDARD_RIGHTS_READ;
+    static const int Write = STANDARD_RIGHTS_WRITE;
+    static const int Execute = STANDARD_RIGHTS_EXECUTE;
+    static const int All = STANDARD_RIGHTS_ALL;
+} StandardRights;
+
 static const int SPECIFIC_RIGHTS_ALL             = 0x0000FFFF;
 
 
@@ -624,9 +632,45 @@ typedef struct _LUID {
 ]]
 
 ffi.cdef[[
+////////////////////////////////////////////////////////////////////////
+//                                                                    //
+//              Security Id     (SID)                                 //
+//                                                                    //
+////////////////////////////////////////////////////////////////////////
+//
+//
+// Pictorially the structure of an SID is as follows:
+//
+//         1   1   1   1   1   1
+//         5   4   3   2   1   0   9   8   7   6   5   4   3   2   1   0
+//      +---------------------------------------------------------------+
+//      |      SubAuthorityCount        |Reserved1 (SBZ)|   Revision    |
+//      +---------------------------------------------------------------+
+//      |                   IdentifierAuthority[0]                      |
+//      +---------------------------------------------------------------+
+//      |                   IdentifierAuthority[1]                      |
+//      +---------------------------------------------------------------+
+//      |                   IdentifierAuthority[2]                      |
+//      +---------------------------------------------------------------+
+//      |                                                               |
+//      +- -  -  -  -  -  -  -  SubAuthority[]  -  -  -  -  -  -  -  - -+
+//      |                                                               |
+//      +---------------------------------------------------------------+
+//
+//
+
 typedef struct _SID_IDENTIFIER_AUTHORITY {
     BYTE  Value[6];
 } SID_IDENTIFIER_AUTHORITY, *PSID_IDENTIFIER_AUTHORITY;
+]]
+
+ffi.cdef[[
+typedef struct _SID {
+   BYTE  Revision;
+   BYTE  SubAuthorityCount;
+   SID_IDENTIFIER_AUTHORITY IdentifierAuthority;
+   DWORD SubAuthority[ANYSIZE_ARRAY];
+} SID, *PISID;
 ]]
 
 ffi.cdef[[
@@ -931,7 +975,9 @@ typedef struct _QUOTA_LIMITS {
 ffi.cdef[[
 typedef DWORD ACCESS_MASK;
 typedef ACCESS_MASK *PACCESS_MASK;
+]]
 
+ffi.cdef[[
 //
 //  These are the generic rights.
 //
@@ -1161,6 +1207,298 @@ typedef struct _ACL
     USHORT AceCount;
     USHORT Sbz2;
 }   ACL, *PACL;
+]]
+
+ffi.cdef[[
+//
+//  The structure of an ACE is a common ace header followed by ace type
+//  specific data.  Pictorally the structure of the common ace header is
+//  as follows:
+//
+//       3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
+//       1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+//      +---------------+-------+-------+---------------+---------------+
+//      |            AceSize            |    AceFlags   |     AceType   |
+//      +---------------+-------+-------+---------------+---------------+
+//
+//  AceType denotes the type of the ace, there are some predefined ace
+//  types
+//
+//  AceSize is the size, in bytes, of ace.
+//
+//  AceFlags are the Ace flags for audit and inheritance, defined shortly.
+
+typedef struct _ACE_HEADER {
+    BYTE  AceType;
+    BYTE  AceFlags;
+    WORD   AceSize;
+} ACE_HEADER;
+typedef ACE_HEADER *PACE_HEADER;
+
+//
+//  The following are the predefined ace types that go into the AceType
+//  field of an Ace header.
+//
+
+static const int ACCESS_MIN_MS_ACE_TYPE                  = (0x0);
+static const int ACCESS_ALLOWED_ACE_TYPE                 = (0x0);
+static const int ACCESS_DENIED_ACE_TYPE                  = (0x1);
+static const int SYSTEM_AUDIT_ACE_TYPE                   = (0x2);
+static const int SYSTEM_ALARM_ACE_TYPE                   = (0x3);
+static const int ACCESS_MAX_MS_V2_ACE_TYPE               = (0x3);
+
+static const int ACCESS_ALLOWED_COMPOUND_ACE_TYPE        = (0x4);
+static const int ACCESS_MAX_MS_V3_ACE_TYPE               = (0x4);
+
+static const int ACCESS_MIN_MS_OBJECT_ACE_TYPE           = (0x5);
+static const int ACCESS_ALLOWED_OBJECT_ACE_TYPE          = (0x5);
+static const int ACCESS_DENIED_OBJECT_ACE_TYPE           = (0x6);
+static const int SYSTEM_AUDIT_OBJECT_ACE_TYPE            = (0x7);
+static const int SYSTEM_ALARM_OBJECT_ACE_TYPE            = (0x8);
+static const int ACCESS_MAX_MS_OBJECT_ACE_TYPE           = (0x8);
+
+static const int ACCESS_MAX_MS_V4_ACE_TYPE               = (0x8);
+static const int ACCESS_MAX_MS_ACE_TYPE                  = (0x8);
+
+static const int ACCESS_ALLOWED_CALLBACK_ACE_TYPE        = (0x9);
+static const int ACCESS_DENIED_CALLBACK_ACE_TYPE         = (0xA);
+static const int ACCESS_ALLOWED_CALLBACK_OBJECT_ACE_TYPE = (0xB);
+static const int ACCESS_DENIED_CALLBACK_OBJECT_ACE_TYPE  = (0xC);
+static const int SYSTEM_AUDIT_CALLBACK_ACE_TYPE          = (0xD);
+static const int SYSTEM_ALARM_CALLBACK_ACE_TYPE          = (0xE);
+static const int SYSTEM_AUDIT_CALLBACK_OBJECT_ACE_TYPE   = (0xF);
+static const int SYSTEM_ALARM_CALLBACK_OBJECT_ACE_TYPE   = (0x10);
+
+static const int SYSTEM_MANDATORY_LABEL_ACE_TYPE         = (0x11);
+static const int ACCESS_MAX_MS_V5_ACE_TYPE               = (0x11);
+
+
+//
+//  The following are the inherit flags that go into the AceFlags field
+//  of an Ace header.
+//
+
+static const int OBJECT_INHERIT_ACE                = (0x1);
+static const int CONTAINER_INHERIT_ACE             = (0x2);
+static const int NO_PROPAGATE_INHERIT_ACE          = (0x4);
+static const int INHERIT_ONLY_ACE                  = (0x8);
+static const int INHERITED_ACE                     = (0x10);
+static const int VALID_INHERIT_FLAGS               = (0x1F);
+
+
+//  The following are the currently defined ACE flags that go into the
+//  AceFlags field of an ACE header.  Each ACE type has its own set of
+//  AceFlags.
+//
+//  SUCCESSFUL_ACCESS_ACE_FLAG - used only with system audit and alarm ACE
+//  types to indicate that a message is generated for successful accesses.
+//
+//  FAILED_ACCESS_ACE_FLAG - used only with system audit and alarm ACE types
+//  to indicate that a message is generated for failed accesses.
+//
+
+//
+//  SYSTEM_AUDIT and SYSTEM_ALARM AceFlags
+//
+//  These control the signaling of audit and alarms for success or failure.
+//
+
+static const int SUCCESSFUL_ACCESS_ACE_FLAG       = (0x40);
+static const int FAILED_ACCESS_ACE_FLAG           = (0x80);
+
+
+//
+//  We'll define the structure of the predefined ACE types.  Pictorally
+//  the structure of the predefined ACE's is as follows:
+//
+//       3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
+//       1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+//      +---------------+-------+-------+---------------+---------------+
+//      |    AceFlags   | Resd  |Inherit|    AceSize    |     AceType   |
+//      +---------------+-------+-------+---------------+---------------+
+//      |                              Mask                             |
+//      +---------------------------------------------------------------+
+//      |                                                               |
+//      +                                                               +
+//      |                                                               |
+//      +                              Sid                              +
+//      |                                                               |
+//      +                                                               +
+//      |                                                               |
+//      +---------------------------------------------------------------+
+//
+//  Mask is the access mask associated with the ACE.  This is either the
+//  access allowed, access denied, audit, or alarm mask.
+//
+//  Sid is the Sid associated with the ACE.
+//
+
+//  The following are the four predefined ACE types.
+
+//  Examine the AceType field in the Header to determine
+//  which structure is appropriate to use for casting.
+
+
+typedef struct _ACCESS_ALLOWED_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD SidStart;
+} ACCESS_ALLOWED_ACE;
+
+typedef ACCESS_ALLOWED_ACE *PACCESS_ALLOWED_ACE;
+
+typedef struct _ACCESS_DENIED_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD SidStart;
+} ACCESS_DENIED_ACE;
+typedef ACCESS_DENIED_ACE *PACCESS_DENIED_ACE;
+
+typedef struct _SYSTEM_AUDIT_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD SidStart;
+} SYSTEM_AUDIT_ACE;
+typedef SYSTEM_AUDIT_ACE *PSYSTEM_AUDIT_ACE;
+
+typedef struct _SYSTEM_ALARM_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD SidStart;
+} SYSTEM_ALARM_ACE;
+typedef SYSTEM_ALARM_ACE *PSYSTEM_ALARM_ACE;
+
+typedef struct _SYSTEM_MANDATORY_LABEL_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD SidStart;
+} SYSTEM_MANDATORY_LABEL_ACE, *PSYSTEM_MANDATORY_LABEL_ACE;
+
+static const int SYSTEM_MANDATORY_LABEL_NO_WRITE_UP       =  0x1;
+static const int SYSTEM_MANDATORY_LABEL_NO_READ_UP        =  0x2;
+static const int SYSTEM_MANDATORY_LABEL_NO_EXECUTE_UP     =  0x4;
+
+static const int SYSTEM_MANDATORY_LABEL_VALID_MASK = (SYSTEM_MANDATORY_LABEL_NO_WRITE_UP   | \
+                                           SYSTEM_MANDATORY_LABEL_NO_READ_UP    | \
+                                           SYSTEM_MANDATORY_LABEL_NO_EXECUTE_UP);
+// end_ntifs
+
+
+typedef struct _ACCESS_ALLOWED_OBJECT_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD Flags;
+    GUID ObjectType;
+    GUID InheritedObjectType;
+    DWORD SidStart;
+} ACCESS_ALLOWED_OBJECT_ACE, *PACCESS_ALLOWED_OBJECT_ACE;
+
+typedef struct _ACCESS_DENIED_OBJECT_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD Flags;
+    GUID ObjectType;
+    GUID InheritedObjectType;
+    DWORD SidStart;
+} ACCESS_DENIED_OBJECT_ACE, *PACCESS_DENIED_OBJECT_ACE;
+
+typedef struct _SYSTEM_AUDIT_OBJECT_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD Flags;
+    GUID ObjectType;
+    GUID InheritedObjectType;
+    DWORD SidStart;
+} SYSTEM_AUDIT_OBJECT_ACE, *PSYSTEM_AUDIT_OBJECT_ACE;
+
+typedef struct _SYSTEM_ALARM_OBJECT_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD Flags;
+    GUID ObjectType;
+    GUID InheritedObjectType;
+    DWORD SidStart;
+} SYSTEM_ALARM_OBJECT_ACE, *PSYSTEM_ALARM_OBJECT_ACE;
+
+//
+// Callback ace support in post Win2000.
+// Resource managers can put their own data after Sidstart + Length of the sid
+//
+
+typedef struct _ACCESS_ALLOWED_CALLBACK_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD SidStart;
+    // Opaque resouce manager specific data
+} ACCESS_ALLOWED_CALLBACK_ACE, *PACCESS_ALLOWED_CALLBACK_ACE;
+
+typedef struct _ACCESS_DENIED_CALLBACK_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD SidStart;
+    // Opaque resouce manager specific data
+} ACCESS_DENIED_CALLBACK_ACE, *PACCESS_DENIED_CALLBACK_ACE;
+
+typedef struct _SYSTEM_AUDIT_CALLBACK_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD SidStart;
+    // Opaque resouce manager specific data
+} SYSTEM_AUDIT_CALLBACK_ACE, *PSYSTEM_AUDIT_CALLBACK_ACE;
+
+typedef struct _SYSTEM_ALARM_CALLBACK_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD SidStart;
+    // Opaque resouce manager specific data
+} SYSTEM_ALARM_CALLBACK_ACE, *PSYSTEM_ALARM_CALLBACK_ACE;
+
+typedef struct _ACCESS_ALLOWED_CALLBACK_OBJECT_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD Flags;
+    GUID ObjectType;
+    GUID InheritedObjectType;
+    DWORD SidStart;
+    // Opaque resouce manager specific data
+} ACCESS_ALLOWED_CALLBACK_OBJECT_ACE, *PACCESS_ALLOWED_CALLBACK_OBJECT_ACE;
+
+typedef struct _ACCESS_DENIED_CALLBACK_OBJECT_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD Flags;
+    GUID ObjectType;
+    GUID InheritedObjectType;
+    DWORD SidStart;
+    // Opaque resouce manager specific data
+} ACCESS_DENIED_CALLBACK_OBJECT_ACE, *PACCESS_DENIED_CALLBACK_OBJECT_ACE;
+
+typedef struct _SYSTEM_AUDIT_CALLBACK_OBJECT_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD Flags;
+    GUID ObjectType;
+    GUID InheritedObjectType;
+    DWORD SidStart;
+    // Opaque resouce manager specific data
+} SYSTEM_AUDIT_CALLBACK_OBJECT_ACE, *PSYSTEM_AUDIT_CALLBACK_OBJECT_ACE;
+
+typedef struct _SYSTEM_ALARM_CALLBACK_OBJECT_ACE {
+    ACE_HEADER Header;
+    ACCESS_MASK Mask;
+    DWORD Flags;
+    GUID ObjectType;
+    GUID InheritedObjectType;
+    DWORD SidStart;
+    // Opaque resouce manager specific data
+} SYSTEM_ALARM_CALLBACK_OBJECT_ACE, *PSYSTEM_ALARM_CALLBACK_OBJECT_ACE;
+
+//
+// Currently define Flags for "OBJECT" ACE types.
+//
+
+static const int ACE_OBJECT_TYPE_PRESENT           = 0x1;
+static const int ACE_INHERITED_OBJECT_TYPE_PRESENT = 0x2;
 ]]
 
 ffi.cdef[[
@@ -1517,3 +1855,8 @@ static const int FILE_ATTRIBUTE_VIRTUAL              = 0x00010000;
 ffi.cdef[[
 static const int MAXIMUM_ALLOWED                 = 0x02000000;
 ]]
+
+return {
+    StandardRights = ffi.new("StandardRights");
+    GenericRights = ffi.new("GENERIC_MAPPING");
+}
