@@ -11,13 +11,13 @@ local journal, err = USNJournal:open("c:");
 print("Journal: ", journal, err);
 
 if not journal and err == ERROR_FILE_NOT_FOUND then
-	-- journal file not found, so create it
-	journal, err = USNJournal:create("c:");
+	-- journal file not found, so activate it
+	journal, err = USNJournal:activate("c:");
 
-	print("Create Journal: ", journal, err);
+	print("Activate Journal: ", journal, err);
 
 	if not journal then
-		print("Could not create journal: ", err)
+		print("Could not activate journal: ", err)
 		return false, err;
 	end
 end 
@@ -72,8 +72,35 @@ typedef struct {
 } USN_RECORD, *PUSN_RECORD;
 --]]
 
--- print all the USNs
-for entry in journal:entries() do
---	print("USN: ", usn);
-	printJournalEntry(entry);
+local test_getJournalEntries = function()
+    -- print all the USNs
+    for entry in journal:entries() do
+    --	print("USN: ", usn);
+	   printJournalEntry(entry);
+    end
 end
+
+local test_getLatestJournalEntries = function()
+    local startAt = tonumber(journal:getNextUsn()) - ffi.C.USN_PAGE_SIZE;
+
+    for entry in journal:entries(startAt) do
+    --  print("USN: ", usn);
+       printJournalEntry(entry);
+    end
+end
+
+local test_waitForNextEntry = function()
+    local entry = journal:waitForNextEntry();
+
+    while entry do
+        printJournalEntry(entry);
+        entry = journal:waitForNextEntry();
+    end
+
+end
+
+test_getJournalEntries();
+--test_getLatestJournalEntries();
+
+
+--test_waitForNextEntry();
