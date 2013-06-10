@@ -15,6 +15,8 @@ local core_file = require("core_file_l1_2_0");
 local WinIoCtl = require("WinIoCtl");
 local WinBase = require("WinBase");
 local errorhandling = require("core_errorhandling_l1_1_1");
+local FsHandles = require("FsHandles");
+
 
 --[[
 Change journal operations
@@ -26,25 +28,7 @@ FSCTL_QUERY_USN_JOURNAL
 FSCTL_READ_USN_JOURNAL
 --]]
 
-ffi.cdef[[
-typedef struct {
-	HANDLE  Handle;
-} FsHandle;
-]]
-local FsHandle = ffi.typeof("FsHandle");
-local FsHandle_mt = {
-	__gc = function(self)
-		if self:isValid() then
-			core_file.CloseHandle(self.Handle);
-		end
-	end,
 
-	__index = {
-		isValid = function(self)
-			return self.Handle ~= INVALID_HANDLE_VALUE;
-		end,
-	},
-};
 
 
 --[[
@@ -158,7 +142,7 @@ ChangeJournal.getVolumeHandle = function(self, driveLetter, dwCreationDispositio
 		return false, errorhandling.GetLastError();
 	end
 
-	return FsHandle(handle);
+	return FsHandles.FsHandle(handle);
 end
 
 ChangeJournal.getNextUsn = function(self)
@@ -235,16 +219,19 @@ ChangeJournal.entries = function(self, StartUsn, ReasonMask)
 
 			if status == 0 then
 				local err = errorhandling.GetLastError();
-				print("FAILURE: ", err)
 				return nil;
 			end
 
 			bytesReturned = dwBytes[0];
---			print("BYTES RETURNED: ", bytesReturned);
 
 			-- skip past the initial USN
 			nextBuffUsn = ffi.cast("USN *", Buffer)[0];
 			dwRetBytes = bytesReturned - ffi.sizeof("USN");
+
+			if dwRetBytes == 0 then
+				-- reached end of records
+				return nil;
+			end
 
 			-- Find the first record
 			UsnRecord = ffi.cast("PUSN_RECORD", ffi.cast("PUCHAR",Buffer) + ffi.sizeof("USN")); 
@@ -253,7 +240,7 @@ ChangeJournal.entries = function(self, StartUsn, ReasonMask)
 			return UsnRecord; 
 		end
 
-
+		-- Return the next record
 		UsnRecord = ffi.cast("PUSN_RECORD",(ffi.cast("PCHAR",UsnRecord) + UsnRecord.RecordLength));
 		dwRetBytes = dwRetBytes - UsnRecord.RecordLength;
 

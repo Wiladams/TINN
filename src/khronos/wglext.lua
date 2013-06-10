@@ -415,7 +415,7 @@ WGL_ACCESS_WRITE_DISCARD_NV    = 0x00000002
 -- WGL_EXT_swap_control_tear
 
 
-function DECLARE_HANDLE(name)
+local function DECLARE_HANDLE(name)
 	local decl = string.format([[
 		struct %s__ {
 			int unused;

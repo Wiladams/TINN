@@ -214,6 +214,16 @@ Heap.allocBlob = function(self, nbytes, flags)
 	return blob
 end
 
+Heap.free = function(self, ptr, dwFlags)
+	dwFlags = dwFlags or 0;
+	local status = heap_ffi.HeapFree(self:getNativeHandle(), dwFlags, ptr);
+	if status == 0 then
+		return false, errorhandling.GetLastError();
+	end
+
+	return true;
+end
+
 Heap.compact = function(self, flags)
 	flags = flags or 0
 	local size = heap_ffi.HeapCompact(self:getNativeHandle(), flags)

@@ -13,31 +13,31 @@ setmetatable(SecurityAcl, {
 		return self:create(...);
 	end,
 
-	__index = {
-		create = function(self, nAclLength, dwAclRevision)
-			nAclLength = nAclLength or 0;
-			dwAclRevision = dwAclRevision or ffi.C.ACL_REVISION;
-
-			if nAclLength == 0 then
-				nAclLength = ffi.sizeof("ACL");
-			end
-
-			local acl = ffi.new("uint8_t[?]", nAclLength);
-		
-			local status = security_base.InitializeAcl(ffi.cast("PACL",acl), nAclLength, dwAclRevision);
-
-			if status == 0 then
-				return false, errorhandling.GetLastError();
-			end
-
-			return self:init(acl);
-		end,
-    },
+	__index = SecurityAcl,
 });
 
 SecurityAcl_mt = {
 	__index = SecurityAcl;
 }
+
+SecurityAcl.create = function(self, nAclLength, dwAclRevision)
+	nAclLength = nAclLength or 0;
+	dwAclRevision = dwAclRevision or ffi.C.ACL_REVISION;
+
+	if nAclLength == 0 then
+		nAclLength = ffi.sizeof("ACL");
+	end
+
+	local acl = ffi.new("uint8_t[?]", nAclLength);
+		
+	local status = security_base.InitializeAcl(ffi.cast("PACL",acl), nAclLength, dwAclRevision);
+
+	if status == 0 then
+		return false, errorhandling.GetLastError();
+	end
+
+	return self:init(acl);
+end
 
 SecurityAcl.init = function(self, aclbuff)
 	local obj = {

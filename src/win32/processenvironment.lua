@@ -4,6 +4,7 @@ local ffi = require("ffi");
 
 local core_procenv = require ("core_processenvironment");
 local core_errorhandling = require("core_errorhandling_l1_1_1");
+local core_library = require("core_libraryloader_l1_1_1");
 
 
 local GetCommandLine = function()
@@ -25,6 +26,18 @@ local GetCurrentDirectory = function()
 	return ffi.string(lpBuffer);
 end
 
+local GetAppPath = function()
+	local moduleHandle = core_library.GetModuleHandleA(nil);
+
+	local bufflen = ffi.C.MAX_PATH;
+	local buff = ffi.new("char[?]", bufflen);
+
+	local maxchars = core_library.GetModuleFileNameA(moduleHandle, buff, bufflen);
+	buff[maxchars] = 0;
+
+	return ffi.string(buff, maxchars);
+end
+
 
 cmdLine = function()
 	print(GetCommandLine());
@@ -43,4 +56,6 @@ return {
 
 	getcwd = GetCurrentDirectory,
 	GetCurrentDirectory = GetCurrentDirectory,
+
+	GetAppPath = GetAppPath,
 }

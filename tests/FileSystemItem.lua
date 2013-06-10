@@ -9,30 +9,13 @@ local errorhandling = require("core_errorhandling_l1_1_1");
 local WinBase = require("WinBase");
 local WinNT = require("WinNT");
 local Collections = require("Collections");
+local FsHandles = require("FsHandles");
 
 
 --[[
 	File System File Iterator
 --]]
 
-ffi.cdef[[
-typedef struct {
-	HANDLE Handle;
-} FsFindFileHandle;
-]]
-local FsFindFileHandle = ffi.typeof("FsFindFileHandle");
-local FsFindFileHandle_mt = {
-	__gc = function(self)
-		core_file.FindClose(self.Handle);
-	end,
-
-	__index = {
-		isValid = function(self)
-			return self.Handle ~= INVALID_HANDLE_VALUE;
-		end,
-	},
-};
-ffi.metatype(FsFindFileHandle, FsFindFileHandle_mt);
 
 
 
@@ -146,7 +129,7 @@ FileSystemItem.items = function(self, pattern)
 		lpSearchFilter,
 		dwAdditionalFlags);
 
-	local handle = FsFindFileHandle(rawHandle);
+	local handle = FsHandles.FsFindFileHandle(rawHandle);
 	local firstone = true;
 
 	local closure = function()
@@ -247,7 +230,7 @@ FileSystemItem.streams = function(self)
 		lpFindStreamData,
 		dwFlags);
 	local firstone = true;
-	local fsHandle = FsFindFileHandle(rawHandle);
+	local fsHandle = FsHandles.FsFindFileHandle(rawHandle);
 
 	--print("streams, rawHandle: ", rawHandle, rawHandle == INVALID_HANDLE);
 

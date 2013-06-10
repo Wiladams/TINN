@@ -5,7 +5,7 @@ local ffi = require("ffi");
 local k32Lib = ffi.load("kernel32");
 local WTypes = require("WTypes");
 local WinNT = require("WinNT");
-
+local WinBase = require("WinBase");
 
 ffi.cdef[[
 typedef struct _RTL_SRWLOCK {                            

@@ -35,7 +35,7 @@ printJournalInfo = function(jinfo)
     print("Allocation Delta: ", tonumber(jinfo.AllocationDelta));
 end
 
-printJournalEntry = function(entry)
+local printJournalEntry = function(entry)
 	print("== JOURNAL ENTRY ==");
 	print("Timestamp: ", entry.TimeStamp.QuadPart);
 	print("RecordLength: ", entry.RecordLength);
@@ -47,9 +47,13 @@ printJournalEntry = function(entry)
 	print("Filename: ", core_string.toAnsi(entry.FileName, entry.FileNameLength));
 end
 
-print("Query: ", qresult, err);
+local printEntryReason = function(entry)
+    print(string.format("0x%x",entry.Reason), core_string.toAnsi(entry.FileName, entry.FileNameLength))
+end
 
-printJournalInfo(qresult);
+--print("Query: ", qresult, err);
+
+--printJournalInfo(qresult);
 
 
 --[[
@@ -72,11 +76,16 @@ typedef struct {
 } USN_RECORD, *PUSN_RECORD;
 --]]
 
-local test_getJournalEntries = function()
+local test_getJournalEntries = function(StartUsn, ReasonMask, printRoutine)
+    StartUsn = StartUsn or 0
+    ReasonMask = ReasonMask or 0xFFFFFFFF;
+    printRoutine = printRoutine or printJournalEntry;
+
     -- print all the USNs
-    for entry in journal:entries() do
-    --	print("USN: ", usn);
-	   printJournalEntry(entry);
+    for entry in journal:entries(nil, ReasonMask) do
+	   --printRoutine(entry);
+
+       collectgarbage();
     end
 end
 
@@ -99,7 +108,7 @@ local test_waitForNextEntry = function()
 
 end
 
-test_getJournalEntries();
+test_getJournalEntries(0, ffi.C.USN_REASON_FILE_DELETE, printEntryReason);
 --test_getLatestJournalEntries();
 
 

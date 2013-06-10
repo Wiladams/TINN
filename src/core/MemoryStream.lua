@@ -21,7 +21,7 @@ function MemoryStream.Open(buff, bufflen, byteswritten)
 
 
 	offset = offset or 0
-	byteswritten = byteswritten or 0
+	--byteswritten = byteswritten or 0
 
 	if not bufflen then
 		if type(buff) == "string" then
@@ -31,6 +31,7 @@ function MemoryStream.Open(buff, bufflen, byteswritten)
 		end
 	end
 
+	byteswritten = byteswritten or bufflen;
 
 	local obj = {
 		Length = bufflen,

@@ -2,11 +2,11 @@
 local ffi = require("ffi");
 
 local lua = require("luajit_ffi");
+local errorhandling = require("core_errorhandling_l1_1_1");
 local core_process = require("core_processthreads_l1_1_1");
 local WinBase = require("WinBase");
 local tinn = ffi.load("tinn.exe");
 
-print("tinn: ", tinn);
 
 -- Definition of RunLuaThread
 -- coming from tinn.c
@@ -24,10 +24,14 @@ int RunLuaScript(void *s);
 local TINNThread = {}
 setmetatable(TINNThread, {
 	__call = function(self, ...)
-		return self:new(...);
+		return self:create(...);
 	end,
 
 	__index = {
+		NumberToPointer = function(self, num)
+			return ffi.cast("intptr_t", num);
+		end,
+
 		-- This helper routine will take a pointer
 		-- to cdata, and return a string that contains
 		-- the memory address
@@ -56,59 +60,94 @@ local TINNThread_mt = {
 }
 
 
-TINNThread.new = function(self, params)
-	params = params or {};
+TINNThread.create = function(self, params)
+	local rawhandle = nil;
 
-	if not params.CodeChunk then
-		return false, 'no code chunk specified';
+	if not params then
+		rawhandle = core_process.GetCurrentThread();
+	else
+		if not params.CodeChunk then
+			return false, 'no code chunk specified';
+		end
+
+		local flags = 0
+		if params.CreateSuspended then
+			flags = CREATE_SUSPENDED;
+		end
+
+		--local obj = {
+		--	ThreadParam = params.Param,
+		--	Flags = flags,
+		--};
+
+
+		local pthreadId = ffi.new("DWORD[1]")
+		rawhandle = core_process.CreateThread(nil,
+			0,
+			tinn.RunLuaScript,
+			ffi.cast("void *", params.CodeChunk),
+			flags,
+			pthreadId);
+		--	local threadId = pthreadId[0];
 	end
 
-	local flags = 0
-	if params.CreateSuspended then
-		flags = CREATE_SUSPENDED;
+	if rawhandle == nil then
+		return false, errorhandling.GetLastError();
 	end
 
-	-- prepend the param to the code chunk if it was supplied
-	--local threadprogram = PrependThreadParam(codechunk, param)
 
+	return self:init(rawhandle);
+end
+
+TINNThread.init = function(self, rawhandle)
 	local obj = {
-		CodeChunk = params.CodeChunk,
-		ThreadParam = params.Param,
-		Flags = flags,
+		Handle = rawhandle;
 	};
 	setmetatable(obj, TINNThread_mt);
-
---print("CHUNK");
---print(obj.CodeChunk);
-
-	local threadId = ffi.new("DWORD[1]")
-	obj.Handle = core_process.CreateThread(nil,
-		0,
-		tinn.RunLuaScript,
-		ffi.cast("void *", obj.CodeChunk),
-		flags,
-		threadId);
-
-	threadId = threadId[0];
-	obj.ThreadId = threadId;
 
 	return obj;
 end
 
-function TINNThread:resume()
+TINNThread.getNativeHandle = function(self)
+	return self.Handle;
+end
+
+TINNThread.getProcessId = function(self)
+	local status = core_process.GetProcessIdOfThread(self.Handle);
+	
+	if status == 0 then
+		return false, errorhandling.GetLastError();
+	end
+
+	return status;
+end
+
+
+TINNThread.getThreadId = function(self)
+	local status = core_process.GetThreadId(self.Handle);
+	if status == 0 then
+		return false, errorhandling.GetLastError();
+	end
+
+	return status;
+end
+
+
+TINNThread.resume = function(self)
 -- need the following thread access right
 --THREAD_SUSPEND_RESUME
 
 	local result = core_process.ResumeThread(self.Handle);
 end
 
-function TINNThread:suspend()
+TINNThread.suspend = function(self)
 	local status = core_process.SuspendThread(self.Handle);
 	return status;
 end
 
-function TINNThread:yield()
+TINNThread.yield = function(self)
 	local status = core_process.SwitchToThread();
+
 	return status;
 end
 

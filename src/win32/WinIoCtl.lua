@@ -1,11 +1,13 @@
 -- WinIoCtl.lua
 
 local ffi = require("ffi");
+
 local bit = require("bit");
 local bor = bit.bor;
 local band = bit.band;
 local lshift = bit.lshift;
 local rshift = bit.rshift;
+
 local WinNT = require("WinNT");
 local WTypes = require("WTypes");
 
