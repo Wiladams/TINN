@@ -28,14 +28,21 @@ setmetatable(TINNThread, {
 	end,
 
 	__index = {
-		NumberToPointer = function(self, num)
-			return ffi.cast("intptr_t", num);
+
+		StringToPointer = function(self, str)
+			local num = tonumber(str);
+			if not num then
+				return nil, "invalid number";
+			end
+
+			return ffi.cast("void *", ffi.cast("intptr_t", num));
 		end,
+
 
 		-- This helper routine will take a pointer
 		-- to cdata, and return a string that contains
 		-- the memory address
-		CreatePointerString = function(self, instance)
+		PointerToString = function(self, instance)
 			if ffi.abi("64bit") then
 				return string.format("0x%016x", tonumber(ffi.cast("int64_t", ffi.cast("void *", instance))))
 			elseif ffi.abi("32bit") then
@@ -45,13 +52,6 @@ setmetatable(TINNThread, {
 			return nil;
 		end,
 		
-		PrependThreadParam = function(self, codechunk, threadparam)
-			if threadparam == nil or codechunk == nil then return codechunk end
-
-			local paramAsString = self:CreatePointerString(threadparam)
-
-			return string.format("local _ThreadParam = %s\n\n%s", paramAsString, codechunk)
-		end,
 	};
 });
 

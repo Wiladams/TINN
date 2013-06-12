@@ -1051,17 +1051,8 @@ ffi.cdef[[
 SOCKET WSASocketA(int af, int type, int protocol, LPWSAPROTOCOL_INFOA lpProtocolInfo,
     GROUP g, DWORD dwFlags);
 
-BOOL AcceptEx (SOCKET sListenSocket, SOCKET sAcceptSocket,
-	PVOID lpOutputBuffer,
-    DWORD dwReceiveDataLength,
-    DWORD dwLocalAddressLength,
-    DWORD dwRemoteAddressLength,
-    LPDWORD lpdwBytesReceived,
-    LPOVERLAPPED lpOverlapped);
-
 int WSAGetLastError();
 
-INT WSARecvEx(SOCKET s, CHAR *buf, INT len, INT *flags);
 
 
 

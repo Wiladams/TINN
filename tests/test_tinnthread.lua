@@ -41,7 +41,7 @@ main = function()
 	local myQueue = SList();
 
 	local threadChunk = string.format(chunkTemplate, 
-		TINNThread:CreatePointerString(myQueue.ListHead));
+		TINNThread:PointerToString(myQueue.ListHead));
 
 	print("CHUNK");
 	print("List Head: ", myQueue.ListHead);

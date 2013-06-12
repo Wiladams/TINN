@@ -54,8 +54,8 @@ local main = function()
 	end
 
 	-- launch worker threads
-	local iocphandle = TINNThread:CreatePointerString(iocp:getNativeHandle());
-	local heaphandle = TINNThread:CreatePointerString(memman:getNativeHandle());
+	local iocphandle = TINNThread:PointerToString(iocp:getNativeHandle());
+	local heaphandle = TINNThread:PointerToString(memman:getNativeHandle());
 	local codechunk = string.format(workerTmpl, iocphandle, heaphandle);
 
 	for i=1,4 do 
