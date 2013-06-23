@@ -3,8 +3,8 @@ local ffi = require "ffi"
 local bit = require "bit"
 local band = bit.band
 
-local WinSock = require "WinSock_Utils"
 local NativeSocket = require "NativeSocket"
+local ws2_32 = require("ws2_32");
 
 -- pass in a sockaddr
 -- get out a more specific sockaddr_in or sockaddr_in6
@@ -29,7 +29,7 @@ local host_serv = function(hostname, servicename, family, sockttype, isnumericst
 	socktype = socktype or SOCK_STREAM;
 
 	local err;
-	local hints = WinSock.addrinfo();
+	local hints = addrinfo();
 	local res = ffi.new("PADDRINFOA[1]")
 
 	--hints.ai_flags = AI_CANONNAME;	-- return canonical name
@@ -39,7 +39,7 @@ local host_serv = function(hostname, servicename, family, sockttype, isnumericst
 		hints.ai_flags = AI_NUMERICHOST
 	end
 
-	err = WinSock.Lib.getaddrinfo(hostname, servicename, hints, res)
+	err = ws2_32.getaddrinfo(hostname, servicename, hints, res)
 --print("host_serv, err: ", err);
 	if err ~= 0 then
 		-- error condition
@@ -53,8 +53,8 @@ end
 local CreateIPV4WildcardAddress= function(family, port)
 	local inetaddr = sockaddr_in()
 	inetaddr.sin_family = family;
-	inetaddr.sin_addr.S_addr = WinSock.Lib.htonl(INADDR_ANY);
-	inetaddr.sin_port = WinSock.Lib.htons(port);
+	inetaddr.sin_addr.S_addr = ws2_32.htonl(INADDR_ANY);
+	inetaddr.sin_port = ws2_32.htons(port);
 
 	return inetaddr
 end
@@ -83,7 +83,7 @@ local CreateSocketAddress = function(hostname, port, family, socktype)
 	oneaddress:SetPort(port)
 
 	-- free the addrinfos structure
-	err = WinSock.Lib.freeaddrinfo(addressinfo)
+	err = ws2_32.freeaddrinfo(addressinfo)
 
 	return oneaddress;
 end
@@ -107,7 +107,7 @@ local CreateTcpServerSocket = function(params)
 	success, err = sock:SetNoDelay(params.nodelay)
 	success, err = sock:SetReuseAddress(true);
 
-	local addr = WinSock.sockaddr_in(params.port);
+	local addr = sockaddr_in(params.port);
 	local addrlen = ffi.sizeof("struct sockaddr_in")
 
 	success, err = sock:Bind(addr,addrlen)
@@ -157,6 +157,9 @@ end
 
 return {
 	host_serv = host_serv,
+	
+	CreateIPV4WildcardAddress = CreateIPV4WildcardAddress,
+	CreateSocketAddress = CreateSocketAddress,
 
 	CreateTcpServerSocket = CreateTcpServerSocket,
 	CreateTcpClientSocket = CreateTcpClientSocket,

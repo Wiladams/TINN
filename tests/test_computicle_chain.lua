@@ -1,36 +1,32 @@
 local Computicle = require("Computicle");
 
+-- Setup the leaf nodes to receive messages
+local sink1 = Computicle:load("comp_sinkcode");
+local sink2 = Computicle:load("comp_sinkcode");
 
 
-local comp2 = Computicle:create([[
-local ffi = require("ffi");
+-- Setup the splitter that will dispatch to the leaf nodes
+local splitter = Computicle:load("comp_splittercode");
 
-while true do
-	local msg = SELFICLE:getMessage();
-	msg = ffi.cast("ComputicleMsg *", msg);
-
-	print(msg.Message*10);
-	SELFICLE.Heap:free(msg);
-end
-]]);
-
-local sinkstone = comp2:getStoned();
+splitter.sink1 = sink1;
+splitter.sink2 = sink2;
 
 
-local comp1 = Computicle:create([[
-local ffi = require("ffi");
-
-local stone = _params.sink;
-stone = ffi.cast("Computicle_t *", stone);
-
-local sinkComp = Computicle:init(stone.HeapHandle, stone.IOCPHandle, stone.ThreadHandle);
-
-for i = 1, 10 do
-	sinkComp:postMessage(i);
-end
-]], {sink = sinkstone});
+-- Setup the source, which will be originating messages
+local source = Computicle:load("comp_sourcecode");
+source.sink = splitter;
 
 
-print("Finish 1: ", comp1:waitForFinish());
+-- Close everything down from the outside
+print("FINISH source: ", source:waitForFinish());
 
-print("Finish 2: ", comp2:waitForFinish());
+-- tell the splitter to quit
+splitter:quit();
+print("FINISH splitter:", splitter:waitForFinish());
+
+-- tell the two sinks to quit once the splitter
+-- has finished
+--sink1:quit();
+--sink2:quit();
+print("Finish Sink 1: ", sink1:waitForFinish());
+print("Finish Sink 2: ", sink2:waitForFinish());

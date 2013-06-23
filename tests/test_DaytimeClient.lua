@@ -1,7 +1,22 @@
+local Computicle = require("Computicle");
 
-local DaytimeClient = require "DaytimeClient"
+--local comp = Computicle:create("print('Hello, World')");
+local comp = Computicle:create([[
+gIdleTimeout = 500
 
-for i=1, 500 do
-	local dtc = DaytimeClient.new("localhost")
-	dtc:Run()
-end
+require("DaytimeClient");
+
+	local dtc, err = GetDateAndTime("localhost");
+	
+	--if not dtc then
+	--	print("test_DaytimeClient.lua - ERROR: ", err);
+	--	break;
+	--end
+
+	print(dtc);
+
+	--collectgarbage();
+]]);
+
+
+comp:waitForFinish();

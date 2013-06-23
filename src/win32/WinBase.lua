@@ -3,9 +3,6 @@
 local ffi = require "ffi"
 
 require ("WTypes");
---require ("Handle_ffi");
---require ("Heap_ffi");
---require ("SysInfo_ffi");
 require ("ntstatus");
 local advapiLib = ffi.load("AdvApi32");
 
@@ -16,9 +13,10 @@ INVALID_FILE_SIZE         = (0xFFFFFFFF);
 INVALID_SET_FILE_POINTER  = (-1);
 INVALID_FILE_ATTRIBUTES   = (-1);
 
-WAIT_TIMEOUT = 0X102;
 WAIT_OBJECT_0 = 0;
-
+WAIT_ABANDONED = 0x00000080;
+WAIT_TIMEOUT = 0x102;
+WAIT_FAILED = 0xFFFFFFFF;
 
 FILE_SHARE_READ			= 0X01;
 FILE_SHARE_WRITE		= 0X02;

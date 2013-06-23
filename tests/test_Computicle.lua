@@ -1,28 +1,29 @@
 
 local Computicle = require("Computicle");
 
-local test_compute = function()
-local comp1 = Computicle:compute([[print("Hello World!");]]);
-local comp2 = Computicle:compute([[
+local test_parallel = function()
+local comp1 = Computicle:create([[print("Hello World!"); exit()]]);
+local comp2 = Computicle:create([[
 	for i=1,10 do
-		print("Counter: ", i);
+		print(string.format("Counter: %d", i));
 	end
+
+	exit();
 ]]);
 
 print("Finish: ", comp1:waitForFinish());
 print("Finish: ", comp2:waitForFinish());
 end
 
-local test_computicle = function()
-	local comp = Computicle:create([[print("Hello World!")]]);
-	comp:resume();
+local test_loadandrun = function()
+	print("Finish: ", Computicle:loadAndRun("helloworld"));
 
-	print("Finish: ", comp:waitForFinish());
 end
 
 
---test_computicle();
+test_parallel();
 
-test_compute();
+--test_loadandrun();
+
 
 

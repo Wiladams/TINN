@@ -1,12 +1,15 @@
 -- Computicle.lua
 
 local ffi = require("ffi");
+
 local Heap = require("Heap");
-local TINNThread = require("TINNThread");
-local IOCompletionPort = require("IOCompletionPort");
 local core_synch = require("core_synch_l1_2_0");
 local errorhandling = require("core_errorhandling_l1_1_1");
 local WinBase = require("WinBase");
+local JSON = require("dkjson");
+
+local TINNThread = require("TINNThread");
+local IOCompletionPort = require("IOCompletionPort");
 
 ffi.cdef[[
 typedef struct {
@@ -17,13 +20,36 @@ typedef struct {
 
 typedef struct {
 	int32_t		Message;
-	UINT_PTR	wParam;
-	LONG_PTR	lParam;
+	UINT_PTR	Param1;
+	LONG_PTR	Param2;
 } ComputicleMsg;
 ]]
 
+
+
+
 local Computicle = {
 	Threads = {},
+	Messages = {
+		QUIT = -1,
+		CODE = -2,
+	},
+
+	Prolog = [[
+TINNThread = require("TINNThread");
+Computicle = require("Computicle");
+IOCompletionPort = require("IOCompletionPort");
+Heap = require("Heap");
+IOProcessor = require("IOProcessor");
+
+exit = function()
+    SELFICLE:quit();
+end
+]];
+
+	Epilog = [[
+require("comp_msgpump");
+]];
 }
 setmetatable(Computicle, {
 	__call = function(self, ...)
@@ -32,7 +58,20 @@ setmetatable(Computicle, {
 });
 
 local Computicle_mt = {
-	__index = Computicle,
+	__index = function(self, key)
+		if Computicle[key] then
+			return Computicle[key];
+		end
+		print("Computicle LOOKUP: ", key);
+	end,
+
+	__newindex = function(self, key, value)
+		--print("Setting Value: ", key, value);
+		
+		local setvalue = key..'='..self:datumToString(value, key);
+
+		return self:exec(setvalue);
+	end,
 }
 
 Computicle.init = function(self, heapHandle, iocpHandle, threadId)
@@ -48,6 +87,53 @@ Computicle.init = function(self, heapHandle, iocpHandle, threadId)
 	return obj;
 end
 
+
+Computicle.datumToString = function(self, data, name)
+	local dtype = type(data);
+	local datastr = tostring(nil);
+
+--print("DATUM TYPE: ", name, dtype);
+
+	if type(data) == "cdata" then
+		-- If it is a cdata type that easily converts to 
+		-- a number, then convert to a number and assign to string
+		if tonumber(data) then
+			datastr = tostring(tonumber(data));
+		else
+			-- if not easily converted to number, then just assign the pointer
+			datastr = string.format("TINNThread:StringToPointer(%s);", 
+				TINNThread:PointerToString(data));
+		end
+	elseif dtype == "table" then
+		if getmetatable(data) == Computicle_mt then
+			-- package up a computicle
+			datastr = string.format("Computicle:init(TINNThread:StringToPointer(%s),TINNThread:StringToPointer(%s));", 
+				TINNThread:PointerToString(data.Heap:getNativeHandle()), 
+				TINNThread:PointerToString(data.IOCP:getNativeHandle()));
+		elseif getmetatable(data) == getmetatable(self.IOCP) then
+			-- The data is an iocompletion port, so handle it specially
+			datastr = string.format("IOCompletionPort:init(TINNThread:StringToPointer(%s))",
+				TINNThread:PointerToString(data:getNativeHandle()));
+		else
+			-- get a json string representation of the table
+			datastr = string.format("[[ %s ]]",JSON.encode(data, {indent=true}));
+
+			--print("=== JSON ===");
+			--print(datastr)
+		end
+	elseif dtype == "function" then
+		datastr = "loadstring([["..string.dump(data).."]])";
+	elseif dtype == "string" then
+		datastr = string.format("[[%s]]", data);
+	else 
+		datastr = tostring(data);
+	end
+
+	return datastr;
+end
+
+
+
 Computicle.packParams = function(self, params, name)
 	if not params then
 		return "";
@@ -59,50 +145,58 @@ Computicle.packParams = function(self, params, name)
 	-- as string pointers
 	local res = {};
 	for k,v in pairs(params) do
-		table.insert(res, string.format("%s['%s'] = TINNThread:StringToPointer(%s);", 
-			name, k, TINNThread:PointerToString(v)));
+		table.insert(res, string.format("%s['%s'] = %s", name, k, self:datumToString(v, k)));
 	end
 
 	return table.concat(res, '\n');
 end
 
-Computicle.unpackParams = function(self, paramsstring)
-end
+
+
+
 
 Computicle.createThreadChunk = function(self, codechunk, params, codeparams)
 	local res = {};
 
 
-	local preamble = [[
-local TINNThread = require("TINNThread");
-local Computicle = require("Computicle");
-]]
-	table.insert(res, preamble);
+	-- What we want to load before any other code is executed
+	-- This is typically some 'require' statements.
+	table.insert(res, Computicle.Prolog);
 
+
+	-- Package up the parameters that may want to be passed in
 	local paramname = "_params";
-
 
 	table.insert(res, string.format("%s = {};", paramname));
 	table.insert(res, self:packParams(params, paramname));
 	table.insert(res, self:packParams(codeparams, paramname));
 
+	-- Create the Computicle instance that is running within 
+	-- the Computicle
 	table.insert(res, 
 		string.format("SELFICLE = Computicle:init(%s.HeapHandle, %s.IOCPHandle);", paramname, paramname));
 
 
+	-- Stuff in the user's code
+	table.insert(res, [[main = function()]]);
 	table.insert(res, codechunk);
+	table.insert(res, [[end]]);
+	-- make sure the user's code is running in a coroutine
+	table.insert(res, [[IOProcessor:spawn(main)]]);
+
+	
+	-- What we want to execute after the user's code is loaded
+	-- By default, this will be a message pump
+	table.insert(res, Computicle.Epilog);
 
 	return table.concat(res, '\n');
 end
 
-Computicle.compute = function(self, codechunk, params)
-	return  self:create(codechunk, params);
-end
 
 -- Create a new computicle
 --[[
 	codechunk - a simple Lua string
-	params - a table of cdata structs that are to be passed on
+	codeparams - a table of cdata structs that are to be passed on
 --]]
 
 
@@ -122,11 +216,9 @@ Computicle.create = function(self, codechunk, codeparams)
 	};
 	local threadCode = Computicle:createThreadChunk(codechunk, params, codeparams);
 
-
-	-- Create the thread that is the actual work 
-	-- for the computicle.
-	print("== THREAD CODE ==");
-	print(threadCode);
+--print("== CODE ==");
+--print(threadCode);
+--print("** CODE **");
 
 	local worker, err = TINNThread({CodeChunk = threadCode, CreateSuspended = params.CreateSuspended});
 	table.insert(Computicle.Threads, worker);
@@ -142,8 +234,23 @@ Computicle.create = function(self, codechunk, codeparams)
 	return obj;
 end
 
+Computicle.load = function(self, name, codeparams)
+	local comp = self:create(string.format("require('%s');", name), codeparams);
+
+	return comp;
+end
+
+Computicle.loadAndRun = function(self, name, codeparams)
+	local comp, err = self:load(name);
+	if not comp then
+		return false, err;
+	end
+
+	return comp:waitForFinish();
+end
+
 Computicle.getStoned = function(self)
-	local stone = self.Heap:alloc(ffi.sizeof("Computicle_t"));
+	local stone = self:allocData(ffi.sizeof("Computicle_t"));
 	stone = ffi.cast("Computicle_t *", stone);
 	stone.HeapHandle = self.Heap:getNativeHandle();
 	stone.IOCPHandle = self.IOCP:getNativeHandle();
@@ -152,32 +259,111 @@ Computicle.getStoned = function(self)
 	return stone;
 end
 
-Computicle.getMessage = function(self)
-	return self.IOCP:dequeue();
+Computicle.exec = function(self, codechunk)
+
+	if not codechunk then
+		return false, "no code specified";
+	end
+
+	-- allocate some space within the computicle's heap
+	-- to copy the piece of code into.
+	-- This is done so that the receiving side can 
+	-- safely deallocate the memory, knowing it came from 
+	-- it's own heap.
+	local codelen = #codechunk;
+
+	local buff = self:allocData(codelen+1);
+
+	-- Copy the code into the newly allocated area
+	-- make sure it is null terminated
+	ffi.copy(buff, ffi.cast("const uint8_t *", codechunk), codelen);
+	ffi.cast("uint8_t *",buff)[codelen] = 0;
+
+	-- post the message with the code chunk
+	return self:postMessage(Computicle.Messages.CODE, buff, codelen)
 end
 
-Computicle.postMessage = function(self, msg, wParam, lParam)
-	-- Create a message object to send to the thread
-	local msgSize = ffi.sizeof("ComputicleMsg");
-	local newWork = self.Heap:alloc(msgSize);
-	newWork = ffi.cast("ComputicleMsg *", newWork);
-	newWork.Message = msg;
-	newWork.wParam = wParam or 0;
-	newWork.lParam = lParam or 0;
+Computicle.import = function(self, codemodule)
+	local fs = io.open(codemodule)
+	if not fs then 
+		return false, 'could not load file'
+	end
 
+	local codechunk = fs:read("*all");
+	fs:close();
+
+	return self:exec(codechunk);
+
+end
+
+Computicle.getMessage = function(self, timeout)
+	return self.IOCP:dequeue(timeout);
+end
+
+
+Computicle.allocData = function(self, size)
+	if not size then
+		return false, 'no size specified';
+	end
+
+	return self.Heap:alloc(size);
+end
+
+Computicle.freeData = function(self, msg)
+	if msg ~= nil then
+		self.Heap:free(msg);
+	end
+
+	return self;
+end
+
+Computicle.allocMessage = function(self, message, param1, param2)
+	local msgSize = ffi.sizeof("ComputicleMsg");
+	local newWork = self:allocData(msgSize);
+	newWork = ffi.cast("ComputicleMsg *", newWork);
+	newWork.Message = message;
+	if param1 then
+		newWork.Param1 = ffi.cast("UINT_PTR",param1);
+	else
+		newWork.Param1 = 0;
+	end
+
+	if param2 then
+		newWork.Param2 = ffi.cast("LONG_PTR",param2); 
+	else
+		newWork.Param2 = 0;
+	end
+
+	return newWork;	
+end
+
+Computicle.freeMessage = function(self, msg)
+	self:freeData(msg);
+end
+
+Computicle.postMessage = function(self, message, param1, param2)
+	-- Create a message object to send to the thread
 	-- post it to the thread's queue
-	self.IOCP:enqueue(newWork);
+	self.IOCP:enqueue(self:allocMessage(message, param1, param2));
 
 	return true;
 end
 
+Computicle.quit = function(self)
+	self:postMessage(Computicle.Messages.QUIT);
+end
+
+--[[
 Computicle.resume = function(self)
 	self.Thread:resume();
 	return self;
 end
+--]]
 
-Computicle.waitForFinish = function(self)
-	local status = core_synch.WaitForSingleObject(self.Thread:getNativeHandle(), ffi.C.INFINITE);
+Computicle.waitForFinish = function(self, timeout)
+	local timeout = timeout or ffi.C.INFINITE;
+	local status = core_synch.WaitForSingleObject(self.Thread:getNativeHandle(), timeout);
+	
 	if status == WAIT_OBJECT_0 then
 		return true;
 	end

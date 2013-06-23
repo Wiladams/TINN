@@ -4,6 +4,7 @@ local bit = require("bit")
 local band = bit.band
 
 local WinSock = require("WinSock_Utils");
+local ws2_32 = require("ws2_32");
 
 local WSAProtocolInfo_t = {}
 local WSAProtocolInfo_mt = {
@@ -125,9 +126,9 @@ Network_t.GetInterfaces = function(self, stype)
         local nFlags = InterfaceList[i].iiFlags;
 
         table.insert(interfaces,{
-        	address = ffi.string(WinSock.Lib.inet_ntoa(pAddress.sin_addr)),
-        	broadcast = ffi.string(WinSock.Lib.inet_ntoa(bAddress.sin_addr)),
-        	netmask = ffi.string(WinSock.Lib.inet_ntoa(nMask.sin_addr)),
+        	address = ffi.string(ws2_32.inet_ntoa(pAddress.sin_addr)),
+        	broadcast = ffi.string(ws2_32.inet_ntoa(bAddress.sin_addr)),
+        	netmask = ffi.string(ws2_32.inet_ntoa(nMask.sin_addr)),
         	
         	isloopback = band(nFlags, IFF_LOOPBACK)>0,
         	ispointtopoint = band(nFlags, IFF_POINTTOPOINT)>0,

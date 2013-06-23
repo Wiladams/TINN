@@ -7,7 +7,8 @@ local bor = bit.bor
 local lshift = bit.lshift
 local rshift = bit.rshift
 
-_WIN64 = ffi.os == "Windows" and ffi.abi("64bit");
+local basetsd = require("basetsd");
+
 
 ffi.cdef[[
 
@@ -22,52 +23,27 @@ typedef long            *LPLONG;
 ffi.cdef[[
 
 // Basic Data types
-typedef unsigned char BYTE;
 typedef unsigned char *PBYTE;
 
 typedef BYTE			BOOLEAN;
-typedef char          CHAR;
 
 typedef wchar_t			  WCHAR;
-typedef uint16_t		  WORD;
 
 
 typedef long      BOOL;
 typedef long *    PBOOL;
 
-typedef int16_t     SHORT;
-typedef unsigned short  USHORT;
 
-typedef int         INT;
 typedef int *        LPINT;
 typedef int *        PINT;
-typedef long        LONG;
-typedef int32_t     INT32;
-typedef signed int  LONG32;
-typedef unsigned long DWORD;
-typedef uint32_t		DWORD32;
 
-typedef int64_t     LONGLONG;
-typedef uint64_t    DWORDLONG;
-typedef uint64_t   *PDWORDLONG;
-typedef int64_t			INT64;
-typedef uint64_t    ULONG64;
-typedef uint64_t *  PULONG64;
-typedef uint64_t    DWORD64;
-typedef uint64_t *  PDWORD64;
+
 
 
 typedef float 			FLOAT;
-typedef size_t			SIZE_T;
-typedef size_t *    PSIZE_T;
 
 typedef uint8_t			BCHAR;
-typedef unsigned char	UCHAR;
-typedef unsigned int	UINT;
 typedef unsigned int	UINT32;
-typedef unsigned long	ULONG;
-typedef unsigned int	ULONG32;
-typedef uint64_t		ULONGLONG;
 
 
 // Some pointer types
@@ -84,7 +60,6 @@ typedef const unsigned char *PCUCHAR;
 typedef unsigned int	*PUINT;
 typedef unsigned int	*PUINT32;
 typedef unsigned long	*PULONG;
-typedef unsigned int	*PULONG32;
 typedef unsigned short	*PUSHORT;
 typedef LONGLONG 		*PLONGLONG;
 typedef ULONGLONG 		*PULONGLONG;
@@ -92,12 +67,11 @@ typedef ULONGLONG 		*PULONGLONG;
 
 typedef void        VOID;
 typedef void *			PVOID;
-typedef DWORD *			DWORD_PTR;
-typedef intptr_t		LONG_PTR;
-typedef intptr_t    INT_PTR;
-typedef uintptr_t		UINT_PTR;
-typedef uintptr_t		ULONG_PTR;
-typedef ULONG_PTR *		PULONG_PTR;
+]]
+
+
+
+ffi.cdef[[
 
 
 typedef DWORD *			LPCOLORREF;
@@ -165,6 +139,15 @@ typedef LONG FXPT2DOT30, *LPFXPT2DOT30;
 
 ]]
 
+ffi.cdef[[
+typedef struct tagBLOB
+    {
+    ULONG cbSize;
+    /* [size_is] */ BYTE *pBlobData;
+    }   BLOB;
+
+typedef struct tagBLOB *LPBLOB;
+]]
 
 if STRICT then
     ffi.cdef[[

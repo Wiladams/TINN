@@ -107,16 +107,37 @@ end
 	Queue
 --]]
 local Queue = {}
+setmetatable(Queue, {
+	__call = function(self, ...)
+		return self:create(...);
+	end,
+});
+
 local Queue_mt = {
 	__index = Queue;
 }
 
-function Queue.new(name)
-	local obj = {first=1, last=0, name=name}
+Queue.init = function(self, first, last, name)
+	first = first or 1;
+	last = last or 0;
+
+	local obj = {
+		first=first, 
+		last=last, 
+		name=name};
 
 	setmetatable(obj, Queue_mt);
 
 	return obj
+end
+
+Queue.create = function(self, first, last, name)
+	return self:init(first, last, name);
+end
+
+
+function Queue.new(name)
+	return Queue:init(1, 0, name);
 end
 
 function Queue:Enqueue(value)

@@ -1,40 +1,46 @@
 local ffi = require "ffi"
 
-local NativeSocket = require "NativeSocket"
-local SocketUtils = require "SocketUtils"
+require("IOProcessor");
+
+
+--local IOCPSocket = require("IOCPSocket");
+--local IOCompletionPort = require("IOCompletionPort");
+--local SocketOps = require("SocketOps");
+
 
 local daytimeport = 9091
 
-DaytimeClient = {}
-DaytimeClient_mt = {
-	__index = DaytimeClient,
-}
 
-function DaytimeClient.new(hostname, port)
+
+GetDateAndTime = function(hostname, port)
     hostname = hostname or "localhost";
     port = port or daytimeport;
 
-	local self = {}
-    self.Socket = SocketUtils.CreateTcpClientSocket(hostname, port);
-	self.Socket:SetNonBlocking(false);
-	setmetatable(self, DaytimeClient_mt)
-	
-	return self;
-end
+    local socket, err = IOProcessor:createClientSocket(hostname, port);
 
-function DaytimeClient:Run()
-    local bufflen = 256
-    local buff = ffi.new("char [256]")
+
+    if not socket then
+        print("Socket Creation Failed: ", err);
+        return nil, err;
+    end
+
+    --socket:setNonBlocking(false);
+
+
+    local bufflen = 256;
+    local buff = ffi.new("char [?]", bufflen);
 
 	--print("client about to receive");
-    n, err = self.Socket:Receive(buff, bufflen)
-	--print("client received: ", n);
-    while (n > 0) do
-        buff[n] = 0		-- null terminated
-        print(ffi.string(buff))
+    local n, err = socket:receive(buff, bufflen)
+ 	print("client received: ", n, err);
 
-        n = self.Socket:Receive(buff, bufflen)
+    if not n then
+        return false, err;
     end
+
+    if n > 0 then
+        return ffi.string(buff, n);
+    end
+
 end
 
-return DaytimeClient

@@ -1,5 +1,8 @@
+local Computicle = require("Computicle");
 
-local Server = require "DaytimeServer"
+Computicle:loadAndRun("DaytimeServer");
 
-Server.Startup({port = 9091});
+--local Server = require "DaytimeServer"
+
+--Server.Startup({port = 9091});
 

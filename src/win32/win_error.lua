@@ -28,6 +28,8 @@ ERROR_ENVVAR_NOT_FOUND          = 203;
 
 ERROR_MORE_DATA                 = 234;
 
+WAIT_TIMEOUT                    = 258;
+
 ERROR_NOACCESS                  = 998;
 
 ERROR_INVALID_SERVICE_CONTROL   = 1052;

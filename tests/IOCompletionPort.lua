@@ -30,10 +30,13 @@ local IOCompletionPort_mt = {
 	__index = IOCompletionPort,
 }
 
+
 IOCompletionPort.create = function(self, ExistingCompletionPort, FileHandle, NumberOfConcurrentThreads)
 	FileHandle = FileHandle or INVALID_HANDLE_VALUE;
 	NumberOfConcurrentThreads = NumberOfConcurrentThreads or 0
 	local CompletionKey = 0;
+
+--print("FILE HANDLE: ", FileHandle);
 
 	local rawhandle = core_io.CreateIoCompletionPort(FileHandle,
 		ExistingCompletionPort,
@@ -64,22 +67,15 @@ IOCompletionPort.getNativeHandle = function(self)
 	return self.Handle.Handle;
 end
 
-IOCompletionPort.addWorkerThread = function(self, newthread)
-	local Key = ffi.cast("ULONG_PTR", 0);
+IOCompletionPort.addIoHandle = function(self, otherhandle, Key)
+	Key = Key or ffi.cast("ULONG_PTR", 0);
+	Key = ffi.cast("ULONG_PTR", ffi.cast("void *",Key));
 
-	local rawhandle = core_io.CreateIoCompletionPort(newthread:getNativeHandle(),
-		self:getNativeHandle(),
-		Key,
-		0);
+	local rawhandle = core_io.CreateIoCompletionPort(otherhandle, self:getNativeHandle(), Key, 0);
 
 	if rawhandle == nil then
 		return false, errorhandling.GetLastError();
 	end
-
-	-- Associate the completion port handle with
-	-- the thread
-	--self.CompletionPortHandles[handle] = newthread
-	--self.CompletionThreads[newthread] = handle
 
 	return IOCompletionPort(rawhandle);
 end
@@ -107,7 +103,7 @@ IOCompletionPort.dequeue = function(self, dwMilliseconds)
 	dwMilliseconds = dwMilliseconds or ffi.C.INFINITE;
 
 	local lpNumberOfBytesTransferred = ffi.new("DWORD[1]");
-	local lpCompletionKey = ffi.new("ULONG_PTR [1]");	-- PULONG_PTR
+	local lpCompletionKey = ffi.new("ULONG_PTR[1]");	-- PULONG_PTR
 	local lpOverlapped = ffi.new("LPOVERLAPPED[1]");
 	local status = core_io.GetQueuedCompletionStatus(self:getNativeHandle(),
     	lpNumberOfBytesTransferred,
@@ -116,7 +112,11 @@ IOCompletionPort.dequeue = function(self, dwMilliseconds)
     	dwMilliseconds);
 
 	if status == 0 then
-		return false, errorhandling.GetLastError();
+		local err = errorhandling.GetLastError();
+		--print("dequeue ERROR: ", err);
+		--print("dequeue BYTES: ", lpNumberOfBytesTransferred[0]);
+		--print("   overlapped: ", lpOverlapped[0]);
+		return false, err; 
 	end
 
 	return lpCompletionKey[0], lpNumberOfBytesTransferred[0], lpOverlapped[0];

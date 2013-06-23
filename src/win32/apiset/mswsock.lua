@@ -4,6 +4,94 @@
 local ffi = require("ffi");
 local WTypes = require("WTypes");
 
+ffi.cdef[[
+typedef  DWORD (* LPFN_NSPAPI) (void ) ;
+
+
+//
+// Structures for using the service routines asynchronously.
+//
+typedef void (*LPSERVICE_CALLBACK_PROC) (LPARAM lParam, HANDLE hAsyncTaskHandle);
+
+typedef struct _SERVICE_ASYNC_INFO {
+    LPSERVICE_CALLBACK_PROC lpServiceCallbackProc;
+    LPARAM lParam;
+    HANDLE hAsyncTaskHandle;
+} SERVICE_ASYNC_INFO, *PSERVICE_ASYNC_INFO, * LPSERVICE_ASYNC_INFO;
+
+typedef struct _NS_ROUTINE {
+    DWORD        dwFunctionCount;
+    LPFN_NSPAPI *alpfnFunctions;
+    DWORD        dwNameSpace;
+    DWORD        dwPriority;
+} NS_ROUTINE, *PNS_ROUTINE, * LPNS_ROUTINE;
+
+]]
+
+ffi.cdef[[
+//
+// A Single Address definition.
+//
+typedef struct _SERVICE_ADDRESS {
+    DWORD   dwAddressType ;
+    DWORD   dwAddressFlags ;
+    DWORD   dwAddressLength ;
+    DWORD   dwPrincipalLength ;
+    BYTE   *lpAddress ;
+    BYTE   *lpPrincipal ;
+} SERVICE_ADDRESS, *PSERVICE_ADDRESS, *LPSERVICE_ADDRESS;
+
+//
+// Addresses used by the service. Contains array of SERVICE_ADDRESS.
+//
+typedef struct _SERVICE_ADDRESSES {
+    DWORD           dwAddressCount ;
+    SERVICE_ADDRESS Addresses[1] ;
+} SERVICE_ADDRESSES, *PSERVICE_ADDRESSES, *LPSERVICE_ADDRESSES;
+]]
+
+ffi.cdef[[
+//
+// Service Information.
+//
+typedef struct _SERVICE_INFOA {
+    LPGUID lpServiceType ;
+    LPSTR   lpServiceName ;
+    LPSTR   lpComment ;
+    LPSTR   lpLocale ;
+    DWORD dwDisplayHint ;
+    DWORD dwVersion ;
+    DWORD dwTime ;
+    LPSTR   lpMachineName ;
+    LPSERVICE_ADDRESSES lpServiceAddress ;
+    BLOB ServiceSpecificInfo ;
+} SERVICE_INFOA, *PSERVICE_INFOA, * LPSERVICE_INFOA ;
+//
+// Service Information.
+//
+typedef struct _SERVICE_INFOW {
+    LPGUID lpServiceType ;
+    LPWSTR  lpServiceName ;
+    LPWSTR  lpComment ;
+    LPWSTR  lpLocale ;
+    DWORD dwDisplayHint ;
+    DWORD dwVersion ;
+    DWORD dwTime ;
+    LPWSTR  lpMachineName ;
+    LPSERVICE_ADDRESSES lpServiceAddress ;
+    BLOB ServiceSpecificInfo ;
+} SERVICE_INFOW, *PSERVICE_INFOW, * LPSERVICE_INFOW ;
+]]
+
+ffi.cdef[[
+typedef struct _TRANSMIT_FILE_BUFFERS {
+    LPVOID Head;
+    DWORD HeadLength;
+    LPVOID Tail;
+    DWORD TailLength;
+} TRANSMIT_FILE_BUFFERS, *PTRANSMIT_FILE_BUFFERS, *LPTRANSMIT_FILE_BUFFERS;
+]]
+
 
 ffi.cdef[[
 BOOL AcceptEx (SOCKET sListenSocket, SOCKET sAcceptSocket,
@@ -161,32 +249,32 @@ INT WSARecvEx(SOCKET s, CHAR *buf, INT len, INT *flags);
 local Lib = ffi.load("mswsock");
 
 return {
-AcceptEx
+    AcceptEx = Lib.AcceptEx,
 -- dn_expand
-EnumProtocolsA
-EnumProtocolsW
-GetAcceptExSockaddrs
-GetAddressByNameA
-GetAddressByNameW
-GetNameByTypeA
-GetNameByTypeW
+    EnumProtocolsA = Lib.EnumProtocolsA,
+    EnumProtocolsW = Lib.EnumProtocolsW,
+    GetAcceptExSockaddrs = Lib.GetAcceptExSockaddrs,
+    GetAddressByNameA = Lib.GetAddressByNameA,
+    GetAddressByNameW = Lib.GetAddressByNameW,
+    GetNameByTypeA = Lib.GetNameByTypeA,
+    GetNameByTypeW = Lib.GetNameByTypeW,
 --getnetbyname
-GetServiceA
-GetServiceW
+    GetServiceA = Lib.GetServiceA,
+    GetServiceW = Lib.GetServiceW,
 --GetSocketErrorMessageW
-GetTypeByNameA
-GetTypeByNameW
+    GetTypeByNameA = Lib.GetTypeByNameA,
+    GetTypeByNameW = Lib.GetTypeByNameW,
 --inet_network
 --MigrateWinsockConfiguration
 --MigrateWinsockConfigurationEx
-NPLoadNameSpaces
+    NPLoadNameSpaces = Lib.NPLoadNameSpaces,
 --rcmd
 --rexec
 --rresvport
 --s_perror
 --sethostname
-SetServiceA
-SetServiceW
-TransmitFile
-WSARecvEx
+    SetServiceA = Lib.SetServiceA,
+    SetServiceW = Lib.SetServiceW,
+    TransmitFile = Lib.TransmitFile,
+    WSARecvEx = Lib.WSARecvEx,
 }

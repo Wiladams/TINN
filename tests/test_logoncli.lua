@@ -57,12 +57,11 @@ DomainControllerInfo.new = function(info)
 end
 
 
-local getDCInfo = function(DomainName)
-	ComputerName = nil;
-	DomainGuid = nil;
-	SiteName = "";
-	Flags = bor(ffi.C.DS_WRITABLE_REQUIRED, ffi.C.DS_DIRECTORY_SERVICE_REQUIRED);
-	pDomainControllerInfo = ffi.new("PDOMAIN_CONTROLLER_INFOA[1]");
+local getDCInfo = function(DomainName, ComputerName)
+	local DomainGuid = nil;
+	local SiteName = "";
+	local Flags = bor(ffi.C.DS_WRITABLE_REQUIRED, ffi.C.DS_DIRECTORY_SERVICE_REQUIRED);
+	local pDomainControllerInfo = ffi.new("PDOMAIN_CONTROLLER_INFOA[1]");
 
 	local status = logoncli.DsGetDcNameA(ComputerName, DomainName, DomainGuid, SiteName, 
 		Flags,
@@ -112,7 +111,13 @@ local test_getDCInfo = function()
 end
 
 local test_getSiteCoverage = function()
-	local dcInfo = getDCInfo("redmond");
+	local dcInfo, err = getDCInfo("redmond");
+	
+	if not dcInfo then
+		return false, err
+	end
+
+
 print("test_getSiteCoverage")
 print("Controller Name: ", dcInfo.ControllerName);
 

@@ -1,35 +1,40 @@
 
-local SocketUtils = require "SocketUtils"
+local IOCPSocket = require("IOCPSocket");
 
+local serverPort = 9091
 
-local function Run(config)
-	local port = config.port or 13
-	local ServerSocket, err = SocketUtils.CreateTcpServerSocket({port = port, backlog = 15, nonblocking=false, nodelay = false});
+local port = serverPort
+local serverSocket, err = IOCPSocket:createServer({port = serverPort, backlog = 15, nonblocking=false, nodelay = false});
 	
-	if not ServerSocket then 
-		return false, err
-	end
+if not serverSocket then 
+	return false, err
+end
 	
-	print("Daytime Server Running")
-	while (true) do
-		local acceptedsock, err = ServerSocket:Accept()
+print("Daytime Server Running")
 
-		if acceptedsock then
-			--print("Accepted: ", acceptedsock);
-			acceptedsock:Send(os.date("%c"));
-			acceptedsock:Send("\r\n");
+while true do
+	local acceptedsock, err = serverSocket:accept()
+
+	if acceptedsock then
+		--print("Accepted: ", acceptedsock);
+		acceptedsock:send(os.date("%c"));
+		acceptedsock:send("\r\n");
 			
-			-- close down the socket
-			-- or the client won't know when to stop reading
-			acceptedsock:CloseDown()
+		-- close down the socket
+		-- or the client won't know when to stop reading
+		acceptedsock:closeDown();
 			
-			acceptedsock = nil
-		else
-			print("No SOCKET");
-		end
+		acceptedsock = nil
+	else
+		print("No SOCKET");
 	end
+
+	collectgarbage();
 end
 
-return {
-	Startup = Run,
-}
+
+
+
+--return {
+--	Startup = Run,
+--}

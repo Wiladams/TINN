@@ -1,10 +1,15 @@
 
 local ffi = require "ffi"
+local bit = require "bit"
+local lshift = bit.lshift
+local rshift = bit.rshift
+local band = bit.band
+local bor = bit.bor
+local bnot = bit.bnot
+local bswap = bit.bswap
 
-local wsock = require "win_socket"
 
--- Startup windows sockets
-local SocketLib = ffi.load("ws2_32")
+local ws2_32 = require("ws2_32");
 
 --[[
 	Casual Macros
@@ -29,233 +34,67 @@ end
 IN4_MULTICAST = IN4_CLASSD
 
 
---[[
-	Data Structures
---]]
-
-IN_ADDR = ffi.typeof("struct in_addr");
-IN_ADDR_mt = {
-	__gc = function (self)
-		print("-- IN_ADDR: GC");
-	end,
-
-	__tostring = function(self)
-		local res = SocketLib.inet_ntoa(self)
-		if res then
-			return ffi.string(res)
-		end
-
-		return nil
-	end,
-
-	__index = {
-		Assign = function(self, rhs)
-		--print("IN_ADDR Assign: ", rhs.s_addr)
-			self.S_addr = rhs.S_addr
-			return self
-		end,
-
-		Clone = function(self)
-			local obj = IN_ADDR(self.S_addr)
-			return obj
-		end,
-
-	},
-}
-IN_ADDR = ffi.metatype(IN_ADDR, IN_ADDR_mt)
-
-
-local families = {
-	[AF_INET] = "AF_INET",
-	[AF_INET6] = "AF_INET6",
-	[AF_BTH] = "AF_BTH",
-}
-
-local socktypes = {
-	[SOCK_STREAM] = "SOCK_STREAM",
-	[SOCK_DGRAM] = "SOCK_DGRAM",
-}
-
-local protocols = {
-	[IPPROTO_IP]  = "IPPROTO_IP",
-	[IPPROTO_TCP] = "IPPROTO_TCP",
-	[IPPROTO_UDP] = "IPPROTO_UDP",
-	[IPPROTO_GGP] = "IPPROTO_GGP",
-}
-
-
-sockaddr_in = ffi.typeof("struct sockaddr_in")
-sockaddr_in_mt = {
-	__gc = function (self)
-		--print("GC: sockaddr_in");
-	end,
-
-	__new = function(ct, port, family)
-		port = tonumber(port) or 80
-		family = family or AF_INET;
-		
-		local obj = ffi.new(ct)
-		obj.sin_family = family;
-		obj.sin_addr.S_addr = SocketLib.htonl(INADDR_ANY);
-		obj.sin_port = SocketLib.htons(port);
-		
-		return obj
-	end,
-	
-	__tostring = function(self)
-		return string.format("Family: %s  Port: %d Address: %s",
-			families[self.sin_family], SocketLib.ntohs(self.sin_port), tostring(self.sin_addr));
-	end,
-
-	__index = {
-		SetPort = function(self, port)
-			local portnum = tonumber(port);
-			if not portnum then 
-				return nil, "not a number"
-			end
-			
-			self.sin_port = SocketLib.htons(tonumber(port));
-		end,
-	},
-}
-sockaddr_in = ffi.metatype(sockaddr_in, sockaddr_in_mt);
-
-sockaddr_in6 = ffi.typeof("struct sockaddr_in6")
-sockaddr_in6_mt = {
-	__gc = function (self)
-		print("-- sockaddr_in6: GC");
-	end,
-
-	__tostring = function(self)
-		return string.format("Family: %s  Port: %d Address: %s",
-			families[self.sin6_family], self.sin6_port, tostring(self.sin6_addr));
-	end,
-
-	__index = {
-		SetPort = function(self, port)
-			local portnum = tonumber(port);
-			self.sin6_port = SocketLib.htons(portnum);
-		end,
-	},
-}
-sockaddr_in6 = ffi.metatype(sockaddr_in6, sockaddr_in6_mt);
-
-
-sockaddr = ffi.typeof("struct sockaddr")
-sockaddr_mt = {
-	__index = {
-	}
-}
-sockaddr = ffi.metatype(sockaddr, sockaddr_mt);
-
-
-addrinfo = nil
-addrinfo_mt = {
-	__tostring = function(self)
-		local family = families[self.ai_family]
-		local socktype = socktypes[self.ai_socktype]
-		local protocol = protocols[self.ai_protocol]
-
-		--local family = self.ai_family
-		local socktype = self.ai_socktype
-		local protocol = self.ai_protocol
-
-
-		local str = string.format("Socket Type: %s, Protocol: %s, %s", socktype, protocol, tostring(self.ai_addr));
-
-		return str
-	end,
-
-	__index = {
-		Print = function(self)
-			print("-- AddrInfo ==")
-			print("Flags: ", self.ai_flags);
-			print("Family: ", families[self.ai_family])
-			print("Sock Type: ", socktypes[self.ai_socktype]);
-			print("Protocol: ", protocols[self.ai_protocol]);
-			print("Canon Name: ", self.ai_canonname);
-			--print("Addr Len: ", self.ai_addrlen);
-			--print("Address: ", self.ai_addr);
-			--print("Address Family: ", self.ai_addr.sa_family);
-			local addr
-			if self.ai_addr.sa_family == AF_INET then
-				addr = ffi.cast("struct sockaddr_in *", self.ai_addr)
-			elseif self.ai_addr.sa_family == AF_INET6 then
-				addr = ffi.cast("struct sockaddr_in6 *", self.ai_addr)
-			end
-			print(addr);
-
-			if self.ai_next ~= nil then
-				self.ai_next:Print();
-			end
-		end,
-	},
-}
-addrinfo = ffi.metatype("struct addrinfo", addrinfo_mt)
-
-
-
 
 --[[
 	BSD Style functions
 --]]
 local accept = function(s, addr, addrlen)
-	local socket = SocketLib.accept(s,addr,addrlen);
+	local socket = ws2_32.accept(s,addr,addrlen);
 	if socket == INVALID_SOCKET then
-		return false, SocketLib.WSAGetLastError();
+		return false, ws2_32.WSAGetLastError();
 	end
 	
 	return socket;
 end
 
 local bind = function(s, name, namelen)
-	if 0 == SocketLib.bind(s, ffi.cast("const struct sockaddr *",name), namelen) then
+	if 0 == ws2_32.bind(s, ffi.cast("const struct sockaddr *",name), namelen) then
 		return true;
 	end
 	
-	return false, SocketLib.WSAGetLastError();
+	return false, ws2_32.WSAGetLastError();
 end
 
 local connect = function(s, name, namelen)
-	if 0 == SocketLib.connect(s, ffi.cast("const struct sockaddr *", name), namelen) then
+	if 0 == ws2_32.connect(s, ffi.cast("const struct sockaddr *", name), namelen) then
 		return true
 	end
 	
-	return false, SocketLib.WSAGetLastError();
+	return false, ws2_32.WSAGetLastError();
 end
 
 local closesocket = function(s)
-	if 0 == SocketLib.closesocket(s) then
+	if 0 == ws2_32.closesocket(s) then
 		return true
 	end
 	
-	return false, SocketLib.WSAGetLastError();
+	return false, ws2_32.WSAGetLastError();
 end
 
 local ioctlsocket = function(s, cmd, argp)
-	if 0 == SocketLib.ioctlsocket(s, cmd, argp) then
+	if 0 == ws2_32.ioctlsocket(s, cmd, argp) then
 		return true
 	end
 	
-	return false, SocketLib.WSAGetLastError();
+	return false, ws2_32.WSAGetLastError();
 end
 
 local listen = function(s, backlog)
-	if 0 == SocketLib.listen(s, backlog) then
+	if 0 == ws2_32.listen(s, backlog) then
 		return true
 	end
 	
-	return false, SocketLib.WSAGetLastError();
+	return false, ws2_32.WSAGetLastError();
 end
 
 local recv = function(s, buf, len, flags)
 	len = len or #buf;
 	flags = flags or 0;
 	
-	local bytesreceived = SocketLib.recv(s, ffi.cast("char*", buf), len, flags);
+	local bytesreceived = ws2_32.recv(s, ffi.cast("char*", buf), len, flags);
 
 	if bytesreceived == SOCKET_ERROR then
-		return false, SocketLib.WSAGetLastError();
+		return false, ws2_32.WSAGetLastError();
 	end
 	
 	return bytesreceived;
@@ -265,38 +104,37 @@ local send = function(s, buf, len, flags)
 	len = len or #buf;
 	flags = flags or 0;
 	
-	local bytessent = SocketLib.send(s, ffi.cast("const char*", buf), len, flags);
+	local bytessent = ws2_32.send(s, ffi.cast("const char*", buf), len, flags);
 
 	if bytessent == SOCKET_ERROR then
-		return false, SocketLib.WSAGetLastError();
+		return false, ws2_32.WSAGetLastError();
 	end
 	
 	return bytessent;
 end
 
--- int getsockopt(SOCKET s, int level, int optname, char* optval,int* optlen);
 local getsockopt = function(s, optlevel, optname, optval, optlen)
-	if 0 == SocketLib.getsockopt(s, optlevel, optname, ffi.cast("char *",optval), optlen) then
+	if 0 == ws2_32.getsockopt(s, optlevel, optname, ffi.cast("char *",optval), optlen) then
 		return true
 	end
 	
-	return false, SocketLib.WSAGetLastError();
+	return false, ws2_32.WSAGetLastError();
 end
 
 local setsockopt = function(s, optlevel, optname, optval, optlen)
-	if 0 == SocketLib.setsockopt(s, optlevel, optname, ffi.cast("const uint8_t *", optval), optlen) then
+	if 0 == ws2_32.setsockopt(s, optlevel, optname, ffi.cast("const uint8_t *", optval), optlen) then
 		return true
 	end
 	
-	return false, SocketLib.WSAGetLastError();
+	return false, ws2_32.WSAGetLastError();
 end
 
 local shutdown = function(s, how)
-	if 0 == SocketLib.shutdown(s, how) then
+	if 0 == ws2_32.shutdown(s, how) then
 		return true
 	end
 	
-	return false, SocketLib.WSAGetLastError();
+	return false, ws2_32.WSAGetLastError();
 end
 
 local socket = function(af, socktype, protocol)
@@ -304,9 +142,9 @@ local socket = function(af, socktype, protocol)
 	socktype = socktype or SOCK_STREAM
 	protocol = protocol or IPPROTO_TCP
 	
-	local sock = SocketLib.socket(af, socktype, protocol);
+	local sock = ws2_32.socket(af, socktype, protocol);
 	if sock == INVALID_SOCKET then
-		return false, SocketLib.WSAGetLastError();
+		return false, ws2_32.WSAGetLastError();
 	end
 	
 	return sock;
@@ -320,10 +158,10 @@ local WSAEnumProtocols = function()
 	local dwBufferLen = 16384;
 	local lpProtocolBuffer = ffi.cast("LPWSAPROTOCOL_INFOA", ffi.new("uint8_t[?]", dwBufferLen));	-- LPWSAPROTOCOL_INFO
 	local lpdwBufferLength = ffi.new('int32_t[1]',dwBufferLen)
-	local res = SocketLib.WSAEnumProtocolsA(lpiProtocols, lpProtocolBuffer, lpdwBufferLength);
+	local res = ws2_32.WSAEnumProtocolsA(lpiProtocols, lpProtocolBuffer, lpdwBufferLength);
 
 	if res == SOCKET_ERROR then
-		return false, SocketLib.WSAGetLastError();
+		return false, ws2_32.WSAGetLastError();
 	end
 
 	local dwBufferLength = lpdwBufferLength[0];
@@ -340,7 +178,7 @@ local WSAIoctl = function(s,
     lpcbBytesReturned,
     lpOverlapped, lpCompletionRoutine)
 
-	local res = SocketLib.WSAIoctl(s, dwIoControlCode, 
+	local res = ws2_32.WSAIoctl(s, dwIoControlCode, 
 		lpvInBuffer, cbInBuffer,
 		lpvOutBuffer, cbOutBuffer,
 		lpcbBytesReturned,
@@ -351,14 +189,14 @@ local WSAIoctl = function(s,
 		return true
 	end
 
-	return false, SocketLib.WSAGetLastError();
+	return false, ws2_32.WSAGetLastError();
 end
 
 local WSAPoll = function(fdArray, fds, timeout)
-	local res = SocketLib.WSAPoll(fdArray, fds, timeout)
+	local res = ws2_32.WSAPoll(fdArray, fds, timeout)
 	
 	if SOCKET_ERROR == res then
-		return false, SocketLib.WSAGetLastError();
+		return false, ws2_32.WSAGetLastError();
 	end
 	
 	return res 
@@ -372,15 +210,54 @@ local WSASocket = function(af, socktype, protocol, lpProtocolInfo, g, dwFlags)
 	g = g or 0;
 	dwFlags = dwFlags or WSA_FLAG_OVERLAPPED;
 
-	local socket = SocketLib.WSASocketA(af, socktype, protocol, lpProtocolInfo, g, dwFlags);
+	local socket = ws2_32.WSASocketA(af, socktype, protocol, lpProtocolInfo, g, dwFlags);
 	
 	if socket == INVALID_SOCKET then
-		return false, SocketLib.WSAGetLastError();
+		return false, ws2_32.WSAGetLastError();
 	end
 
 	return socket;
 end
 
+--
+-- MSWSock.h
+--
+WSAID_ACCEPTEX = GUID{0xb5367df1,0xcbac,0x11cf,{0x95,0xca,0x00,0x80,0x5f,0x48,0xa1,0x92}}
+WSAID_CONNECTEX = GUID{0x25a207b9,0xddf3,0x4660,{0x8e,0xe9,0x76,0xe5,0x8c,0x74,0x06,0x3e}};
+WSAID_DISCONNECTEX = GUID{0x7fda2e11,0x8630,0x436f,{0xa0, 0x31, 0xf5, 0x36, 0xa6, 0xee, 0xc1, 0x57}};
+
+
+ffi.cdef[[
+typedef BOOL
+( * LPFN_ACCEPTEX)(
+    SOCKET sListenSocket,
+    SOCKET sAcceptSocket,
+    PVOID lpOutputBuffer,
+    DWORD dwReceiveDataLength,
+    DWORD dwLocalAddressLength,
+    DWORD dwRemoteAddressLength,
+    LPDWORD lpdwBytesReceived,
+    LPOVERLAPPED lpOverlapped
+    );
+
+typedef BOOL ( * LPFN_CONNECTEX) (
+    SOCKET s,
+    const struct sockaddr *name,
+    int namelen,
+    PVOID lpSendBuffer,
+    DWORD dwSendDataLength,
+    LPDWORD lpdwBytesSent,
+    LPOVERLAPPED lpOverlapped);
+
+
+
+typedef BOOL ( * LPFN_DISCONNECTEX) (
+    SOCKET s,
+    LPOVERLAPPED lpOverlapped,
+    DWORD  dwFlags,
+    DWORD  dwReserved);
+
+]]
 
 local GetExtensionFunctionPointer = function(funcguid)
 --print("GetExtensionFunctionPointer: ", funcguid)
@@ -441,7 +318,7 @@ end
 
 local function GetLocalHostName()
 	local name = ffi.new("char[255]")
-	local err = SocketLib.gethostname(name, 255);
+	local err = ws2_32.gethostname(name, 255);
 
 	return ffi.string(name)
 end
@@ -450,21 +327,25 @@ end
 	This startup routine must be called before any other functions
 	within the library are utilized.
 --]]
+local function MAKEWORD(low,high)
+	return bor(low , lshift(high , 8))
+end
 
 function WinsockStartup()
 	local wVersionRequested = MAKEWORD( 2, 2 );
 
-	local dataarrayname = string.format("%s[1]", wsock.wsadata_typename)
-	local wsadata = ffi.new(dataarrayname)
-    local retValue = SocketLib.WSAStartup(wVersionRequested, wsadata);
-	wsadata = wsadata[0]
+	local wsadata = ffi.new("WSADATA");
+    local status = ws2_32.WSAStartup(wVersionRequested, wsadata);
+    if status ~= 0 then
+    	return false, ws2_32.WSAGetLastError();
+    end
 
-	return retValue, wsadata
+	return true;
 end
 
 
 -- Initialize the library
-local err, wsadata = WinsockStartup()
+local successfulStart = WinsockStartup();
 
 -- Do whatever is needed after library initialization
 
@@ -475,6 +356,38 @@ local CAcceptEx, err = ffi.cast("LPFN_ACCEPTEX", GetExtensionFunctionPointer(WSA
 local CConnectEx, err = ffi.cast("LPFN_CONNECTEX", GetExtensionFunctionPointer(WSAID_CONNECTEX));
 local CDisconnectEx, err = ffi.cast("LPFN_DISCONNECTEX", GetExtensionFunctionPointer(WSAID_DISCONNECTEX));
 
+local AcceptEx = function(sock, 
+	sListenSocket, 
+	sAcceptSocket, 
+	lpOutputBuffer, 
+	dwReceiveDataLength,
+	dwLocalAddressLength,
+	dwRemoteAddressLength,
+	lpOverlapped)
+
+
+	dwReceiveDataLength = dwReceiveDataLength or 0;
+	dwLocalAddressLength = dwLocalAddressLength or 0;
+	dwRemoteAddressLength = dwRemoteAddressLength or 0;
+	local lpdwBytesReceived = ffi.new("DWORD[1]");
+	
+	local status = CAppectEx(
+	    sListenSocket,
+	    sAcceptSocket,
+	    lpOutputBuffer,
+	    dwReceiveDataLength,
+	    dwLocalAddressLength,
+    	dwRemoteAddressLength,
+    	lpdwBytesReceived,
+    	lpOverlapped);
+
+	if success == 1 then
+		return true;
+	end
+
+	return false, ws2_32.WSAGetLastError();
+end
+
 
 local DisconnectEx = function(sock, dwFlags, lpOverlapped)
 	local success = CDisconnectEx(sock, nil,0,0);
@@ -482,15 +395,12 @@ local DisconnectEx = function(sock, dwFlags, lpOverlapped)
 		return true;
 	end
 
-	return false, SocketLib.WSAGetLastError();
+	return false, ws2_32.WSAGetLastError();
 end
 
 
 return {
-	WSAData = wsadata,
-
-	Lib = SocketLib,
-	FFI = wsock,
+	SuccessfulStartup = successfulStart,
 
 	-- Data Structures
 	IN_ADDR = IN_ADDR,
@@ -519,7 +429,7 @@ return {
 	WSASocket = WSASocket,
 	WSAEnumProtocols = WSAEnumProtocols,
 
-	CAcceptEx = CAcceptEx;
+	AcceptEx = AcceptEx;
 	CConnectEx = CConnectEx;
 	DisconnectEx = DisconnectEx;
 

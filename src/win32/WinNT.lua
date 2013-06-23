@@ -202,12 +202,6 @@ typedef struct _PROCESSOR_NUMBER {
     BYTE  Reserved;
 } PROCESSOR_NUMBER, *PPROCESSOR_NUMBER;
 
-//
-// Structure to represent a group-specific affinity, such as that of a
-// thread.  Specifies the group number and the affinity within that group.
-//
-typedef ULONG_PTR KAFFINITY;
-typedef KAFFINITY *PKAFFINITY;
 
 typedef struct _GROUP_AFFINITY {
     KAFFINITY Mask;

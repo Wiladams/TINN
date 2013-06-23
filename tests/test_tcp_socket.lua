@@ -78,12 +78,12 @@ function test_send_zero()
 	local buff = ffi.new("uint8_t[1024]")
 
 	-- Create a connected socket
-	local gsock, err = SocketUtils.CreateTcpClientSocket("www.google.com", 80)
+	local gsock, err = SocketUtils.CreateTcpClientSocket("www.bing.com", 80)
 	--gsock:SetNonBlocking(true)
 	print("GSocket Creation: ", gsock, "Error: ", err);
 
 	if err then
-		print("GSock Connected: ", WinSock.GetSocketErrorString(err));
+		print("GSock Failed Connection: ", WinSock.GetSocketErrorString(err));
 	end
 	
 	-- try to send blank

@@ -2,6 +2,7 @@
 local ffi = require "ffi"
 
 local WinSock = require "WinSock_Utils"
+local ws2_32 = require("ws2_32");
 
 
 
@@ -16,10 +17,10 @@ typedef struct {
 local NativeSocket = ffi.typeof("Socket_Win32");
 local NativeSocket_mt = {
 	__gc = function(self)
+		--print("GC: NativeSocket: ", self.Handle, success, err);
 		-- Force close on socket
 		-- To ensure it's really closed
 		local success, err = self:ForceClose();
---		print("GC: NativeSocket: ", self.Handle, success, err);
 	end,
 	
 	__new = function(ct, handle, family, socktype, protocol, flags)
@@ -31,9 +32,10 @@ local NativeSocket_mt = {
 --print("NativeSocket:CT(): ", handle);	
 
 		if not handle then
-			handle, err = WinSock.WSASocket(family, socktype, protocol, nil, 0, WSA_FLAG_OVERLAPPED);
-			if not handle then
-				return nil, err
+			handle = ws2_32.socket(family, socktype, protocol);
+	
+			if handle == INVALID_SOCKET then
+				return nil, ws2_32.WSAGetLastError();
 			end
 		end
 				
@@ -47,6 +49,10 @@ local NativeSocket_mt = {
 	end,
 	
 	__index = {
+		getNativeHandle = function(self)
+			return ffi.cast("HANDLE", ffi.cast("intptr_t", self.Handle));
+		end,
+
 		--[[
 			Setting various options
 		--]]

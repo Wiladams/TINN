@@ -69,7 +69,7 @@ local NetApiBuffer = ffi.typeof("NetApiBuffer");
 local NetApiBuffer_t = {};
 local NetApiBuffer_mt = {
 	__gc = function(self)
-		--print("GC: NetApiBuffer");
+		print("GC: NetApiBuffer");
 		return NetApiBufferFree(self.Handle);
 	end,
 

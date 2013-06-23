@@ -8,13 +8,23 @@ local ffi = require ("ffi");
 local bit = require("bit");
 local bor = bit.bor;
 
-local Lib = ffi.load("logoncli"); -- logoncli.dll
-require("WTypes");
-require("ntstatus");
-local winsock = require("win_socket");
-require("SubAuth");
-require("lmcons");
+local WTypes = require("WTypes");
+local ntstatus = require("ntstatus");
+--local ws2_32 = require("ws2_32");
+local NTSecAPI = require("NTSecAPI")
+local SubAuth = require("SubAuth");
+local lmcons = require("lmcons");
 
+
+ffi.cdef[[
+/*
+ * SockAddr Information
+ */
+typedef struct _SOCKET_ADDRESS {
+    LPSOCKADDR lpSockaddr;
+    INT iSockaddrLength;
+} SOCKET_ADDRESS, *PSOCKET_ADDRESS, *LPSOCKET_ADDRESS;
+]]
 
 
 ffi.cdef[[
@@ -483,10 +493,9 @@ NetRemoveServiceAccount(
      DWORD Flags);
 ]]
 
+local Lib = ffi.load("logoncli"); -- logoncli.dll
 
 return {
-	Lib = Lib,
-
 DsAddressToSiteNamesA = Lib.DsAddressToSiteNamesA,
 DsAddressToSiteNamesExA = Lib.DsAddressToSiteNamesExA,
 DsAddressToSiteNamesExW = Lib.DsAddressToSiteNamesExW,
