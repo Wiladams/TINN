@@ -42,6 +42,7 @@ setmetatable(TINNThread, {
 		-- This helper routine will take a pointer
 		-- to cdata, and return a string that contains
 		-- the memory address
+		-- tonumber(ffi.cast('intptr_t', ffi.cast('void *', ptr)))
 		PointerToString = function(self, instance)
 			if ffi.abi("64bit") then
 				return string.format("0x%016x", tonumber(ffi.cast("int64_t", ffi.cast("void *", instance))))

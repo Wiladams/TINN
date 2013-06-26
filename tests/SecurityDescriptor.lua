@@ -58,23 +58,23 @@ SecurityDescriptor.new = function(self, Descriptor)
 end
 
 SecurityDescriptor.accessAllowed = function(self, ClientToken, DesiredAccess)
+	DesiredAccess = DesiredAccess or ffi.C.MAXIMUM_ALLOWED;
+
 	local GenericMapping = nil;
 	local PrivilegeSet = nil;
 	local PrivilegeSetLength = ffi.new("DWORD[1]",0);
 	local GrantedAccess = ffi.new("DWORD[1]");
 	local AccessStatus = ffi.new("BOOL[1]");
 
---[[
-local status = security_base.AccessCheck(ffi.cast("PSECURITY_DESCRIPTOR",self.Descriptor),
-  _In_       HANDLE ClientToken,
-  _In_       DWORD DesiredAccess,
+	local status = security_base.AccessCheck(ffi.cast("PSECURITY_DESCRIPTOR",self.Descriptor),
+		ClientToken,
+		DesiredAccess,
   _In_       PGENERIC_MAPPING GenericMapping,
   _Out_opt_  PPRIVILEGE_SET PrivilegeSet,
-  _Inout_    LPDWORD PrivilegeSetLength,
-  _Out_      LPDWORD GrantedAccess,
-  _Out_      LPBOOL AccessStatus
-);
---]]
+			LPDWORD PrivilegeSetLength,
+			LPDWORD GrantedAccess,
+			LPBOOL AccessStatus);
+
 end
 
 SecurityDescriptor.getControlInfo = function(self)

@@ -1173,12 +1173,8 @@ InetPtonW = Lib.
 
     ioctlsocket = Lib.ioctlsocket,
     listen = Lib.listen,
-
---[[
-ntohl = Lib.ntohl,
-ntohs = Lib.ntohs,
---]]
-
+    ntohl = Lib.ntohl,
+    ntohs = Lib.ntohs,
     recv = Lib.recv,
     recvfrom = Lib.recvfrom,
     ["select"] = Lib.select,

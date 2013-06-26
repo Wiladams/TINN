@@ -30,6 +30,15 @@ local IOCompletionPort_mt = {
 	__index = IOCompletionPort,
 }
 
+IOCompletionPort.init = function(self, rawhandle)
+
+	local obj = {
+		Handle = IOCompletionHandle(rawhandle);
+	};
+	setmetatable(obj, IOCompletionPort_mt);
+
+	return obj;
+end
 
 IOCompletionPort.create = function(self, ExistingCompletionPort, FileHandle, NumberOfConcurrentThreads)
 	FileHandle = FileHandle or INVALID_HANDLE_VALUE;
@@ -50,18 +59,7 @@ IOCompletionPort.create = function(self, ExistingCompletionPort, FileHandle, Num
 	return self:init(rawhandle);
 end
 
-IOCompletionPort.init = function(self, rawhandle)
 
-	local obj = {
-		Handle = IOCompletionHandle(rawhandle);
---		ConcurrentThreads = nThreads;
---		CompletionThreads = {};
---		CompletionPortHandles = {};
-	};
-	setmetatable(obj, IOCompletionPort_mt);
-
-	return obj;
-end
 
 IOCompletionPort.getNativeHandle = function(self)
 	return self.Handle.Handle;

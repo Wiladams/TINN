@@ -659,16 +659,14 @@ MakeSelfRelativeSD (
 VOID
 MapGenericMask (
     PDWORD AccessMask,
-       PGENERIC_MAPPING GenericMapping
-    );
+    PGENERIC_MAPPING GenericMapping);
 
 
 BOOL
 ObjectCloseAuditAlarmW (
     LPCWSTR SubsystemName,
     LPVOID HandleId,
-    BOOL GenerateOnClose
-    );
+    BOOL GenerateOnClose);
 
 BOOL
 ObjectDeleteAuditAlarmW (
