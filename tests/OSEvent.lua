@@ -64,7 +64,7 @@ OSEvent.clear = function(self)
 	return true;
 end
 
-OSEvent.wait = function(self, dwMilliseconds)
+OSEvent.await = function(self, dwMilliseconds)
 	dwMilliseconds = dwMilliseconds or ffi.C.INFINITE;
 	
 	local status = core_synch.WaitForSingleObject(self:getNativeHandle(), dwMilliseconds);	

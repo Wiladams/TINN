@@ -3,19 +3,18 @@ local ffi = require("ffi");
 local core_interlocked = require("core_interlocked");
 local Heap = require("Heap");
 
-local LockFreeList = function(ct)
 
 SList = {}
 setmetatable(SList, {
 	__call = function(self, ...)
-		return self:new(...);
+		return self:create(...);
 	end,
 });
 SList_mt = {
 	__index = SList;
 }
 
-SList.new = function(self, listHead)
+SList.create = function(self, listHead)
 	local obj = {};
 
 	if not listHead then

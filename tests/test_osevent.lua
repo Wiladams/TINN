@@ -2,8 +2,8 @@
 -- Demonstrate how synchronization can occur across
 -- computicles, using event objects.
 
-local OSEvent = require("OSEvent");
 local Computicle = require("Computicle");
+local OSEvent = require("OSEvent");
 
 local initialState = false;
 local ev1, err = OSEvent:create(initialState);
@@ -23,5 +23,5 @@ event:set();
 
 local comp = Computicle:create(eventResetTmpl, {event = ev1:getNativeHandle()});
 
-print(string.format("0x%x",ev1:wait()));
+print(string.format("0x%x",ev1:await()));
 

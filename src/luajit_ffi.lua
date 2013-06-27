@@ -87,13 +87,7 @@ luajit.LUA_COMPAT_MOD	= nil	-- OLD: math.mod, NEW: math.fmod
 luajit.LUA_COMPAT_GFIND = nil	-- OLD: string.gfind, NEW: string.gmatch
 
 
--- Configuration for the frontend (the luajit executable).
-if (luajit_c) then
-	luajit.LUA_PROGNAME	= "tinn"  -- Fallback frontend name.
-	luajit.LUA_PROMPT	= "> "	-- Interactive prompt.
-	luajit.LUA_PROMPT2	= ">> "	-- Continuation prompt.
-	luajit.LUA_MAXINPUT	= 512	-- Max. input line length.
-end
+
 
 ffi.cdef[[
 /* Note: changing the following defines breaks the Lua 5.1 ABI. */

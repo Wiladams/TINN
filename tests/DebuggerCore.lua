@@ -15,7 +15,7 @@ local errorhandling = require("core_errorhandling_l1_1_1");
 local DebuggerCore = {}
 setmetatable(DebuggerCore, {
 	__call = function(self, processId)
-		return self:new(processId);
+		return self:create(processId);
 	end,
 });
 
@@ -23,11 +23,7 @@ local DebuggerCore_mt = {
 	__index = DebuggerCore;
 }
 
-DebuggerCore.new = function(self, processId)
-	if not processId then
-		return nil;
-	end
-
+DebuggerCore.init = function(self, processId)
 	local success, err = self:attachToProcess(processId);
 	if not success then
 		return nil, err;
@@ -40,6 +36,11 @@ DebuggerCore.new = function(self, processId)
 	setmetatable(obj, DebuggerCore_mt);
 
 	return obj;
+end
+
+DebuggerCore.create = function(self, processId)
+
+	return self:init(processId);
 end
 
 DebuggerCore.attachToProcess = function(self, processId)
