@@ -30,6 +30,8 @@ ERROR_MORE_DATA                 = 234;
 
 WAIT_TIMEOUT                    = 258;
 
+ERROR_OPERATION_ABORTED			= 995;
+
 ERROR_NOACCESS                  = 998;
 
 ERROR_INVALID_SERVICE_CONTROL   = 1052;

@@ -314,38 +314,6 @@ end
 --[[
 	Data Transport
 --]]
-	
---[[
-typedef struct __WSABUF {
-	u_long len;
-	char * buf;
-} WSABUF,  *LPWSABUF;
---]]
-
-IOCPSocket.send = function(self, buff, bufflen)
-	bufflen = bufflen or #buff
-
-	local lpBuffers = ffi.new("WSABUF", bufflen, ffi.cast("char *",buff));
-	local dwBufferCount = 1;
-	local lpNumberOfBytesSent = ffi.new("DWORD[1]");
-	local dwFlags = 0;
-	local lpOverlapped = nil;
-	local lpCompletionRoutine = nil;
-
-	local status = ws2_32.WSASend(self:getNativeSocket(),
-		lpBuffers,
-		dwBufferCount,
-		lpNumberOfBytesSent,
-		dwFlags,
-		lpOverlapped,
-		lpCompletionRoutine);
-
-	if status == 0 then
-		return lpNumberOfBytesSent[0];
-	end
-
-	return status
-end
 
 --[[
 	uint8_t * Buffer;
@@ -361,6 +329,57 @@ IOCPSocket.createOverlapped = function(self, buff, bufflen, operation)
 
 	return obj;
 end
+
+--[[
+typedef struct __WSABUF {
+	u_long len;
+	char * buf;
+} WSABUF,  *LPWSABUF;
+--]]
+
+IOCPSocket.send = function(self, buff, bufflen)
+	bufflen = bufflen or #buff
+
+	local lpBuffers = ffi.new("WSABUF", bufflen, ffi.cast("char *",buff));
+	local dwBufferCount = 1;
+	local lpNumberOfBytesSent = ffi.new("DWORD[1]");
+	local dwFlags = 0;
+
+	local lpOverlapped = self:createOverlapped(ffi.cast("uint8_t *",buff), bufflen, SocketOps.WRITE);
+	local lpCompletionRoutine = nil;
+
+	local status = ws2_32.WSASend(self:getNativeSocket(),
+		lpBuffers,
+		dwBufferCount,
+		lpNumberOfBytesSent,
+		dwFlags,
+		ffi.cast("OVERLAPPED *",lpOverlapped),
+		lpCompletionRoutine);
+
+	if status == 0 then
+		return lpNumberOfBytesSent[0];
+	end
+
+	-- didn't send bytes immediately, so see if it's a 'pending'
+	-- or some other error
+	local err = ws2_32.WSAGetLastError();
+    if err ~= WSA_IO_PENDING then
+        return false, err;
+    end
+
+    
+    if IOProcessor then
+    	local status = IOProcessor:yieldForIo(self, SocketOps.WRITE);
+
+    	-- BUGBUG
+    	-- check current state of socket
+    	-- of no error, then return the number of bytes read
+    	return lpOverlapped.bytestransferred;
+    end
+
+	return false, err, "no ioprocessor present";
+end
+
 
 
 IOCPSocket.receive = function(self, buff, bufflen)

@@ -1,5 +1,7 @@
 local Computicle = require("Computicle");
 
-local comp = Computicle:load("iocpwebserver");
+local acceptor = Computicle:load("comp_socketacceptor");
+--local requesthandler = Computicle:load("comp_webserver");
+--acceptor.sink1 = requesthandler;
 
-comp:waitForFinish();
+acceptor:waitForFinish();

@@ -74,7 +74,7 @@ end
 IOProcessor.yieldForIo = function(self, sock, iotype)
 
 	-- associate a fiber with a socket
-	print("yieldForIo, CurrentFiber: ", self.CurrentFiber);
+	--print("yieldForIo, CurrentFiber: ", self.CurrentFiber);
 	
 	self.EventFibers[sock:getNativeSocket()] = self.CurrentFiber;
 
@@ -153,8 +153,6 @@ IOProcessor.stepFibers = function(self)
 end
 
 IOProcessor.step = function(self)
-
-
 	self:stepFibers();
 	self:stepIOEvents();
 

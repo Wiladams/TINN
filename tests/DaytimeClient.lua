@@ -3,11 +3,6 @@ local ffi = require "ffi"
 require("IOProcessor");
 
 
---local IOCPSocket = require("IOCPSocket");
---local IOCompletionPort = require("IOCompletionPort");
---local SocketOps = require("SocketOps");
-
-
 local daytimeport = 9091
 
 
@@ -32,7 +27,7 @@ GetDateAndTime = function(hostname, port)
 
 	--print("client about to receive");
     local n, err = socket:receive(buff, bufflen)
- 	print("client received: ", n, err);
+ 	--print("client received: ", n, err);
 
     if not n then
         return false, err;
