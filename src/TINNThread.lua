@@ -60,6 +60,14 @@ local TINNThread_mt = {
 	__index = TINNThread;
 }
 
+TINNThread.init = function(self, rawhandle)
+	local obj = {
+		Handle = rawhandle;
+	};
+	setmetatable(obj, TINNThread_mt);
+
+	return obj;
+end
 
 TINNThread.create = function(self, params)
 	local rawhandle = nil;
@@ -100,21 +108,14 @@ TINNThread.create = function(self, params)
 	return self:init(rawhandle);
 end
 
-TINNThread.init = function(self, rawhandle)
-	local obj = {
-		Handle = rawhandle;
-	};
-	setmetatable(obj, TINNThread_mt);
 
-	return obj;
-end
 
 TINNThread.getNativeHandle = function(self)
 	return self.Handle;
 end
 
 TINNThread.getProcessId = function(self)
-	local status = core_process.GetProcessIdOfThread(self.Handle);
+	local status = core_process.GetProcessIdOfThread(self:getNativeHandle());
 	
 	if status == 0 then
 		return false, errorhandling.GetLastError();

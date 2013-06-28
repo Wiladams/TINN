@@ -28,8 +28,6 @@ setNumbers = function()
 end
 
 
-
-
 local setTable = function()
 
 	comp.contacts = {

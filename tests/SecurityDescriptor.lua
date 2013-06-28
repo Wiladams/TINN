@@ -25,20 +25,9 @@ SetSecurityDescriptorSacl = advapiLib.SetSecurityDescriptorSacl,
 local SecurityDescriptor = {}
 setmetatable(SecurityDescriptor, {
 	__call = function(self, ...)
-		return self:new(...);
+		return self:create(...);
 	end,
 
-	__index = {
-		create = function(self)
-			local Descriptor = ffi.new("SECURITY_DESCRIPTOR");
-			if not Descriptor then
-				return nil;
-			end
-			security_base.InitializeSecurityDescriptor(Descriptor, ffi.C.SECURITY_DESCRIPTOR_REVISION);
-
-			return SecurityDescriptor:new(Descriptor);
-		end,
-	},
 });
 
 local SecurityDescriptor_mt = {
@@ -46,7 +35,7 @@ local SecurityDescriptor_mt = {
 }
 
 
-SecurityDescriptor.new = function(self, Descriptor)
+SecurityDescriptor.init = function(self, Descriptor)
 
 	local obj = {
 		Descriptor = ffi.cast("PSECURITY_DESCRIPTOR",Descriptor);
@@ -55,6 +44,16 @@ SecurityDescriptor.new = function(self, Descriptor)
 	setmetatable(obj, SecurityDescriptor_mt);
 
 	return obj;
+end
+
+SecurityDescriptor.create = function(self)
+	local Descriptor = ffi.new("SECURITY_DESCRIPTOR");
+	if not Descriptor then
+		return nil;
+	end
+	security_base.InitializeSecurityDescriptor(Descriptor, ffi.C.SECURITY_DESCRIPTOR_REVISION);
+
+	return SecurityDescriptor:init(Descriptor);
 end
 
 SecurityDescriptor.accessAllowed = function(self, ClientToken, DesiredAccess)
@@ -69,11 +68,11 @@ SecurityDescriptor.accessAllowed = function(self, ClientToken, DesiredAccess)
 	local status = security_base.AccessCheck(ffi.cast("PSECURITY_DESCRIPTOR",self.Descriptor),
 		ClientToken,
 		DesiredAccess,
-  _In_       PGENERIC_MAPPING GenericMapping,
-  _Out_opt_  PPRIVILEGE_SET PrivilegeSet,
-			LPDWORD PrivilegeSetLength,
-			LPDWORD GrantedAccess,
-			LPBOOL AccessStatus);
+  		GenericMapping,
+  		PrivilegeSet,
+		PrivilegeSetLength,
+		GrantedAccess,
+		AccessStatus);
 
 end
 
