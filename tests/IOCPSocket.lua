@@ -39,7 +39,7 @@ IOCPSocket.init = function(self, sock, iop)
 
 	local obj = {
 		SafeHandle = IOCPSocketHandle(sock),
-		EventQueue = evq,
+		EventQueue = iop,
 	};
 	setmetatable(obj, IOCPSocket_mt);
 

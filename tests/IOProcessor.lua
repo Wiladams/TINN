@@ -28,7 +28,7 @@ IOProcessor.createClientSocket = function(self, hostname, port)
 end
 
 IOProcessor.createServerSocket = function(self, params)
-	return IOCPSocket:createServerSocket(params, self)
+	return IOCPSocket:createServer(params, self)
 end
 
 
