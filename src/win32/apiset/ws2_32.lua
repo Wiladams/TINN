@@ -952,6 +952,14 @@ int WSAEnumProtocolsA(
     LPWSAPROTOCOL_INFOA lpProtocolBuffer,
     LPDWORD lpdwBufferLength);
 
+BOOL
+WSAGetOverlappedResult(
+    SOCKET s,
+    LPWSAOVERLAPPED lpOverlapped,
+    LPDWORD lpcbTransfer,
+    BOOL fWait,
+    LPDWORD lpdwFlags);
+
 int WSAPoll(
     LPWSAPOLLFD fdArray, 
     ULONG fds, 
@@ -1260,9 +1268,9 @@ WSAEventSelect = Lib.
 
 
     WSAGetLastError = Lib.WSAGetLastError,
+    WSAGetOverlappedResult = Lib.WSAGetOverlappedResult,
 
 --[[
-WSAGetOverlappedResult = Lib.
 WSAGetQOSByName = Lib.
 WSAGetServiceClassInfoA = Lib.
 WSAGetServiceClassInfoW = Lib.

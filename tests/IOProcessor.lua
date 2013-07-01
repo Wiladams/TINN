@@ -6,7 +6,7 @@ local IOCPSocket = require("IOCPSocket");
 local SimpleFiber = require("SimpleFiber");
 local IOCompletionPort = require("IOCompletionPort");
 local SocketOps = require("SocketOps");
-
+local ws2_32 = require("ws2_32");
 
 IOProcessor = {
 	fibers = Collections.Queue.new();
@@ -16,6 +16,8 @@ IOProcessor = {
 
 	IOEventQueue = IOCompletionPort:create();
 	MessageQuanta = 15;		-- 15 milliseconds
+
+	OperationId = 0;
 };
 
 
@@ -36,7 +38,33 @@ IOProcessor.observeSocketIO = function(self, socket)
 	return self.IOEventQueue:addIoHandle(socket:getNativeHandle(), socket.SafeHandle);
 end
 
+IOProcessor.getCompletionStatus = function(self, sock, Overlapped)
+	local lpcbTransfer = ffi.new("DWORD[1]");
+	local Flags = ffi.new("DWORD[1]");
 
+	local status = ws2_32.WSAGetOverlappedResult(sock,
+		ffi.cast("OVERLAPPED *",Overlapped),
+		lpcbTransfer,
+        0, 
+        Flags);
+
+	if status == 0 then
+		local err = ws2_32.WSAGetLastError();
+		return false, err;
+	end
+
+
+	--print("IOProcessor.getCompletionStatus: ", status);
+	--print("                   transferred: ", lpcbTransfer[0]);
+	--print(string.format("                         Flags: 0x%x", Flags[0]));
+
+	return lpcbTransfer[0], Flags[0];
+end
+
+IOProcessor.getNextOperationId = function(self)
+	self.OperationId = self.OperationId + 1;
+	return self.OperationId;
+end
 
 
 --[[
@@ -54,7 +82,7 @@ IOProcessor.scheduleFiber = function(self, afiber, ...)
 end
 
 IOProcessor.spawn = function(self, aroutine, ...)
-	--print("Spawn()")
+	--print("Spawn()", aroutine)
 	return self:scheduleFiber(SimpleFiber(aroutine, ...));
 end
 
@@ -71,44 +99,65 @@ IOProcessor.yield = function(self)
 	coroutine.yield();
 end
 
-IOProcessor.yieldForIo = function(self, sock, iotype)
+IOProcessor.yieldForIo = function(self, sock, iotype, opid)
 
 	-- associate a fiber with a socket
-	--print("yieldForIo, CurrentFiber: ", self.CurrentFiber);
+	--print("IOProcessor.yieldForIo, CurrentFiber: ", self.CurrentFiber);
 	
-	self.EventFibers[sock:getNativeSocket()] = self.CurrentFiber;
+	self.EventFibers[opid] = self.CurrentFiber;
 
 	-- Keep a list of fibers that are awaiting io
 	if self.CurrentFiber ~= nil then
 		self.FibersAwaitingEvent[self.CurrentFiber] = true;
 
-		-- Whether we were successful or not in adding the socket
-		-- to the pool, perform a yield() so the world can move on.
 		self:yield();
 	end
-
 end
+
+
 
 
 IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
 	local ovl = ffi.cast("SocketOverlapped *", overlapped);
 	local sock = ovl.sock;
-	ovl.bytestransferred = numbytes;
+
+	--print("IOProcessor.processIOEvent(): ", sock);
+	--print("                   operation: ", ovl.operation);
+	--print("                       bytes: ", numbytes);
+	--print("                     counter: ", ovl.opcounter);
+
+
+	-- an invalid socket can occur for a couple of reasons
+	-- 1) The socket was intentionally set that way in the 
+	--    overlap data.  this might be the case if some routine
+	--    is trying to indicate the overlap is no longer relevant.
+
 	if sock == INVALID_SOCKET then
 		return false, "invalid socket"
 	end
 
-	--print("IOProcessor.processIOEvent(): ", sock, ovl.operation);
+	-- Get the io completion data from the socket
+	local transferred, flags = self:getCompletionStatus(sock, ovl);
 
-	local fiber = self.EventFibers[sock];
+	-- if nothing was transferred, an error is indicated
+	-- so, return that error
+	if not transferred then
+		return false, flags;
+	end
+
+	-- Find the waiting task that is waiting for this IO event
+	ovl.bytestransferred = numbytes;
+
+	local fiber = self.EventFibers[ovl.opcounter];
 	if fiber then
 		self:scheduleFiber(fiber);
-		self.EventFibers[sock] = nil;
+		self.EventFibers[ovl.opcounter] = nil;
 		self.FibersAwaitingEvent[fiber] = nil;
 	else
-		print("EventScheduler_t.ProcessEventQueue(), No Fiber waiting to process.")
-		-- remove the socket from the watch list
+		--print("IOProcessor.processIOEvent, No task waiting to process.")
 	end
+
+	return true;
 end
 
 IOProcessor.stepIOEvents = function(self)
@@ -118,9 +167,8 @@ IOProcessor.stepIOEvents = function(self)
 	--print("IO Event Queue: ", key, numbytes, overlapped);
 
 	if key then
-		self:processIOEvent(key, numbytes, overlapped);
-	else
-		--print("Event Pool ERROR: ", numbytes);
+		local status, err = self:processIOEvent(key, numbytes, overlapped);
+		--print("IOProcessor.stepIOEvents: ", status, err);
 	end
 end
 
@@ -155,7 +203,29 @@ end
 IOProcessor.step = function(self)
 	self:stepFibers();
 	self:stepIOEvents();
+	
+	local fibersawaitio = false;
 
+	for fiber in pairs(self.FibersAwaitingEvent) do
+		fibersawaitio = true;
+		break;
+	end
+
+	if self.fibers:Len() < 1 and
+		not fibersawaitio then
+		return false
+	end
+
+	return true;
+end
+
+IOProcessor.run = function(self)
+	-- Run the IOProcessor loop
+	local continuerunning = true;
+
+	while continuerunning do
+	    continuerunning = IOProcessor:step();
+	end
 end
 
 

@@ -1,4 +1,4 @@
--- SocketAcceptor.lua
+-- comp_socketacceptor.lua
 
 local ffi = require("ffi");
 
@@ -17,8 +17,14 @@ local mswsock = require("mswsock");
 local acceptNotificationQueue = IOCompletionPort:create();
 
 -- Create the socket that will listen for connection requests
-port = _params.port or 8080;
-backlog = _params.backlog or 10;
+if _params then
+	port = _params.port or 8080;
+	backlog = _params.backlog or 10;
+else
+	port = 8080;
+	backlog = 10;
+end
+
 listenSocket, err = IOCPSocket:createServer({port = port, backlog = backlog, nonblocking=true, nodelay = false});
 
 
@@ -37,8 +43,10 @@ acceptsOutstanding = 0;
 local sListenSocket = listenSocket:getNativeSocket();
 socketsUsed = {};
 
+
+
 local postAccept = function()
-print("postAccept")
+--print("postAccept")
 	-- Each new accept must have a socket that is already 
 	-- constructed standing by, so create that socket
 	local newSocket = IOCPSocket();
@@ -88,7 +96,7 @@ end
 
 handleAccept = function(sock)
 	-- decrement the accept count
-	print("handleAccept: ", sock);
+	--print("handleAccept: ", sock);
 
 	acceptsOutstanding = acceptsOutstanding - 1;
 	

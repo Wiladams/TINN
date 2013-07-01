@@ -18,7 +18,6 @@ local NetStream_mt = {
 }
 
 
-
 function NetStream.new(socket, iocore)
 --	print("NEW NETSTREAM")
 	iocore = iocore or CoSocketIo;

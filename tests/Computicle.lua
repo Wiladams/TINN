@@ -49,6 +49,8 @@ end
 
 	Epilog = [[
 require("comp_msgpump");
+
+IOProcessor:run();
 ]];
 }
 setmetatable(Computicle, {
@@ -82,7 +84,6 @@ Computicle.init = function(self, heapHandle, iocpHandle, threadId)
 	};
 
 	setmetatable(obj, Computicle_mt);
-
 
 	return obj;
 end
@@ -122,9 +123,9 @@ Computicle.datumToString = function(self, data, name)
 			--print(datastr)
 		end
 	elseif dtype == "function" then
-		datastr = "loadstring([["..string.dump(data).."]])";
+		datastr = "loadstring([==["..string.dump(data).."]==])";
 	elseif dtype == "string" then
-		datastr = string.format("[[%s]]", data);
+		datastr = string.format("[==[%s]==]", data);
 	else 
 		datastr = tostring(data);
 	end
@@ -181,10 +182,10 @@ Computicle.createThreadChunk = function(self, codechunk, params, codeparams)
 	table.insert(res, [[main = function()]]);
 	table.insert(res, codechunk);
 	table.insert(res, [[end]]);
+
 	-- make sure the user's code is running in a coroutine
 	table.insert(res, [[IOProcessor:spawn(main)]]);
 
-	
 	-- What we want to execute after the user's code is loaded
 	-- By default, this will be a message pump
 	table.insert(res, Computicle.Epilog);
@@ -260,6 +261,8 @@ Computicle.getStoned = function(self)
 end
 
 Computicle.exec = function(self, codechunk)
+--print("Computicle.exec:");
+--print(codechunk);
 
 	if not codechunk then
 		return false, "no code specified";

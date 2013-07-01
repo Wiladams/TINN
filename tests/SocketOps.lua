@@ -16,7 +16,7 @@ typedef struct {
 
 	int operation;
 	int bytestransferred;
-
+	int opcounter;
 } SocketOverlapped;
 ]]
 
