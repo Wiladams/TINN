@@ -6,23 +6,16 @@
 --
 
 local ffi = require "ffi"
-bit = require("bit");
-band = bit.band;
-bor = bit.bor;
-rshift = bit.rshift;
-lshift = bit.lshift;
+local bit = require("bit");
+local band = bit.band;
+local bor = bit.bor;
+local rshift = bit.rshift;
+local lshift = bit.lshift;
 
 local global = _G;
 
---local apppath = string.format([[;%s\?.lua;%s\core\?.lua;%s\core\Win32\?.lua;%s\modules\?.lua]],argv[1], argv[1], argv[1], argv[1]);
---local ppath = package.path..apppath;
---package.path = ppath;
 
---local libpath = string.format([[;%s\clibs\?.dll;%s\clibs\?.exe]], argv[1],argv[1]);
---package.cpath = package.cpath..libpath
-
-
-require ("WTypes");
+local WTypes = require ("WTypes");
 local core_synch = require("core_synch_l1_2_0");
 
 local User32 = require("User32");
@@ -156,7 +149,7 @@ function Loop(win)
 	win.IsRunning = true;
 
 
-	local timerEvent = core_sync.CreateEvent(nil, false, false, nil)
+	local timerEvent = core_synch.CreateEventA(nil, false, false, nil)
 	-- If the timer event was not created
 	-- just return
 	if timerEvent == nil then

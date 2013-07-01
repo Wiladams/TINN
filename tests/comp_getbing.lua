@@ -5,8 +5,9 @@ local HttpRequest = require("HttpRequest");
 local HttpResponse = require("HttpResponse");
 local HttpChunkIterator = require("HttpChunkIterator");
 
+local hostname = "www.google.com"
 
-local netstream, err = IOCPNetStream:create("www.google.com", 80);
+local netstream, err = IOCPNetStream:create(hostname, 80);
 
 local function GET()
 
@@ -15,7 +16,7 @@ local function GET()
 		return false, err;
 	end
 
-	local request = HttpRequest.new("GET", "/", {Host= "www.google.com"});
+	local request = HttpRequest.new("GET", "/", {Host= hostname});
 	request:Send(netstream);
 
 	--local request = "GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n";
@@ -32,7 +33,7 @@ local function GET()
 	print(response.Status, response.Phrase);
 
 	for chunk in HttpChunkIterator.ReadChunks(response) do
-		--print(chunk);
+		print(chunk);
 	end
 
 	exit();
