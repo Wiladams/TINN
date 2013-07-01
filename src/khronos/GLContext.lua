@@ -5,6 +5,7 @@ local bor = bit.bor;
 
 local User32 = require("User32");
 local GDI32 = require("GDI32");
+local WindowKind = require("WindowKind");
 
 local OglMan = require("OglMan");
 
@@ -18,6 +19,7 @@ local CHECKGL = function(str)
 	end
 end
 
+--local dummyWinKind = WindowKind:create("dummyclass");
 
 local CreateGLContext = function(hWnd, majorversion, minorversion, multisamplemode)
 
@@ -164,12 +166,27 @@ local CreateGLContext = function(hWnd, majorversion, minorversion, multisamplemo
 end
 
 
-local GLContext_t = {}
+local GLContext = {}
+setmetatable(GLContext, {
+	__call = function(self, ...)
+		return self:create(...);
+	end,
+})
 local GLContext_mt = {
-	__index = GLContext_t;
+	__index = GLContext;
 }
 
-local GLContext = function(hWnd, majorversion, minorversion, multisamplemode)
+GLContext.init = function(self, hRC)
+	local obj = {
+		Handle = hRC;
+	}
+	setmetatable(obj, GLContext_mt);
+
+	return obj
+end
+
+
+GLContext.create = function(self, hWnd, majorversion, minorversion, multisamplemode)
 	if not hWnd then
 		return false, "must specify a window handle"
 	end
@@ -184,15 +201,10 @@ local GLContext = function(hWnd, majorversion, minorversion, multisamplemode)
 		return false, err
 	end
 
-	local obj = {
-		Handle = hRC;
-	}
-	setmetatable(obj, GLContext_mt);
-
-	return obj
+	return self:init(hRC);
 end
 
-GLContext_t.MakeCurrent = function(self, hDC)
+GLContext.MakeCurrent = function(self, hDC)
 	OglMan.Lib.wglMakeCurrent(hDC, self.Handle)
 end
 

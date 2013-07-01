@@ -1,5 +1,5 @@
 --
--- GameWindow.lua
+-- GLWindow.lua
 --
 
 
@@ -10,27 +10,37 @@ local band = bit.band;
 local rshift = bit.rshift;
 
 
-local Gdi32 = require ("GDI32");
-local User32 = require ("User32");
-local StopWatch = require ("StopWatch");
 local errorhandling = require("core_errorhandling_l1_1_1");
 
-local GLContext = require("GLContext");
-local core_library = require("core_libraryloader_l1_1_1");
+local Gdi32 = require ("GDI32");
+local User32 = require ("user32_ffi");
+local WindowKind = require("WindowKind");
 
-local GLWindow_t = {
+
+local StopWatch = require ("StopWatch");
+
+local GLContext = require("GLContext");
+local libraryloader = require("core_libraryloader_l1_1_1");
+
+
+
+local GLWindow = {
 	Defaults = {
 		ClassName = "LuaWindow",
 		Title = "Game Window",
 		Origin = {10,10},
 		Extent = {320, 240},
 		FrameRate = 30,
-	}
+	},
+	WindowMap = {},
 }
-GLWindow_t.WindowMap = {}
-
+setmetatable(GLWindow, {
+	__call = function(self, ...)
+		return self:create(...);
+	end,
+});
 local GLWindow_mt = {
-	__index = GLWindow_t;
+	__index = GLWindow;
 }
 
 --[[
@@ -70,7 +80,7 @@ local WindowProc = function(hwnd, msg, wparam, lparam)
 	local winptr = ffi.cast("intptr_t", hwnd)
 	local winnum = tonumber(winptr)
 
-	local win = GLWindow_t.WindowMap[winnum]
+	local win = GLWindow.WindowMap[winnum]
 
 --print(string.format("WindowProc: 0x%x, Window: 0x%x, win: %s", msg, winnum, tostring(win)))
 
@@ -84,20 +94,20 @@ local WindowProc = function(hwnd, msg, wparam, lparam)
 			return result
 		end
 
-		if (msg == User32.FFI.WM_DESTROY) then
+		if (msg == User32.WM_DESTROY) then
 			return win:OnDestroy()
 		end
 
-		if (msg >= User32.FFI.WM_MOUSEFIRST and msg <= User32.FFI.WM_MOUSELAST) or
-				(msg >= User32.FFI.WM_NCMOUSEMOVE and msg <= User32.FFI.WM_NCMBUTTONDBLCLK) then
+		if (msg >= User32.WM_MOUSEFIRST and msg <= User32.WM_MOUSELAST) or
+				(msg >= User32.WM_NCMOUSEMOVE and msg <= User32.WM_NCMBUTTONDBLCLK) then
 			win:OnMouseMessage(hwnd, msg, wparam, lparam)
 		end
 
-		if (msg >= User32.FFI.WM_KEYDOWN and msg <= User32.FFI.WM_SYSCOMMAND) then
+		if (msg >= User32.WM_KEYDOWN and msg <= User32.WM_SYSCOMMAND) then
 			win:OnKeyboardMessage(hwnd, msg, wparam, lparam)
 		end
 
-		if msg == User32.FFI.WM_SIZING then
+		if msg == User32.WM_SIZING then
 			local prect = ffi.cast("PRECT", lparam);
 			--print("WM_SIZING: ", wparam, prect.left, prect.top, prect.right, prect.bottom);
 
@@ -107,7 +117,7 @@ local WindowProc = function(hwnd, msg, wparam, lparam)
 			win:OnWindowResizing(newWidth, newHeight);
 		end
 
-		if msg == User32.FFI.WM_SIZE then
+		if msg == User32.WM_SIZE then
 			local newWidth = LOWORD(lparam);
 			local newHeight = HIWORD(lparam);
 			--print("WM_SIZE: ", wparam, newWidth, newHeight);
@@ -118,20 +128,28 @@ local WindowProc = function(hwnd, msg, wparam, lparam)
 	end
 
 	-- If we have reached here, then do default message processing
-	return User32.Lib.DefWindowProcA(hwnd, msg, wparam, lparam);
+	return User32.DefWindowProcA(hwnd, msg, wparam, lparam);
 end
 
-local GLWindow = function(params)
-	params = params or GLWindow_t.Defaults
 
-	params.ClassName = params.ClassName or GLWindow_t.Defaults.ClassName
-	params.Title = params.Title or GLWindow_t.Defaults.Title
-	params.Origin = params.Origin or GLWindow_t.Defaults.Origin
-	params.Extent = params.Extent or GLWindow_t.Defaults.Extent
-	params.FrameRate = params.FrameRate or GLWindow_t.Defaults.FrameRate
+local winKind = WindowKind:create("GLWindow", WindowProc);
 
-	local self = {
-		Registration = nil;
+
+GLWindow.init = function(self, nativewindow, params)
+	params = params or GLWindow.Defaults
+
+	params.ClassName = params.ClassName or GLWindow.Defaults.ClassName
+	params.Title = params.Title or GLWindow.Defaults.Title
+	params.Origin = params.Origin or GLWindow.Defaults.Origin
+	params.Extent = params.Extent or GLWindow.Defaults.Extent
+	params.FrameRate = params.FrameRate or GLWindow.Defaults.FrameRate
+
+	local obj = {
+		NativeWindow = nativewindow;
+
+		Width = params.Extent[1];
+		Height = params.Extent[2];
+
 		GLContext = nil;
 
 		IsReady = false;
@@ -152,110 +170,69 @@ local GLWindow = function(params)
 		OnMouseDelegate = params.OnMouseDelegate;
 		GestureInteractor = params.GestureInteractor;
 	}
-	setmetatable(self, GLWindow_mt);
+	setmetatable(obj, GLWindow_mt);
 
-	self:Register(params);
-	self:CreateWindow(params);
+	obj:OnCreated(nativewindow);
 
-	return self;
+
+	return obj;
 end
 
-function GLWindow_t:GetClientSize()
-	local csize = ffi.new( "RECT[1]" )
-    User32.Lib.GetClientRect(self.WindowHandle, csize);
-	csize = csize[0]
-	local width = csize.right-csize.left
-	local height = csize.bottom-csize.top
+GLWindow.create = function(self, params)
+	params = params or GLWindow.Defaults
 
-	return width, height
+	params.ClassName = params.ClassName or GLWindow.Defaults.ClassName
+	params.Title = params.Title or GLWindow.Defaults.Title
+	params.Origin = params.Origin or GLWindow.Defaults.Origin
+	params.Extent = params.Extent or GLWindow.Defaults.Extent
+	params.FrameRate = params.FrameRate or GLWindow.Defaults.FrameRate
+
+	-- try to create a window of our kind
+	local win, err = winKind:createWindow(params.Extent[1], params.Extent[2], params.Title);
+	
+	if not win then
+		return nil, err;
+	end
+
+	return self:init(win, params);
+end
+
+function GLWindow:GetClientSize()
+	return self.NativeWindow:GetClientSize();
 end
 
 
-function GLWindow_t:SetFrameRate(rate)
+function GLWindow:SetFrameRate(rate)
 	self.FrameRate = rate
 	self.Interval = 1/self.FrameRate
 end
 
 
 
-function GLWindow_t:Register(params)
-	self.AppInstance = core_library.GetModuleHandleA(nil)
-	self.ClassName = params.ClassName
+function GLWindow:Show()
+	self.NativeWindow:Show();
+end
 
-	local classStyle = bit.bor(User32.FFI.CS_HREDRAW, User32.FFI.CS_VREDRAW, User32.FFI.CS_OWNDC);
+function GLWindow:Hide()
+	self.NativeWindow:Hide();
+end
 
-	local aClass = ffi.new('WNDCLASSEXA', {
-		cbSize = ffi.sizeof("WNDCLASSEXA");
-		style = classStyle;
-		lpfnWndProc = WindowProc;
-		cbClsExtra = 0;
-		cbWndExtra = 0;
-		hInstance = self.AppInstance;
-		hIcon = nil;
-		hCursor = nil;
-		hbrBackground = nil;
-		lpszMenuName = nil;
-		lpszClassName = self.ClassName;
-		hIconSm = nil;
-		})
+function GLWindow:Maximize()
+	self.NativeWindow:Maximize();
+end
 
-	self.Registration = User32.Lib.RegisterClassExA(aClass)
-
-	assert(self.Registration ~= 0, "Registration error"..tostring(errorhandling.GetLastError()))
+function GLWindow:Update()
+	self.NativeWindow:Update();
 end
 
 
-function GLWindow_t:CreateWindow(params)
-	self.ClassName = params.ClassName
-	self.Title = params.Title
-	self.Width = params.Extent[1]
-	self.Height = params.Extent[2]
-
-	local dwExStyle = bit.bor(User32.FFI.WS_EX_APPWINDOW, User32.FFI.WS_EX_WINDOWEDGE)
-	local dwStyle = bit.bor(User32.FFI.WS_SYSMENU, User32.FFI.WS_VISIBLE, User32.FFI.WS_POPUP)
-
---print("GameWindow:CreateWindow - 1.0")
-	local hwnd = User32.Lib.CreateWindowExA(
-		0,
-		self.ClassName,
-		self.Title,
-		User32.FFI.WS_OVERLAPPEDWINDOW,
-		User32.FFI.CW_USEDEFAULT,
-		User32.FFI.CW_USEDEFAULT,
-		params.Extent[1], params.Extent[2],
-		nil,
-		nil,
-		self.AppInstance,
-		nil)
---print("GameWindow:CreateWindow - 2.0")
-
-	assert(hwnd,"unable to create window"..tostring(errorhandling.GetLastError()))
-
-	self.WindowHandle = hwnd;
-
-	self:OnCreated(hwnd)
-end
-
-
-function GLWindow_t:Show()
-	User32.Lib.ShowWindow(self.WindowHandle, User32.FFI.SW_SHOW)
-end
-
-function GLWindow_t:Hide()
-end
-
-function GLWindow_t:Update()
-	User32.Lib.UpdateWindow(self.WindowHandle)
-end
-
-
-function GLWindow_t:SwapBuffers()
+function GLWindow:SwapBuffers()
 	Gdi32.Lib.SwapBuffers(self.GDIContext.Handle);
 end
 
 
-function GLWindow_t:CreateGLContext()
-	local ctx, err = GLContext(self.WindowHandle);
+function GLWindow:CreateGLContext()
+	local ctx, err = GLContext(self.NativeWindow:getNativeHandle());
 
 	if not ctx then
 		return false, err
@@ -268,16 +245,16 @@ function GLWindow_t:CreateGLContext()
 end
 
 
-function GLWindow_t:OnCreated(hwnd)
+function GLWindow:OnCreated(nativewindow)
 --print("GLWindow:OnCreated: ", hwnd)
+	local hwnd = nativewindow:getNativeHandle();
 
 	local winptr = ffi.cast("intptr_t", hwnd)
 	local winnum = tonumber(winptr)
 
-	GLWindow_t.WindowMap[winnum] = self
+	GLWindow.WindowMap[winnum] = self;
 
-
-	self.GDIContext = DeviceContext(User32.Lib.GetDC(self.WindowHandle));
+	self.GDIContext = nativewindow:getDeviceContext();
 
 --print("GDIContext: ", self.GDIContext, self.GDIContext.Handle);
 	self.GDIContext:UseDCPen()
@@ -285,22 +262,22 @@ function GLWindow_t:OnCreated(hwnd)
 
 	local success, err = self:CreateGLContext()
 	if not success then
-		print("GLWindow_t:OnCreated(), CreateGLContext(), FAILURE: ", err);
+		print("GLWindow:OnCreated(), CreateGLContext(), FAILURE: ", err);
 	end
 
 	self.IsValid = true
 end
 
-function GLWindow_t:OnDestroy()
-	--print("GameWindow:OnDestroy")
+function GLWindow:OnDestroy()
+	print("GLWindow:OnDestroy")
 
 	ffi.C.PostQuitMessage(0)
 
 	return 0
 end
 
-function GLWindow_t:OnQuit()
---print("GameWindow:OnQuit")
+function GLWindow:OnQuit()
+--print("GLWindow:OnQuit")
 	self.IsRunning = false
 	stop();
 	-- delete glcontext
@@ -309,41 +286,41 @@ function GLWindow_t:OnQuit()
 	--end
 end
 
-function GLWindow_t:OnTick(tickCount)
+function GLWindow:OnTick(tickCount)
 	if (self.OnTickDelegate) then
 		self.OnTickDelegate(self, tickCount)
 	end
 end
 
-function GLWindow_t:OnFocusMessage(msg)
+function GLWindow:OnFocusMessage(msg)
 --print("OnFocusMessage")
 	if (self.OnSetFocusDelegate) then
 		self.OnSetFocusDelegate(self, msg)
 	end
 end
 
-function GLWindow_t:OnKeyboardMessage(hwnd, msg, wparam, lparam)
+function GLWindow:OnKeyboardMessage(hwnd, msg, wparam, lparam)
 	if self.OnKeyDelegate then
 		self.OnKeyDelegate(hwnd, msg, wparam, lparam)
 	end
 end
 
-function GLWindow_t:OnMouseMessage(hwnd, msg, wparam, lparam)
---print("GLWindow_t:OnMouseMessage()")
+function GLWindow:OnMouseMessage(hwnd, msg, wparam, lparam)
+--print("GLWindow:OnMouseMessage()")
 	if self.OnMouseDelegate then
 		self.OnMouseDelegate(hwnd, msg, wparam, lparam)
 	end
 end
 
-function GLWindow_t:OnWindowResized(width, height)
-	--print("GLWindow_t:OnWindowResized: ", width, height);
+function GLWindow:OnWindowResized(width, height)
+	--print("GLWindow:OnWindowResized: ", width, height);
 	if self.OnWindowResizedDelegate then
 		self.OnWindowResizedDelegate(width, height);
 	end
 end
 
-function GLWindow_t:OnWindowResizing(width, height)
-	--print("GLWindow_t:OnWindowResizing: ", width, height);
+function GLWindow:OnWindowResizing(width, height)
+	--print("GLWindow:OnWindowResizing: ", width, height);
 	if self.OnWindowResizingDelegate then
 		self.OnWindowResizingDelegate(width, height);
 	end

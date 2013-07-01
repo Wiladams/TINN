@@ -63,55 +63,6 @@ local CreateWindowHandle = function(winclass, wintitle, width, height, winstyle,
 end
 
 
---[=[
-ffi.cdef[[
-typedef struct _WindowClass {
-	WNDPROC	MessageProc;
-	ATOM	Registration;
-	HINSTANCE	AppInstance;
-	char *	ClassName;
-	int X;
-	int Y;
-	int Width;
-	int Height;
-	char *Title;
-} User32WindowClass;
-]]
---]=]
-
-ffi.cdef[[
-typedef struct _User32Window {
-	HWND	Handle;
-} NativeWindow, *PNativeWindow;
-]]
-
-NativeWindow = ffi.typeof("NativeWindow")
-NativeWindow_mt = {
-	__index = {
-		Show = function(self)
-			User32Lib.ShowWindow(self.Handle, C.SW_SHOW)
-		end,
-
-		Update = function(self)
-			User32Lib.UpdateWindow(self.Handle)
-		end,
-
-		GetTitle = function(self)
-			local buf = ffi.new("char[?]", 256)
-			local lbuf = ffi.cast("intptr_t", buf)
-			if User32Lib.SendMessageA(self.WindowHandle, C.WM_GETTEXT, 255, lbuf) ~= 0 then
-				return ffi.string(buf)
-			end
-		end,
-
-		OnCreate = function(self)
-			print("User32Window:OnCreate")
-			return 0
-		end,
-	}
-}
-NativeWindow = ffi.metatype(NativeWindow, NativeWindow_mt)
-
 
 
 

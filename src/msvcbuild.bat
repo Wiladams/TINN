@@ -133,6 +133,7 @@
 %LUAC% Win32/IOCompletionPort.lua IOCompletionPort.obj
 %LUAC% Win32/KeyMouse.lua KeyMouse.obj
 %LUAC% Win32/logoncli_ffi.lua logoncli_ffi.obj
+%LUAC% Win32/NativeWindow.lua NativeWindow.obj
 %LUAC% Win32/NativeSocket.lua NativeSocket.obj
 %LUAC% Win32/NetStream.lua NetStream.obj
 %LUAC% Win32/netutils.lua netutils.obj
@@ -161,13 +162,14 @@
 %LUAC% Win32/win_socket.lua win_socket.obj
 %LUAC% Win32/WinBase.lua WinBase.obj
 %LUAC% Win32/WinCrypt.lua WinCrypt.obj
+%LUAC% Win32/WindowKind.lua WindowKind.obj
 %LUAC% Win32/WinIoCtl.lua WinIoCtl.obj
 %LUAC% Win32/WinNT.lua WinNT.obj
 %LUAC% Win32/WinSock_Utils.lua WinSock_Utils.obj
 %LUAC% Win32/Workstation.lua Workstation.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj logoncli_ffi.obj NativeSocket.obj NetStream.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  WebApp.obj win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
+@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj logoncli_ffi.obj NativeSocket.obj NativeWindow.obj NetStream.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  WebApp.obj win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WindowKind.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
  
 @rem Create the graphics specific stuff
 %LUAC% graphics/math_matrix.lua math_matrix.obj
