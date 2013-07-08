@@ -154,6 +154,7 @@ IP_DONTFRAGMENT    = 9;           -- set/get IP Don't Fragment flag
 
 
 -- Error Codes
+WSA_IO_INCOMPLETE   = 996;
 WSA_IO_PENDING  = 997;
 WSAEFAULT       = 10014;
 WSAEINVAL       = 10022;
@@ -965,6 +966,9 @@ int WSAPoll(
     ULONG fds, 
     INT timeout);
 
+/*
+// Commented, because we won't want the 
+// callback function to be in here.
 int WSARecv(
     SOCKET s,
     LPWSABUF lpBuffers,
@@ -973,6 +977,17 @@ int WSARecv(
     LPDWORD lpFlags,
     LPWSAOVERLAPPED lpOverlapped,
     LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+*/
+
+int WSARecv(
+    SOCKET s,
+    LPWSABUF lpBuffers,
+    DWORD dwBufferCount,
+    LPDWORD lpNumberOfBytesRecvd,
+    LPDWORD lpFlags,
+    LPWSAOVERLAPPED lpOverlapped,
+    void* lpCompletionRoutine);
+
 
 int WSASend(SOCKET s, 
 	LPWSABUF lpBuffers, 

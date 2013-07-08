@@ -53,7 +53,7 @@ end
 function HttpRequest_t:SetBody(body)
 	if not body then
 		self.Body = nil
-		return
+		return self;
 	end
 
 	len = #body

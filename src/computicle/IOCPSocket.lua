@@ -2,6 +2,7 @@
 local ffi = require "ffi"
 
 local ws2_32 = require("ws2_32");
+local mswsock = require("mswsock");
 local WinSock = require "WinSock_Utils"
 local SocketUtils = require("SocketUtils");
 local SocketOps = require("SocketOps");
@@ -17,12 +18,14 @@ typedef struct {
 IOCPSocketHandle = ffi.typeof("IOCPSocketHandle");
 IOCPSocketHandle_mt = {
 	__gc = function(self)
---		print("GC: IOCPSocketHandle: ", self:getNativeSocket(), success, err);
+		print("GC: IOCPSocketHandle: ", self.sock);
 		-- Force close on socket
 		-- To ensure it's really closed
-		local status = ws2_32.closesocket(self:getNativeSocket());
+		local status = ws2_32.closesocket(self.sock);
 	end,	
 }
+ffi.metatype(IOCPSocketHandle, IOCPSocketHandle_mt);
+
 
 local IOCPSocket = {};
 setmetatable(IOCPSocket, {
@@ -56,9 +59,9 @@ IOCPSocket.create = function(self, family, socktype, protocol, iop)
 	family = family or AF_INET;
 	socktype = socktype or SOCK_STREAM;
 	protocol = protocol or 0;
-	lpProtocolInfo = nil;
-	group = 0;
-	dwFlags = WSA_FLAG_OVERLAPPED;
+	local lpProtocolInfo = nil;
+	local group = 0;
+	local dwFlags = WSA_FLAG_OVERLAPPED;
 
 
 	-- Create the actual socket
@@ -291,6 +294,25 @@ IOCPSocket.shutdown = function(self, how)
 	return WinSock.shutdown(self:getNativeSocket(), how)
 end
 
+
+--[[
+
+--]]
+local opCounter = 0;
+
+IOCPSocket.createOverlapped = function(self, buff, bufflen, operation)
+	opCounter = opCounter + 1;
+	local obj = ffi.new("SocketOverlapped");
+	obj.sock = self:getNativeSocket();
+	obj.operation = operation;
+	obj.opcounter = IOProcessor:getNextOperationId();
+	obj.Buffer = buff;
+	obj.BufferLength = bufflen;
+
+	return obj, opCounter;
+end
+
+
 --[[
 	Client Socket Routines
 --]]
@@ -309,13 +331,69 @@ IOCPSocket.makePassive = function(self, backlog)
 end
 
 IOCPSocket.accept = function(self)
-	local handle, err =  WinSock.accept(self:getNativeSocket(), nil, nil);
+	local family = AF_INET;
+	local socktype = SOCK_STREAM;
+	local protocol = 0;
+	local lpProtocolInfo = nil;
+	local group = 0;
+	local dwFlags = WSA_FLAG_OVERLAPPED;
 
-	if not handle then
-		return false, err
+
+	local newsock = ws2_32.WSASocketA(family, socktype, protocol, lpProtocolInfo, group, dwFlags);
+	if newsock == INVALID_SOCKET then
+		return false, ws2_32.WSAGetLastError();
 	end
-			
-	return IOCPSocket:init(handle, self.EventQueue);
+
+	-- Now, construct up the accept call
+	local sAcceptSocket = newsock;
+	local dwReceiveDataLength = 0;
+	local dwLocalAddressLength = ffi.sizeof("struct sockaddr_in")+16;
+	local dwRemoteAddressLength = ffi.sizeof("struct sockaddr_in")+16;
+	local lpOutputBufferLen = dwReceiveDataLength + dwLocalAddressLength + dwRemoteAddressLength;
+	local lpOutputBuffer = ffi.new("char[?]", lpOutputBufferLen);
+	local lpdwBytesReceived = ffi.new("DWORD[1]");
+
+	local lpOverlapped = self:createOverlapped(lpOutputBuffer, lpOutputBufferLen, SocketOps.ACCEPT);
+
+	local status = mswsock.AcceptEx(self:getNativeSocket(), sAcceptSocket, 
+		lpOutputBuffer, 
+		dwReceiveDataLength,
+		dwLocalAddressLength,
+		dwRemoteAddressLength,
+		lpdwBytesReceived,
+		ffi.cast("OVERLAPPED *", lpOverlapped));
+
+	--print("IOCPSocket.accept: ", status);
+
+	-- If the accept completes successfully, then 
+	-- return the new socket
+	if status ~= 0 then
+		return newsock;
+	end
+
+	local err = ws2_32.WSAGetLastError();
+
+	--print("  ERR: ", err);
+
+	if err ~= WSA_IO_PENDING then
+		return false, err;
+	end
+
+	-- If we've gotten this far, it means an accept was queued
+	-- so we should yield, and we'll continue when completion is indicated
+	if IOProcessor then    	
+    	local status = IOProcessor:yieldForIo(self, SocketOps.ACCEPT, lpOverlapped.opcounter);
+
+    	-- BUGBUG
+    	-- check current state of socket
+		--local bytestrans, flags = IOProcessor:getCompletionStatus(self:getNativeSocket(), lpOverlapped);
+    	--print("Status after yield: ", bytestrans, flags);
+
+    	-- if no error, then return the socket
+     	return newsock;
+    end
+
+    return false, "No IOProcessor present";		
 end
 		
 IOCPSocket.bind = function(self, addr, addrlen)
@@ -326,23 +404,6 @@ end
 	Data Transport
 --]]
 
---[[
-	uint8_t * Buffer;
-	int BufferLength;
---]]
-local opCounter = 0;
-
-IOCPSocket.createOverlapped = function(self, buff, bufflen, operation)
-	opCounter = opCounter + 1;
-	local obj = ffi.new("SocketOverlapped");
-	obj.sock = self:getNativeSocket();
-	obj.operation = operation;
-	obj.opcounter = IOProcessor:getNextOperationId();
-	obj.Buffer = buff;
-	obj.BufferLength = bufflen;
-
-	return obj, opCounter;
-end
 
 
 
@@ -370,7 +431,12 @@ IOCPSocket.send = function(self, buff, bufflen)
 	-- if the return value is == 0, then the transfer
 	-- to the network stack has already completed, so 
 	-- return the number of bytes transferred.
+
+
+-- Do the following if we want to handle
+-- immediate success
 	if status == 0 then
+		print("#### IOCPSocket, WSASend STATUS == 0 ####")
 		local bytestrans, flags = IOProcessor:getCompletionStatus(self:getNativeSocket(), lpOverlapped);
 		if not bytestrans then
 			return false, flags;
@@ -405,13 +471,13 @@ end
 
 
 IOCPSocket.receive = function(self, buff, bufflen)
+
 	local lpBuffers = ffi.new("WSABUF", bufflen, buff);
 	local dwBufferCount = 1;
 	local lpNumberOfBytesRecvd = ffi.new("DWORD[1]");
 	local lpFlags = ffi.new("DWORD[1]");
 	local lpOverlapped = self:createOverlapped(buff, bufflen, SocketOps.READ);
 	local lpCompletionRoutine = nil;
-
 
 
 	local status = ws2_32.WSARecv(self:getNativeSocket(),
@@ -428,48 +494,46 @@ IOCPSocket.receive = function(self, buff, bufflen)
 	-- to the network stack has already completed, so 
 	-- return the number of bytes transferred.
 	if status == 0 then
+		print("#### IOCPSocket.WSARecv, STATUS == 0 ####");
+		
+		return lpNumberOfBytesRecvd[0];
+
+--[[		
 		local bytestrans, flags = IOProcessor:getCompletionStatus(self:getNativeSocket(), lpOverlapped);
 
-		--print("    bytestrans, flags: ", bytestrans, flags);
 
 		if not bytestrans then
 			return false, flags;
 		end
 
 		-- return the number of bytes transferred
-		return bytestrans;
-	end
-
-
-	-- didn't get bytes immediately, so see if it's a 'pending'
-	-- or some other error
-	local err = ws2_32.WSAGetLastError();
-
---print("receive, Error: ", err);
-
-    if err ~= WSA_IO_PENDING then
-        return false, err;
-    end
-
---print("receive, PENDING");
-
-    if IOProcessor then
-    	
-    	local status = IOProcessor:yieldForIo(self, SocketOps.READ, lpOverlapped.opcounter);
-
---print("receive, yieldforio: ", status);
+		return lpNumberOfBytesRecvd[0];
+--]]
+	else
+		-- didn't get bytes immediately, so see if it's a 'pending'
+		-- or some other error
+		local err = ws2_32.WSAGetLastError();
+	
+    	if err ~= WSA_IO_PENDING then
+        	return false, err;
+    	end
 
     	-- BUGBUG
     	-- check current state of socket
     	-- of no error, then return the number of bytes read
-    	local bytesReceived = lpOverlapped.bytestransferred;
- 
---print("receive, bytesReceived: ", bytesReceived);
+		--local bytestrans, flags = IOProcessor:getCompletionStatus(self:getNativeSocket(), lpOverlapped);
+ 	end
 
-    	return bytesReceived;
-    end
+    local status = IOProcessor:yieldForIo(self, SocketOps.READ, lpOverlapped.opcounter);
 
-	return err;
+	local bytestrans, flags = IOProcessor:getCompletionStatus(self:getNativeSocket(), lpOverlapped);
+	
+	--print("    bytestrans, flags: ", bytestrans, flags);
+	--print("receive, bytesReceived: ", bytesReceived);
+    
+    local bytesReceived = lpOverlapped.bytestransferred;
+    
+    return bytesReceived;
 end
 
 

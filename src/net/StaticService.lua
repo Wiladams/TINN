@@ -28,6 +28,9 @@ print("NO RESPONSE BODY")
 		return false, "Resource Not Found";
 	end
 
+print("== SENDING ==");
+print(resourceBody);
+
 	local headers = {
 		["Content-Type"] = mimetype;
 	}

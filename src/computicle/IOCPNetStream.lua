@@ -31,10 +31,10 @@ function IOCPNetStream:init(socket)
 		IoCore = IOCPSocketIo,
 		CanSeek = false,
 
-		ReadTimer = StopWatch.new(),
+		ReadTimer = StopWatch(),
 		ReadTimeout = nil,
 
-		WriteTimer = StopWatch.new(),
+		WriteTimer = StopWatch(),
 		WriteTimeout = nil,
 
 		rb_onebyte = ffi.new("uint8_t[1]"),
@@ -174,6 +174,7 @@ function IOCPNetStream:readByte()
 end
 
 function IOCPNetStream:readBytes(buffer, len, offset)
+--print("IOCPNetStream:readBytes: ", buffer, len, offset);
 	offset = offset or 0
 
 	-- Reset the stopwatch
@@ -182,7 +183,6 @@ function IOCPNetStream:readBytes(buffer, len, offset)
 	return self.IoCore.ReadN(self.Socket, buffer, len);
 end
 
-IOCPNetStream.ReadBytes = IOCPNetStream.readBytes;
 
 function IOCPNetStream:readString(bufflen)
 	bufflen = bufflen or 8192
@@ -314,8 +314,9 @@ function IOCPNetStream:writeStream(stream, size)
 	return count
 end
 
+IOCPNetStream.ReadByte = IOCPNetStream.readByte;
+IOCPNetStream.ReadBytes = IOCPNetStream.readBytes;
 IOCPNetStream.ReadLine = IOCPNetStream.readLine
-
 IOCPNetStream.WriteLine = IOCPNetStream.writeLine;
 
 return IOCPNetStream;

@@ -3,7 +3,7 @@ local ffi = require ("ffi");
 
 -- Read the number of bytes specified by the 'size'
 -- parameter.
-local function ReadN(sock, buff, size)
+local function ReadN(socket, buff, size)
 
 	local nleft = size;
 	local nread = 0;
@@ -11,9 +11,12 @@ local function ReadN(sock, buff, size)
 	local ptr = ffi.cast("uint8_t *",buff);
 
 	while nleft > 0 do
-		nread, err = sock:receive(ptr, nleft);
+		nread, err = socket:receive(ptr, nleft);
+
+			--print("IOCPSocketIo.ReadN: ", nread, err)
 
 		if not nread then
+			print("IOCPSocketIo.ReadN, ERROR: ", nread, err)
 			break;
 		end
 
@@ -27,6 +30,10 @@ local function ReadN(sock, buff, size)
 		end
 
 		ptr = ptr + nread;
+	end
+
+	if err then
+		print("ReadN, ERROR: ", err);
 	end
 
 	local bytesread = size - nleft
@@ -48,14 +55,14 @@ end
 local CR = string.byte("\r")
 local LF = string.byte("\n")
 
-local function ReadLine(sock, buff, size)
---print("CoReadLine()")
+local function ReadLine(socket, buff, size)
+--print("IOCPSocketIo.ReadLine()")
 	local nchars = 0;
 	local ptr = ffi.cast("uint8_t *", buff);
 	local bytesread, err
 
 	while nchars < size do
-		bytesread, err = ReadN(sock, ptr, 1);
+		bytesread, err = ReadN(socket, ptr, 1);
 		
 		if not bytesread then
 			-- err is either "eof" or some other socket error

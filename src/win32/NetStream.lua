@@ -31,10 +31,10 @@ function NetStream.new(socket, iocore)
 		IoCore = iocore,
 		CanSeek = false,
 
-		ReadTimer = StopWatch.new(),
+		ReadTimer = StopWatch(),
 		ReadTimeout = nil,
 
-		WriteTimer = StopWatch.new(),
+		WriteTimer = StopWatch(),
 		WriteTimeout = nil,
 
 		rb_onebyte = ffi.new("uint8_t[1]"),

@@ -12,7 +12,7 @@ OnMessage = function(msg)
 			print(" delivery data: ", msg.Param2);
 		else
 			if msg.Param1 ~= NodeId then
-				next:postMessage(msg.Message, msg.Param1, msg.Param2);
+				next:receiveMessage(msg.Message, msg.Param1, msg.Param2);
 			end
 		end
 	end

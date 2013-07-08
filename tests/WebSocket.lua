@@ -11,8 +11,7 @@ local base64 = require("base64")
 local CryptUtils = require("BCryptUtils")
 local UrlParser = require("url");
 
-local FileStream = require ("FileStream");
-local HttpResponse = require ("HttpResponse");
+local HttpResponse = require ("WebResponse");
 
 local b64 = require("base64");
 
@@ -26,18 +25,18 @@ local tinsert = table.insert;
 local webSocketGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 
-WebSocketStream_t = {}
-WebSocketStream_mt = {
-	__index = WebSocketStream_t,
+WebSocket_t = {}
+WebSocket_mt = {
+	__index = WebSocket_t,
 }
 
-local WebSocketStream = function(dataStream)
+local WebSocket = function(dataStream)
 	local obj = {
 		DataStream = dataStream;
 		readyState = "CLOSED",
 	}
 
-	setmetatable(obj, WebSocketStream_mt);
+	setmetatable(obj, WebSocket_mt);
 
 	return obj
 end
@@ -64,10 +63,10 @@ local UpgradeRequest = function(req)
 end
 
 
-WebSocketStream_t.InitiateClientHandshake = function(self, url, origin)
+WebSocket_t.InitiateClientHandshake = function(self, url, origin)
 	local urlparts = UrlParser.parse(url, {port="80", path="/", scheme="ws"});
 
---print("WebSocketStream_t.InitiateClientHandshake()", urlparts.host, urlparts.port, urlparts.path, urlparts.query)
+--print("WebSocket_t.InitiateClientHandshake()", urlparts.host, urlparts.port, urlparts.path, urlparts.query)
 
 	local rngBuff, err = CryptUtils.GetRandomBytes(16)
 	if not rngBuff then
@@ -86,19 +85,26 @@ WebSocketStream_t.InitiateClientHandshake = function(self, url, origin)
 
 	local upgraded = UpgradeRequest(req);
 
-print("UPGRADED: ", upgraded);
+--print("UPGRADED: ", upgraded);
 
-	local success, err = self.DataStream:writeString(upgraded);
-	if not success then
+	local status, err = self.DataStream:writeString(upgraded);
+
+-- BUGBUG
+-- the following line affects the timing of the parse
+-- such that it will fail of the following line is commented out
+--print("  DataStream:writeString: ", status, err);
+
+	if not status then
 		return false, err
 	end
 
 	-- Get the response back
-	local response, err = HttpResponse.Parse(self.DataStream);
+	local response, err = HttpResponse:Parse(self.DataStream);
 
-print("Response: ", response);
+
 
 	if not response then 
+		print("Response Error: ", err);
 		return false, err
 	end
 
@@ -111,7 +117,7 @@ print("Response: ", response);
 	return true
 end
 
-WebSocketStream_t.Connect = function(self, url, onconnected)
+WebSocket_t.Connect = function(self, url, onconnected)
 	local urlparts = URL.parse(url, {port=80});
 
 	self.readyState = "CONNECTING"
@@ -127,8 +133,8 @@ WebSocketStream_t.Connect = function(self, url, onconnected)
 	return onconnected(self, err)
 end
 
-WebSocketStream_t.RespondWithServerHandshake = function(self, request, response)
-	--print("WebSocketStream_t.RespondWithServerHandshake()")
+WebSocket_t.RespondWithServerHandshake = function(self, request, response)
+	--print("WebSocket_t.RespondWithServerHandshake()")
 	self.Request = request
 	self.DataStream = request.DataStream;
 
@@ -176,11 +182,11 @@ end
 
 --]]
 
-WebSocketStream_t.OnClose = function(self)
+WebSocket_t.OnClose = function(self)
 	print("CLOSE RECEIVED");
 end
 
-WebSocketStream_t.OnPing = function(self)
+WebSocket_t.OnPing = function(self)
 	print("PING RECEIVED");
 end
 
@@ -193,15 +199,15 @@ local unmaskdata =  function(buff, bufflen, mask)
 	end
 end
 
-WebSocketStream_t.ReadFrameHeader = function(self)
---print("WebSocketStream_t.ReadFrameHeader()")
+WebSocket_t.ReadFrameHeader = function(self)
+--print("WebSocket_t.ReadFrameHeader()")
 	local headerbuff = ffi.new("uint8_t[4]")
 	local BStream = BinaryStream.new(self.DataStream, true);
 
 	-- Read the first two bytes to get up to the initial
 	-- payload length
 	local bytesread, err = self.DataStream:ReadBytes(headerbuff, 2);
---print("WebSocketStream_t.ReadFrameHeader: ", bytesread, err)
+--print("WebSocket_t.ReadFrameHeader, 2 byte header: ", bytesread, err)
 
 	if not bytesread then
 		print("Could not read first 2 bytes of frame")
@@ -219,6 +225,10 @@ WebSocketStream_t.ReadFrameHeader = function(self)
 	frameHeader.MASK = BitBang.getbitsfrombytes(headerbuff, 8, 1, true) > 0;
 	frameHeader.PayloadLen = BitBang.getbitsfrombytes(headerbuff, 9, 7, true)
 
+--print("FRAME HEADER")
+--for k,v in pairs(frameHeader) do
+--	print(k,v);
+--end
 
 
 	-- if payload length == 126 then next two bytes
@@ -254,19 +264,21 @@ WebSocketStream_t.ReadFrameHeader = function(self)
 	return frameHeader;
 end
 
-WebSocketStream_t.ReadFrame = function(self)
---print("WebSocketStream_t.ReadFrame")
+WebSocket_t.ReadFrame = function(self)
+--print("WebSocket_t.ReadFrame")
 	local frameHeader, err = self:ReadFrameHeader();
 
 	if not frameHeader then
-		print("Error: ", err)
+		print("WebSocket.ReadFrame(), reading header Error: ", err);
 		return false, err
 	end
 
 	-- Finally, read the payload data
 	local payloaddata = ffi.new("uint8_t[?]", frameHeader.PayloadLen);
 	local bytesread, err = self.DataStream:ReadBytes(payloaddata, frameHeader.PayloadLen)
+
 --print("PAYLOAD: ", bytesread, err)
+
 	if not bytesread then
 		return false, err
 	end
@@ -281,8 +293,8 @@ WebSocketStream_t.ReadFrame = function(self)
 	return frameHeader
 end
 
-WebSocketStream_t.WriteFrameHeader = function(self, frameHeader)
---print("WebSocketStream_t.ReadFrameHeader()")
+WebSocket_t.WriteFrameHeader = function(self, frameHeader)
+--print("WebSocket_t.ReadFrameHeader()")
 	local headerbuff = ffi.new("uint8_t[4]")
 	local BStream = BinaryStream.new(self.DataStream, true);
 
@@ -326,7 +338,7 @@ WebSocketStream_t.WriteFrameHeader = function(self, frameHeader)
 	return frameHeader;
 end
 
-WebSocketStream_t.WriteFrame = function(self, message, FIN, opcode, shouldmask)
+WebSocket_t.WriteFrame = function(self, message, FIN, opcode, shouldmask)
 	FIN = FIN or 1;
 	opcode = opcode or 1;
 	shouldmask = shouldmask or 0;
@@ -335,7 +347,7 @@ WebSocketStream_t.WriteFrame = function(self, message, FIN, opcode, shouldmask)
 	local payloaddata = ffi.new("uint8_t[?]", payloadlen);
 	ffi.copy(payloaddata, ffi.cast("const uint8_t *", message), payloadlen);
 
---print("WebSocketStream_t.ReadFrame")
+--print("WebSocket_t.ReadFrame")
 	local frameHeader = {
 		FIN = FIN;
 		RSV1 = 0;
@@ -365,4 +377,4 @@ WebSocketStream_t.WriteFrame = function(self, message, FIN, opcode, shouldmask)
 	return true
 end
 
-return WebSocketStream
+return WebSocket

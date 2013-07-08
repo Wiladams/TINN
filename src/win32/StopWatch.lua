@@ -5,7 +5,7 @@ local core_profile = require("core_profile_l1_1_0");
 local StopWatch = {}
 setmetatable(StopWatch, {
 	__call = function(self, ...) 
-		return StopWatch.new(...);
+		return self:create(...);
 	end,
 });
 
@@ -17,20 +17,29 @@ local StopWatch_mt = {
 	end,
 }
 
-function StopWatch.new()
+StopWatch.init = function(self, frequency, startcount)
 	local obj = {
-		Frequency = 0,
-		StartCount = 0,
+		Frequency = frequency,
+		StartCount = startcount,
 		freqbuff = ffi.new("int64_t[1]");
 		countbuff = ffi.new("int64_t[1]");
 	}
 	setmetatable(obj, StopWatch_mt)
 
-	obj:Reset();
-
 	return obj
 end
 
+StopWatch.create = function(self, frequency, startcount)
+	local freqbuff = ffi.new("int64_t[1]");
+	local countbuff = ffi.new("int64_t[1]");
+
+	frequency = frequency or 1/core_profile.getPerformanceFrequency(freqbuff);
+	startcount = startcount or core_profile.getPerformanceCounter(countbuff);
+
+	local obj = self:init(frequency, startcount);
+
+	return obj;
+end
 
 
 function StopWatch:GetCurrentTicks()

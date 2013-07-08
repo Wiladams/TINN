@@ -117,11 +117,12 @@
 
 
 @rem Create the Win32 specific stuff
-%LUAC% Win32/console.lua console.obj
-%LUAC% Win32/ConsoleWindow.lua ConsoleWindow.obj
 %LUAC% Win32/basetsd.lua basetsd.obj
 %LUAC% Win32/BCrypt.lua BCrypt.obj
 %LUAC% Win32/BCryptUtils.lua BCryptUtils.obj
+%LUAC% Win32/Computicle.lua Computicle.obj
+%LUAC% Win32/console.lua console.obj
+%LUAC% Win32/ConsoleWindow.lua ConsoleWindow.obj
 %LUAC% Win32/datetime.lua datetime.obj
 %LUAC% Win32/dbghelp_ffi.lua dbghelp_ffi.obj
 %LUAC% Win32/EventScheduler.lua EventScheduler.obj
@@ -169,13 +170,26 @@
 %LUAC% Win32/Workstation.lua Workstation.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj logoncli_ffi.obj NativeSocket.obj NativeWindow.obj NetStream.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  WebApp.obj win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WindowKind.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
+@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj Computicle.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj EventScheduler.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj logoncli_ffi.obj NativeSocket.obj NativeWindow.obj NetStream.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  WebApp.obj win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WindowKind.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
  
+@rem Create the computicle specific stuff
+%LUAC% computicle/comp_msgpump.lua comp_msgpump.obj
+%LUAC% computicle/Computicle.lua Computicle.obj
+%LUAC% computicle/IOCPNetStream.lua IOCPNetStream.obj
+%LUAC% computicle/IOCPSocket.lua IOCPSocket.obj
+%LUAC% computicle/IOCPSocketIo.lua IOCPSocketIo.obj
+%LUAC% computicle/IOProcessor.lua IOProcessor.obj
+%LUAC% computicle/SocketOps.lua SocketOps.obj
+
+@set COMPUTICLELIB=comp_msgpump.obj Computicle.obj IOCPNetStream.obj IOCPSocket.obj IOCPSocketIo.obj IOProcessor.obj SocketOps.obj
+
+
+
 @rem Create the graphics specific stuff
 %LUAC% graphics/math_matrix.lua math_matrix.obj
 %LUAC% graphics/quaternion.lua quaternion.obj
 
-@set GRAPHICSLIB=math_matrix.obj quaternion
+@set GRAPHICSLIB=math_matrix.obj quaternion.obj
 
 
 @rem Khronos library
@@ -198,14 +212,14 @@
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinn.exe tinn.obj %CLIBS% %NETLIB% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB% %LJLIBNAME%
+%LJLINK% /out:tinn.exe tinn.obj %CLIBS% %COMPUTICLELIB% %NETLIB% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinn.exe.manifest^
   %LJMT% -manifest tinn.exe.manifest -outputresource:tinn.exe
 
 %LJCOMPILE% tinnsh.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinnsh.exe tinnsh.obj %CLIBS% %NETLIB% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB% %LJLIBNAME%
+%LJLINK% /out:tinnsh.exe tinnsh.obj %CLIBS% %COMPUTICLELIB% %NETLIB% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB% %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinnsh.exe.manifest^
   %LJMT% -manifest tinnsh.exe.manifest -outputresource:tinnsh.exe

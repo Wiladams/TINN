@@ -92,14 +92,14 @@ NativeWindow.Hide = function(self, kind)
 end
 		
 NativeWindow.Maximize = function(self)
-	self:Show(User32.SW_MAXIMIZE);
+	print("NativeWinow:MAXIMIZE: ", User32.SW_MAXIMIZE);
+	return self:Show(User32.SW_MAXIMIZE);
 end
 
 NativeWindow.Show = function(self, kind)
 	kind = kind or User32.SW_SHOWNORMAL;
 
-	local res = User32.ShowWindow(self:getNativeHandle(), kind);
-	--print("Show: ", kind, res);
+	return User32.ShowWindow(self:getNativeHandle(), kind);
 end
 
 NativeWindow.Update = function(self)

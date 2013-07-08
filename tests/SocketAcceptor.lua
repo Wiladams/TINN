@@ -101,7 +101,7 @@ while true do
 		print("OVERLAPPED SOCKET: ", overlapped.sock);
 
 		if sink1 then
-			sink1:postMessage(SocketOps.ACCEPT, overlapped.sock);
+			sink1:receiveMessage(SocketOps.ACCEPT, overlapped.sock);
 		end
 	else
 		print("ERROR: ", bytestrans);

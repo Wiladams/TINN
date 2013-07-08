@@ -1,7 +1,8 @@
 
 local ffi = require("ffi");
 
-local Collections = require "Collections"
+local Collections = require("Collections");
+local StopWatch = require("StopWatch");
 local IOCPSocket = require("IOCPSocket");
 local SimpleFiber = require("SimpleFiber");
 local IOCompletionPort = require("IOCompletionPort");
@@ -9,6 +10,7 @@ local SocketOps = require("SocketOps");
 local ws2_32 = require("ws2_32");
 
 IOProcessor = {
+	Clock = StopWatch();
 	fibers = Collections.Queue.new();
 	coroutines = {};
 	EventFibers = {};
@@ -54,9 +56,9 @@ IOProcessor.getCompletionStatus = function(self, sock, Overlapped)
 	end
 
 
-	--print("IOProcessor.getCompletionStatus: ", status);
-	--print("                   transferred: ", lpcbTransfer[0]);
-	--print(string.format("                         Flags: 0x%x", Flags[0]));
+	print("IOProcessor.getCompletionStatus: ", status);
+	print("                   transferred: ", lpcbTransfer[0]);
+	print(string.format("                         Flags: 0x%x", Flags[0]));
 
 	return lpcbTransfer[0], Flags[0];
 end
@@ -121,10 +123,10 @@ IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
 	local ovl = ffi.cast("SocketOverlapped *", overlapped);
 	local sock = ovl.sock;
 
-	--print("IOProcessor.processIOEvent(): ", sock);
-	--print("                   operation: ", ovl.operation);
-	--print("                       bytes: ", numbytes);
-	--print("                     counter: ", ovl.opcounter);
+	print("IOProcessor.processIOEvent(): ", sock);
+	print("                   operation: ", ovl.operation);
+	print("                       bytes: ", numbytes);
+	print("                     counter: ", ovl.opcounter);
 
 
 	-- an invalid socket can occur for a couple of reasons
@@ -211,6 +213,8 @@ IOProcessor.step = function(self)
 		break;
 	end
 
+	--print("IOProcessor.step, fibersawaitio: ", fibersawaitio);
+	
 	if self.fibers:Len() < 1 and
 		not fibersawaitio then
 		return false
@@ -219,13 +223,48 @@ IOProcessor.step = function(self)
 	return true;
 end
 
-IOProcessor.run = function(self)
+IOProcessor.start = function(self)
 	-- Run the IOProcessor loop
-	local continuerunning = true;
+	self.ContinueRunning = true;
 
-	while continuerunning do
-	    continuerunning = IOProcessor:step();
+	while self.ContinueRunning do
+	    if not IOProcessor:step() then
+	    	break;
+	    end
 	end
+end
+
+IOProcessor.stop = function(self)
+	self.ContinueRunning = false;
+end
+
+IOProcessor.run = function(self, func, ...)
+
+	if func ~= nil then
+		self:spawn(func, ...);
+	end
+
+	self:start();
+end
+
+--[[
+	Define some global functions
+--]]
+
+run = function(func, ...)
+	return IOProcessor:run(func, ...);
+end
+
+spawn = function(func, ...)
+	return IOProcessor:spawn(func, ...);
+end
+
+stop = function()
+	return IOProcessor:stop();
+end
+
+yield = function()
+	return IOProcessor:yield();
 end
 
 

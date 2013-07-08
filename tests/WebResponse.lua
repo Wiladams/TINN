@@ -9,15 +9,18 @@ local HttpStatus = require ("httpstatus");
 
 -- parse first line
 -- parse lines until blank lines
-local HttpResponse_t = {}
+local HttpResponse = {}
+setmetatable(HttpResponse, {
+	__call = function(self, ...)
+		return self:create(...);
+	end,
+});
+
 local HttpResponse_mt = {
-	__index = HttpResponse_t;
+	__index = HttpResponse;
 }
 
--- Uses HTTP/1.1 by default
-local HttpResponse = function(body, headers, status, phrase)
---print("HttpResponse() - 0.0");
-
+HttpResponse.init = function(self, body, headers, status, phrase)
 	local obj = {
 		-- Methods
 		AppendHeader = HttpMessage_t.AppendHeader,
@@ -42,14 +45,20 @@ local HttpResponse = function(body, headers, status, phrase)
 	return obj;
 end
 
+HttpResponse.create = function(self, body, headers, status, phrase)
+--print("HttpResponse() - 0.0");
 
-function HttpResponse_t:writeHead(status, headers)
+	return self:init(body, headers, status, phrase);
+end
+
+
+function HttpResponse:writeHead(status, headers)
 	self.Status = tostring(status);
 	self.Phrase = HttpStatus.GetPhrase(status);
 	self:SetHeaders(headers);
 end
 
-function HttpResponse_t:SetBody(body, len, offset)
+function HttpResponse:SetBody(body, len, offset)
 	if not body then
 		return
 	end
@@ -66,7 +75,7 @@ function HttpResponse_t:SetBody(body, len, offset)
 end
 
 
-function HttpResponse_t:WriteFirstLine(stream)
+function HttpResponse:WriteFirstLine(stream)
 	-- Write request line
 	local first_line = string.format("HTTP/%s %s %s", self.Version, self.Status, self.Phrase);
 
@@ -76,7 +85,7 @@ function HttpResponse_t:WriteFirstLine(stream)
 end
 
 
-function HttpResponse_t:WritePreamble(stream)
+function HttpResponse:WritePreamble(stream)
 	stream = stream or self.DataStream;
 	
 	if not self.Status then
@@ -103,7 +112,7 @@ function HttpResponse_t:WritePreamble(stream)
 	return success, err
 end
 
-function HttpResponse_t:Send(stream)
+function HttpResponse:Send(stream)
 	if not self.Status then
 		print("-- HttpResponse:Send(), Response has NO Status")
 		return false, "no status specified"
@@ -129,7 +138,7 @@ function HttpResponse_t:Send(stream)
 	return success, err
 end
 
-function HttpResponse_t:writeEnd(body)
+function HttpResponse:writeEnd(body)
 	if body then
 		self:SetBody(body);
 	end
@@ -143,14 +152,14 @@ function HttpResponse_t:writeEnd(body)
 	return self:Send(self.DataStream);
 end
 
-local OpenResponse = function(stream)
+HttpResponse.OpenResponse = function(self, stream)
 	local obj = HttpResponse(nil, nil, nil, nil);
 	obj.DataStream = stream;
 
 	return obj
 end
 
-local Parse = function(stream)
+HttpResponse.Parse = function(self, stream)
 --print("HttpResponse.Parse() - 1.0");
 
 	local firstline, err = stream:ReadLine(4096);
@@ -188,8 +197,5 @@ local Parse = function(stream)
 	return resp
 end
 
-return {
-	new = HttpResponse,
-	Open = OpenResponse,
-	Parse = Parse,
-}
+return HttpResponse;
+

@@ -54,7 +54,7 @@ end
 TokenRing.deliver = function(self, msg, nodeid)
 	nodeid = nodeid or 1;
 
-	self.NodeList[1]:postMessage(TokenRing.Messages.DELIVER, nodeid, msg)
+	self.NodeList[1]:receiveMessage(TokenRing.Messages.DELIVER, nodeid, msg)
 end
 
 TokenRing.awaitFinish = function(self)

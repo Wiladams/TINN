@@ -48,8 +48,78 @@ end
 ]];
 
 	Epilog = [[
-require("comp_msgpump");
 
+local ffi = require("ffi");
+
+-- This is a basic message pump
+-- 
+
+-- default to 15 millisecond timeout
+gIdleTimeout = gIdleTimeout or 15
+
+
+local idlecount = 0;
+
+local handlemessages = function()
+  while true do
+    local msg, err = SELFICLE:getMessage(gIdleTimeout);
+    -- false, WAIT_TIMEOUT == timed out
+    --print("MSG: ", msg, err);
+
+    if not msg then
+      if err == WAIT_TIMEOUT then
+        --print("about to idle")
+        idlecount = idlecount + 1;
+        if OnIdle then
+          OnIdle(idlecount);
+        end
+      end
+    else
+      local msgFullyHandled = false;
+      msg = ffi.cast("ComputicleMsg *", msg);
+
+      if OnMessage then
+        msgFullyHandled = OnMessage(msg);
+      end
+
+      if not msgFullyHandled then
+        msg = ffi.cast("ComputicleMsg *", msg);
+        local Message = msg.Message;
+        --print("Message: ", Message, msg.Param1, msg.Param2);
+    
+        if Message == Computicle.Messages.QUIT then
+          if OnExit then
+            OnExit();
+          end
+          break;
+        end
+
+        if Message == Computicle.Messages.CODE then
+          local len = msg.Param2;
+          local codePtr = ffi.cast("const char *", msg.Param1);
+    
+          if codePtr ~= nil and len > 0 then
+            local code = ffi.string(codePtr, len);
+
+            SELFICLE:freeData(ffi.cast("void *",codePtr));
+
+
+            local func, err = loadstring(code);
+            func();
+            --print("MSG PUMP, loadstring: ", func, err);
+            --print("FUNC(): ",func());
+          end
+        end
+        SELFICLE:freeMessage(msg);
+      end
+    end
+  
+    -- give up time to other computicles
+    IOProcessor:yield();
+  end
+end
+
+IOProcessor:spawn(handlemessages);
 IOProcessor:run();
 ]];
 }
@@ -146,6 +216,7 @@ Computicle.packParams = function(self, params, name)
 	-- as string pointers
 	local res = {};
 	for k,v in pairs(params) do
+		--print("packParams: ", k,v, type(v));
 		table.insert(res, string.format("%s['%s'] = %s", name, k, self:datumToString(v, k)));
 	end
 
@@ -235,14 +306,27 @@ Computicle.create = function(self, codechunk, codeparams)
 	return obj;
 end
 
+Computicle.createFromFile = function(self, filename, codeparams)
+	local fs = io.open(filename)
+	if not fs then 
+		return nil, 'could not load file'
+	end
+
+	local codechunk = fs:read("*all");
+	fs:close();
+
+	return self:create(codechunk, codeparams);
+end
+
 Computicle.load = function(self, name, codeparams)
 	local comp = self:create(string.format("require('%s');", name), codeparams);
 
 	return comp;
 end
 
+
 Computicle.loadAndRun = function(self, name, codeparams)
-	local comp, err = self:load(name);
+	local comp, err = self:load(name, codeparams);
 	if not comp then
 		return false, err;
 	end
@@ -283,7 +367,7 @@ Computicle.exec = function(self, codechunk)
 	ffi.cast("uint8_t *",buff)[codelen] = 0;
 
 	-- post the message with the code chunk
-	return self:postMessage(Computicle.Messages.CODE, buff, codelen)
+	return self:receiveMessage(Computicle.Messages.CODE, buff, codelen)
 end
 
 Computicle.import = function(self, codemodule)
@@ -344,7 +428,7 @@ Computicle.freeMessage = function(self, msg)
 	self:freeData(msg);
 end
 
-Computicle.postMessage = function(self, message, param1, param2)
+Computicle.receiveMessage = function(self, message, param1, param2)
 	-- Create a message object to send to the thread
 	-- post it to the thread's queue
 	self.IOCP:enqueue(self:allocMessage(message, param1, param2));
@@ -353,7 +437,7 @@ Computicle.postMessage = function(self, message, param1, param2)
 end
 
 Computicle.quit = function(self)
-	self:postMessage(Computicle.Messages.QUIT);
+	self:receiveMessage(Computicle.Messages.QUIT);
 end
 
 --[[

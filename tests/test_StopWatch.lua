@@ -1,6 +1,6 @@
 local StopWatch = require ("StopWatch");
 
-local sw = StopWatch.new();
+local sw = StopWatch();
 
 while(true) do
 	print(sw:Seconds())

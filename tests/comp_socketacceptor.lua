@@ -101,7 +101,7 @@ handleAccept = function(sock)
 	acceptsOutstanding = acceptsOutstanding - 1;
 	
 	if sink1 then
-		sink1:postMessage(SocketOps.ACCEPT, sock);
+		sink1:receiveMessage(SocketOps.ACCEPT, sock);
 	end
 end
 

@@ -2,7 +2,7 @@
 RunOnce = function(sink)
 	print("comp_sourcecode, RunOnce...")
 	for i = 1, 10 do
-		sink:postMessage(i);
+		sink:receiveMessage(i);
 	end
 	--sink:quit();
 end

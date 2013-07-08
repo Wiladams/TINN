@@ -36,7 +36,7 @@ MainWindow = nil;
 
 
 local View3D_t = {
-	Clock = StopWatch.new();
+	Clock = StopWatch();
 	TickCount = 0;
 	FrameCount = 0;
 }
@@ -161,7 +161,7 @@ function Loop(win)
 	local handles = ffi.new('void*[1]', {timerEvent})
 
 	local msg = ffi.new("MSG")
-	local sw = StopWatch.new();
+	local sw = StopWatch();
 	local tickCount = 1
 	local timeleft = 0
 	local lastTime = sw:Milliseconds()
