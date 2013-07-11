@@ -2,39 +2,63 @@
 --[[
 	Fiber, contains stuff related to a running fiber
 --]]
-local SimpleFiber_t = {}
+local SimpleFiber = {}
+
+setmetatable(SimpleFiber, {
+	__call = function(self, ...)
+		return self:init(...);
+	end,
+});
+
 local SimpleFiber_mt = {
-	__index = SimpleFiber_t,
+	__index = SimpleFiber,
 }
 
-local SimpleFiber = function(aroutine, ...)
-	local routine = coroutine.create(aroutine)
-	if not routine then
-		return nil
+SimpleFiber.init = function(self, aroutine, ...)
+	-- The first parameter must be a function
+	if not aroutine or type(aroutine) ~= "function" then
+		return nil;
 	end
+
+	local routine = coroutine.create(aroutine)
 
 	local obj = {
 		routine = routine, 
 		params = {...},
-		status = coroutine.status(routine),
 	}
 	setmetatable(obj, SimpleFiber_mt);
 
 	return obj
 end
 
-SimpleFiber_t.Resume = function(self, ...)
-	local success, values = coroutine.resume(self.routine, unpack(self.params));
-
-	self.status = coroutine.status(self.routine)
-
-	return success, values;
+SimpleFiber.getStatus = function(self)
+	return coroutine.status(self.routine);
 end
 
-SimpleFiber_t.Suspend = function(self, ...)
-	self.status = "suspended"
-	return coroutine.yield("suspended", ...)
+SimpleFiber.setParams = function(self, ...)
+	local nparams = select('#',...);
+
+--print("SimpleFiber.setParams: ", nparams);
+
+	if nparams == 0 then
+		self.params = {};
+	elseif nparams == 1 then
+		if type(select(1,...)) == "table" then
+			self.params = select(1,...);
+		else
+			self.params = {...};
+		end
+	else
+		self.params = {...};
+	end
+
+	return self;
 end
 
+
+SimpleFiber.resume = function(self)
+--print("SimpleFiber, RESUMING: ", unpack(self.params));
+	return coroutine.resume(self.routine, unpack(self.params));
+end
 
 return SimpleFiber;

@@ -78,8 +78,13 @@ IOCompletionPort.addIoHandle = function(self, otherhandle, Key)
 	return IOCompletionPort(rawhandle);
 end
 
+IOCompletionPort.HasOverlappedIoCompleted = function(self, lpOverlapped) 
+	return ffi.cast("DWORD",lpOverlapped.Internal) ~= ffi.C.STATUS_PENDING;
+end
+
 IOCompletionPort.enqueue = function(self, dwCompletionKey, dwNumberOfBytesTransferred, lpOverlapped)
 	if not dwCompletionKey then
+		print("IOCompletionPort.enqueue(), NO KEY SPECIFIED")
 		return false, "no data specified"
 	end
 
@@ -111,10 +116,18 @@ IOCompletionPort.dequeue = function(self, dwMilliseconds)
 
 	if status == 0 then
 		local err = errorhandling.GetLastError();
-		--print("dequeue ERROR: ", err);
-		--print("dequeue BYTES: ", lpNumberOfBytesTransferred[0]);
-		--print("   overlapped: ", lpOverlapped[0]);
-		return false, err; 
+		
+		-- If the dequeue failed, there can be two cases
+		-- In the first case, the lpOverlapped is nil,
+		-- in this case, nothing was dequeued, 
+		-- so just return whatever the reported error was.
+		if lpOverlapped[0] == nil then
+			return false, err;
+		end
+
+		-- if lpOverlapped[0] ~= nil, then there is an error
+		-- reported in the remaining values
+		return false, err, lpCompletionKey[0], lpNumberOfBytesTransferred[0], lpOverlapped[0];
 	end
 
 	return lpCompletionKey[0], lpNumberOfBytesTransferred[0], lpOverlapped[0];

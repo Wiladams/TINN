@@ -56,7 +56,7 @@ loop = function()
     
         if dtc ~= nil then
             transcount = transcount + 1;
-            print(transcount, dtc, transcount/sw:Seconds());
+            --print(transcount, dtc, transcount/sw:Seconds());
         else
             print("Error: ", i, err);        
         end

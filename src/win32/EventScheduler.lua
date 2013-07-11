@@ -141,7 +141,7 @@ EventScheduler_t.Start =  function(self)
 		if fiber then
 			if fiber.status ~= "dead" then
 				self.CurrentFiber = fiber;
-				local result, values = fiber:Resume();
+				local result, values = fiber:resume();
 				if not result then
 					print("RESUME RESULT: ", result, values)
 				end

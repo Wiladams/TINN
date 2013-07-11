@@ -1,8 +1,7 @@
 local Computicle = require("Computicle");
 
-Computicle:loadAndRun("DaytimeServer");
+local comp = Computicle:createFromFile("DaytimeServer.lua");
 
---local Server = require "DaytimeServer"
+comp:waitForFinish();
 
---Server.Startup({port = 9091});
 

@@ -16,7 +16,7 @@ local function GET()
 		return false, err;
 	end
 
-	local request = HttpRequest.new("GET", "/", {Host= hostname});
+	local request = HttpRequest.new("GET", "/ping", {Host= hostname});
 	request:Send(netstream);
 
 	--local request = "GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n";

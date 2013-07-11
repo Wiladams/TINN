@@ -8,6 +8,8 @@ local SimpleFiber = require("SimpleFiber");
 local IOCompletionPort = require("IOCompletionPort");
 local SocketOps = require("SocketOps");
 local ws2_32 = require("ws2_32");
+local WinError = require("win_error");
+local core_synch = require("core_synch_l1_2_0");
 
 IOProcessor = {
 	Clock = StopWatch();
@@ -15,29 +17,64 @@ IOProcessor = {
 	coroutines = {};
 	EventFibers = {};
 	FibersAwaitingEvent = {};
+	ActiveSockets = {};
 
 	IOEventQueue = IOCompletionPort:create();
-	MessageQuanta = 15;		-- 15 milliseconds
+	MessageQuanta = 10;		-- 15 milliseconds
 
 	OperationId = 0;
 };
 
+IOProcessor.setMessageQuanta = function(self, millis)
+print("setMessageQuanta: ", millis);
+	self.MessageQuanta = millis;
+	return self;
+end
 
---[[
-	Socket Management
 --]]
 
 IOProcessor.createClientSocket = function(self, hostname, port)
-	return IOCPSocket:createClient(hostname, port, self)
+	local socket = IOCPSocket:createClient(hostname, port, self)
+	
+	-- see if we already think there is an active socket with the 
+	-- native socket handle.
+	-- if there is, it means that the socket was closed, but we never
+	-- cleaned up the associated object.
+	-- So, clean it up, before creating a new one.
+	local alreadyActive = self.ActiveSockets[socket:getNativeSocket()];
+	if alreadyActive then
+		print("IOProcessor.createClientSocket(), ALREADY ACTIVE: ", socket:getNativeSocket());
+		self.ActiveSockets[socket:getNativeSocket()] = nil;
+	end
+
+	-- add the socket to the active socket table
+	self.ActiveSockets[socket:getNativeSocket()] = socket;
+
+	return socket;
 end
 
 IOProcessor.createServerSocket = function(self, params)
-	return IOCPSocket:createServer(params, self)
+	local socket = IOCPSocket:createServer(params, self)
+
+	-- add the socket to the active socket table
+	self.ActiveSockets[socket:getNativeSocket()] = socket;
+
+	return socket;
+end
+
+IOProcessor.removeDeadSocket = function(self, sock)
+	local socketentry = self.ActiveSockets[sock];
+	if socketentry then
+		print("REMOVING DEAD SOCKET: ", sock);
+		self.ActiveSockets[sock] = nil;
+	end
+
+	return true;
 end
 
 
 IOProcessor.observeSocketIO = function(self, socket)
-	return self.IOEventQueue:addIoHandle(socket:getNativeHandle(), socket.SafeHandle);
+	return self.IOEventQueue:addIoHandle(socket:getNativeHandle(), socket:getNativeSocket());
 end
 
 IOProcessor.getCompletionStatus = function(self, sock, Overlapped)
@@ -50,15 +87,14 @@ IOProcessor.getCompletionStatus = function(self, sock, Overlapped)
         0, 
         Flags);
 
+	--print(string.format("IOProcessor.getCompletionStatus: status(%d), sock(%d), bytes(%d), flags(%d)",
+	--	status, sock, lpcbTransfer[0], Flags[0]));
+
 	if status == 0 then
 		local err = ws2_32.WSAGetLastError();
+		print("    ERR: ", err);
 		return false, err;
 	end
-
-
-	print("IOProcessor.getCompletionStatus: ", status);
-	print("                   transferred: ", lpcbTransfer[0]);
-	print(string.format("                         Flags: 0x%x", Flags[0]));
 
 	return lpcbTransfer[0], Flags[0];
 end
@@ -77,6 +113,7 @@ IOProcessor.scheduleFiber = function(self, afiber, ...)
 	if not afiber then
 		return nil
 	end
+	afiber:setParams(...);
 	self.coroutines[afiber.routine] = afiber;
 	self.fibers:Enqueue(afiber);	
 
@@ -84,13 +121,14 @@ IOProcessor.scheduleFiber = function(self, afiber, ...)
 end
 
 IOProcessor.spawn = function(self, aroutine, ...)
-	--print("Spawn()", aroutine)
-	return self:scheduleFiber(SimpleFiber(aroutine, ...));
+	--print("IOProcessor.spawn()", aroutine)
+	return self:scheduleFiber(SimpleFiber(aroutine), ...);
 end
 
 IOProcessor.removeFiber = function(self, fiber)
-	--print("DROPPING DEAD FIBER")
+	print("DROPPING DEAD FIBER: ", fiber);
 	self.coroutines[fiber.routine] = nil;
+	return true;
 end
 
 IOProcessor.inMainFiber = function(self)
@@ -98,35 +136,35 @@ IOProcessor.inMainFiber = function(self)
 end
 
 IOProcessor.yield = function(self)
-	coroutine.yield();
+	return coroutine.yield();
 end
 
-IOProcessor.yieldForIo = function(self, sock, iotype, opid)
-
-	-- associate a fiber with a socket
-	--print("IOProcessor.yieldForIo, CurrentFiber: ", self.CurrentFiber);
-	
-	self.EventFibers[opid] = self.CurrentFiber;
+IOProcessor.yieldForIo = function(self, socket, iotype, opid)
+--print("== IOProcessor.yieldForIo: BEGIN: ", socket:getNativeSocket(), iotype, opid, self.CurrentFiber);
 
 	-- Keep a list of fibers that are awaiting io
+	self.EventFibers[opid] = self.CurrentFiber;
 	if self.CurrentFiber ~= nil then
 		self.FibersAwaitingEvent[self.CurrentFiber] = true;
-
-		self:yield();
+--print("== IOProcessor.yieldForIo: END: ")
+		return self:yield();
 	end
+
+print("IOProcessor.yieldForIo:  NO CURRENT FIBER");
+
+	return nil;
 end
 
 
 
 
 IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
+	--local keyhandle = ffi.cast("IOCPSocketHandle *", key);
 	local ovl = ffi.cast("SocketOverlapped *", overlapped);
 	local sock = ovl.sock;
 
-	print("IOProcessor.processIOEvent(): ", sock);
-	print("                   operation: ", ovl.operation);
-	print("                       bytes: ", numbytes);
-	print("                     counter: ", ovl.opcounter);
+	--print(string.format("IOProcessor.processIOEvent(): keysock(%d), ovlsock(%d), operation(%d), transid(%d), bytes(%d)", 
+	--	key, ovl.sock, ovl.operation, ovl.opcounter, numbytes));
 
 
 	-- an invalid socket can occur for a couple of reasons
@@ -134,29 +172,34 @@ IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
 	--    overlap data.  this might be the case if some routine
 	--    is trying to indicate the overlap is no longer relevant.
 
-	if sock == INVALID_SOCKET then
-		return false, "invalid socket"
-	end
+	--if sock == INVALID_SOCKET then
+	--	print("IOProcessor.processIOEvent(), INVALID_SOCKET");
+	--	return false, "invalid socket"
+	--end
 
 	-- Get the io completion data from the socket
-	local transferred, flags = self:getCompletionStatus(sock, ovl);
+	--local transferred, flags = self:getCompletionStatus(sock, ovl);
 
 	-- if nothing was transferred, an error is indicated
 	-- so, return that error
-	if not transferred then
-		return false, flags;
-	end
+	--if not transferred then
+	--	print("IOProcessor.processIOEvent(), TRANSFERRED == NIL, : ", flags);
+	--	return false, flags;
+	--end
 
 	-- Find the waiting task that is waiting for this IO event
 	ovl.bytestransferred = numbytes;
 
 	local fiber = self.EventFibers[ovl.opcounter];
 	if fiber then
-		self:scheduleFiber(fiber);
+		self:scheduleFiber(fiber, key, numbytes, overlapped);
 		self.EventFibers[ovl.opcounter] = nil;
 		self.FibersAwaitingEvent[fiber] = nil;
 	else
-		--print("IOProcessor.processIOEvent, No task waiting to process.")
+		--local achar = string.format("0x%02x",ovl.Buffer[0]);
+		local achar = ffi.string(ovl.Buffer, numbytes);
+		print("IOProcessor.processIOEvent,NO FIBER WAITING FOR SOCKET EVENT: ", sock, achar)
+		--self:removeDeadSocket(sock);
 	end
 
 	return true;
@@ -164,14 +207,41 @@ end
 
 IOProcessor.stepIOEvents = function(self)
 	-- Check to see if there are any IO Events to deal with
-	local key, numbytes, overlapped = self.IOEventQueue:dequeue(self.MessageQuanta);
+	--local key, numbytes, overlapped = self.IOEventQueue:dequeue(self.MessageQuanta);
+	local param1, param2, param3, param4, param5 = self.IOEventQueue:dequeue(self.MessageQuanta);
 
-	--print("IO Event Queue: ", key, numbytes, overlapped);
+	local key, bytes, ovl
 
-	if key then
-		local status, err = self:processIOEvent(key, numbytes, overlapped);
-		--print("IOProcessor.stepIOEvents: ", status, err);
+	-- First check to see if we've got a timeout
+	-- if so, then just return immediately
+	if not param1 then
+		if param2 == WAIT_TIMEOUT then
+			return true;
+		end
+		
+		-- other errors that can occur at this point
+		-- could either be iocp errors, or they could
+		-- be socket specific errors
+		-- If the error is ERROR_NETNAME_DELETED
+		-- a socket has closed, so do something about it?
+		if param2 == ERROR_NETNAME_DELETED then
+			print("Processor.stepIOEvents(), ERROR_NETNAME_DELETED: ", param3);
+		else
+			print("Processor.stepIOEvents(), ERROR: ", param3, param2);
+		end
+
+		key = param3;
+		bytes = param4;
+		ovl = param5; 
+	else
+		key = param1;
+		bytes = param2;
+		ovl = param3;
 	end
+
+	local status, err = self:processIOEvent(key, bytes, ovl);
+
+	return status, err;
 end
 
 IOProcessor.stepFibers = function(self)
@@ -180,21 +250,34 @@ IOProcessor.stepFibers = function(self)
 
 	-- Take care of spawning a fiber first
 	if fiber then
-		if fiber.status ~= "dead" then
+		if fiber:getStatus() ~= "dead" then
+
+			-- If the fiber we pulled off the active list is 
+			-- not dead, then set it as the currently running fiber
+			-- and resume it.
 			self.CurrentFiber = fiber;
-			local result, values = fiber:Resume();
-			if not result then
-				print("RESUME RESULT: ", result, values)
-			end
+			local results = {fiber:resume()};
+
+			-- parse out the results of the resume into a success
+			-- and the rest of the values returned from the resume
+			local success = results[1];
+			table.remove(results,1);
+
 			self.CurrentFiber = nil;
 
-			if fiber.status ~= "dead" and not self.FibersAwaitingEvent[fiber] then
-				self:scheduleFiber(fiber)
-			else
+			-- The scheduling strategy here is:
+			--   if the fiber is dead, 
+			--     then remove it from the list of live fibers 
+			--     to be run
+			--   if it's not dead, but there, it is waiting for IO
+			--     then don't put it in the running list
+			if fiber:getStatus() == "dead" then
 				--print("FIBER FINISHED")
 				--print("-- ",values)
 				-- remove coroutine from dictionary
 				self:removeFiber(fiber)
+			elseif  not self.FibersAwaitingEvent[fiber] then
+				self:scheduleFiber(fiber, results);
 			end
 		else
 			self:removeFiber(fiber)
@@ -231,6 +314,7 @@ IOProcessor.start = function(self)
 	    if not IOProcessor:step() then
 	    	break;
 	    end
+	    --core_synch.Sleep(5);
 	end
 end
 
@@ -239,7 +323,7 @@ IOProcessor.stop = function(self)
 end
 
 IOProcessor.run = function(self, func, ...)
-
+--print("IOProcessor.run: ", self, func)
 	if func ~= nil then
 		self:spawn(func, ...);
 	end

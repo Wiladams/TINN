@@ -206,7 +206,11 @@ function IOCPNetStream:readString(bufflen)
 
 --print("NS:ReadString, 3.0: ", bytesread, err);
 
-	return ffi.string(buff, bytesread)
+	local str = ffi.string(buff, bytesread)
+
+--print("NS:readString(): ", str);
+
+	return str;
 end
 
 
@@ -237,7 +241,9 @@ function IOCPNetStream:readLine(size)
 	end
 
 	local str = ffi.string(self.LineBuffer, bytesread); 	
---print("NS:ReadLine(), END: ", bytesread, err, str)	
+
+--print(string.format("NS:ReadLine(), END[%d]: %s", self.Socket:getNativeSocket(),str));	
+
 	return str;
 end
 
@@ -316,7 +322,8 @@ end
 
 IOCPNetStream.ReadByte = IOCPNetStream.readByte;
 IOCPNetStream.ReadBytes = IOCPNetStream.readBytes;
-IOCPNetStream.ReadLine = IOCPNetStream.readLine
+IOCPNetStream.ReadLine = IOCPNetStream.readLine;
+IOCPNetStream.ReadString = IOCPNetStream.readString;
 IOCPNetStream.WriteLine = IOCPNetStream.writeLine;
 
 return IOCPNetStream;
