@@ -56,7 +56,7 @@ Desktop.getNativeHandle = function(self)
 end
 
 
-jit.off(GetDesktops)
+--jit.off(GetDesktops)
 Desktop.desktops = function(self, winsta)
 	winsta = winsta or desktop_ffi.GetProcessWindowStation()
 
@@ -64,7 +64,7 @@ Desktop.desktops = function(self, winsta)
 
 	local counter = 0;
 
-	jit.off(enumdesktop)
+	--jit.off(enumdesktop)
 	function enumdesktop(desktopname, lParam)
 		counter = counter + 1;
 		local name = ffi.string(desktopname)
@@ -80,6 +80,7 @@ Desktop.desktops = function(self, winsta)
 	local result = desktop_ffi.EnumDesktopsA(winsta, enumproc, 0)
 	print("RESULT: ", result);
 
+	
 	--repeat
 	--	local result = desktop_ffi.EnumDesktopsA(winsta, enumproc, 0)  
 	--	print(result, counter)

@@ -20,13 +20,13 @@ SimpleFiber.init = function(self, aroutine, ...)
 		return nil;
 	end
 
-	local routine = coroutine.create(aroutine)
-
 	local obj = {
-		routine = routine, 
+		routine = coroutine.create(aroutine), 
 		params = {...},
 	}
 	setmetatable(obj, SimpleFiber_mt);
+	
+	obj:setParams(...);
 
 	return obj
 end
@@ -40,18 +40,7 @@ SimpleFiber.setParams = function(self, ...)
 
 --print("SimpleFiber.setParams: ", nparams);
 
-	if nparams == 0 then
-		self.params = {};
-	elseif nparams == 1 then
-		if type(select(1,...)) == "table" then
-			self.params = select(1,...);
-		else
-			self.params = {...};
-		end
-	else
-		self.params = {...};
-	end
-
+	self.params = {...}
 	return self;
 end
 

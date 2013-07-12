@@ -26,7 +26,7 @@ IOProcessor = {
 };
 
 IOProcessor.setMessageQuanta = function(self, millis)
-print("setMessageQuanta: ", millis);
+--print("setMessageQuanta: ", millis);
 	self.MessageQuanta = millis;
 	return self;
 end
@@ -113,6 +113,7 @@ IOProcessor.scheduleFiber = function(self, afiber, ...)
 	if not afiber then
 		return nil
 	end
+
 	afiber:setParams(...);
 	self.coroutines[afiber.routine] = afiber;
 	self.fibers:Enqueue(afiber);	
@@ -121,12 +122,12 @@ IOProcessor.scheduleFiber = function(self, afiber, ...)
 end
 
 IOProcessor.spawn = function(self, aroutine, ...)
-	--print("IOProcessor.spawn()", aroutine)
+	--print("IOProcessor.spawn()", aroutine, ...);
 	return self:scheduleFiber(SimpleFiber(aroutine), ...);
 end
 
 IOProcessor.removeFiber = function(self, fiber)
-	print("DROPPING DEAD FIBER: ", fiber);
+	--print("DROPPING DEAD FIBER: ", fiber);
 	self.coroutines[fiber.routine] = nil;
 	return true;
 end
@@ -265,6 +266,12 @@ IOProcessor.stepFibers = function(self)
 
 			self.CurrentFiber = nil;
 
+			--print("SUCCESS: ", success);
+			if not success then
+				print("RESUME ERROR")
+				print(unpack(results));
+			end
+
 			-- The scheduling strategy here is:
 			--   if the fiber is dead, 
 			--     then remove it from the list of live fibers 
@@ -275,11 +282,13 @@ IOProcessor.stepFibers = function(self)
 				--print("FIBER FINISHED")
 				--print("-- ",values)
 				-- remove coroutine from dictionary
+				--print("INNER FIBER DEAD")
 				self:removeFiber(fiber)
 			elseif  not self.FibersAwaitingEvent[fiber] then
 				self:scheduleFiber(fiber, results);
 			end
 		else
+			print("OUTER FIBER DEAD")
 			self:removeFiber(fiber)
 		end
 	end

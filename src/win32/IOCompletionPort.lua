@@ -125,11 +125,13 @@ IOCompletionPort.dequeue = function(self, dwMilliseconds)
 			return false, err;
 		end
 
-		-- if lpOverlapped[0] ~= nil, then there is an error
-		-- reported in the remaining values
+		-- if lpOverlapped[0] ~= nil, then 
+		-- data was transferred, but there is an error
+		-- indicated in the underlying connection
 		return false, err, lpCompletionKey[0], lpNumberOfBytesTransferred[0], lpOverlapped[0];
 	end
 
+	-- For the remaining cases
 	return lpCompletionKey[0], lpNumberOfBytesTransferred[0], lpOverlapped[0];
 end
 
