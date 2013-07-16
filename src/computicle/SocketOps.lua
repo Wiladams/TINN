@@ -20,6 +20,14 @@ typedef struct {
 } SocketOverlapped;
 ]]
 
+ffi.cdef[[
+typedef struct {
+	HANDLE HeapHandle;
+	HANDLE IOCPHandle;
+	HANDLE ThreadHandle;
+} Computicle_t;
+
+]]
 
 return {
 	ERROR = -1;

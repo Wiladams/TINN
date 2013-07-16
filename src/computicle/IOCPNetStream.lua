@@ -1,6 +1,6 @@
 
 local ffi = require "ffi"
-local Stream = require "stream"
+--local Stream = require "stream"
 
 local IOProcessor = require("IOProcessor");
 local IOCPSocketIo = require("IOCPSocketIo");
@@ -213,6 +213,48 @@ function IOCPNetStream:readString(bufflen)
 	return str;
 end
 
+--[[
+	Read a single line terminated with one of:
+	\r\n
+	\n
+--]]
+
+local CR = string.byte("\r")
+local LF = string.byte("\n")
+
+local function readOneLine(socket, buff, size)
+--print("IOCPSocketIo.ReadLine()")
+	local nchars = 0;
+	local ptr = ffi.cast("uint8_t *", buff);
+	local bytesread, err
+
+	while nchars < size do
+		bytesread, err = socket:receive(ptr, 1);
+		
+		if not bytesread then
+			-- err is either "eof" or some other socket error
+			break
+		else
+			if ptr[0] == LF then
+				--io.write("LF]\n")
+				break
+			elseif ptr[0] == CR then
+				--io.write("[CR")
+			else
+				-- Just a regular character
+				ptr = ptr + 1
+				nchars = nchars+1
+			end
+		end
+	end
+
+--print("END OF WHILE:", err, nchars)
+	if err and err ~= "eof" then
+		return nil, err
+	end
+
+	return nchars
+end
 
 function IOCPNetStream:readLine(size)
 	size = size or 1024;
@@ -227,11 +269,11 @@ function IOCPNetStream:readLine(size)
 --print("NS:ReadLine(), after assert")
 
 	--local bytesread, err = self.Socket:receive(self.LineBuffer, size);
-	local bytesread, err = self.IoCore.ReadLine(self.Socket, self.LineBuffer, size)
+	local bytesread, err = readOneLine(self.Socket, self.LineBuffer, size)
 
 --print("NS:ReadLine(), ReadLine: ", bytesread, err)
 
-	self.ReadTimer:Reset();
+--	self.ReadTimer:Reset();
 
 --print("AFTER Reset()");
 

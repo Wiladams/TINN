@@ -1,5 +1,12 @@
 
 local Computicle = require("Computicle");
+local Messenger = require("Messenger");
+
+local test_single = function()
+	local comp1 = Computicle:create([[print("Hello World!"); exit()]]);
+	comp1:waitForFinish();
+end
+
 
 local test_parallel = function()
 local comp1 = Computicle:create([[print("Hello World!"); exit()]]);
@@ -21,7 +28,8 @@ local test_loadandrun = function()
 end
 
 
-test_parallel();
+test_single();
+--test_parallel();
 
 --test_loadandrun();
 

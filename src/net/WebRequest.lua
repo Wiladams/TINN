@@ -1,13 +1,19 @@
 local ffi = require "ffi"
---local peg = require "peg_http"
+
 local MemoryStream = require "MemoryStream"
 
 local HttpMessage = require ("HttpMessage").HttpMessage;
 local HttpMessage_t = require("HttpMessage").HttpMessage_t;
 
 
-local HttpRequest_t = {}
-local HttpRequest_mt = {
+local WebRequest = {}
+setmetatable(WebRequest, {
+	__call = function(self, ...)
+		return self:create(...);
+	end,
+});
+
+local WebRequest_mt = {
 --[[
 	__tostring = function(self)
 		local mstream = MemoryStream.new(8192)
@@ -18,11 +24,11 @@ local HttpRequest_mt = {
 		return str
 	end,
 --]]
-	__index = HttpRequest_t;
+	__index = WebRequest;
 }
 
 
-local HttpRequest = function(method, resource, headers, body)
+WebRequest.init = function(self, method, resource, headers, body)
 	headers = headers or {}
 
 	local obj = {
@@ -41,35 +47,39 @@ local HttpRequest = function(method, resource, headers, body)
 		Headers = {}
 	}
 
-	setmetatable(obj, HttpRequest_mt);
+	setmetatable(obj, WebRequest_mt);
 
 	obj:SetHeaders(headers);
-	-- Set the body if it's there
 	obj:SetBody(body);
 
 	return obj;
 end
 
 
-function HttpRequest_t:SetBody(body)
+
+WebRequest.create = function(self, method, resource, headers, body)
+	return self:init(method, resource, headers, body);
+end
+
+---[[
+WebRequest.SetBody = function(self, body)
 	if not body then
-		self.Body = nil
+		self.Body = nil;
 		return self;
 	end
 
-	len = #body
+	len = #body;
 
---print("--HttpRequest:SetBody()")
+--print("--WebRequest:SetBody()")
 --print(body)
 
-	self.Body = body
+	self.Body = body;
 	self:AddHeader("Content-Length", len);
 end
 
 
-
-function HttpRequest_t:WritePreamble(stream)
---print("HttpRequest:WritePreamble()")
+WebRequest.WritePreamble = function(self, stream)
+--print("WebRequest:WritePreamble()")
 	if not self.Method or not self.Resource then
 		return nil, "malformed http request"
 	end
@@ -79,27 +89,26 @@ function HttpRequest_t:WritePreamble(stream)
 	-- Write request line
 	local req_line = string.format("%s %s HTTP/%s", self.Method, self.Resource,self.Version);
 	success, err = stream:WriteLine(req_line)
---print("-- HttpRequest:WritePreamble(), Line Success: ", success, err);
+--print("-- WebRequest:WritePreamble(), Line Success: ", success, err);
 	if not success then
 		return nil, err
 	end
 
 	-- Write Headers
 	success, err = self:WriteHeaders(stream);
---print("-- HttpRequest:WritePreamble(), Headers Success: ", success, err);
+--print("-- WebRequest:WritePreamble(), Headers Success: ", success, err);
 	if not success then
 		return nil, err
 	end
 
 	-- Write blank line
 	success, err = stream:WriteLine()
---print("-- HttpRequest:WritePreamble(), Blank Success: ", success, err);
+--print("-- WebRequest:WritePreamble(), Blank Success: ", success, err);
 
 	return success, err
 end
 
-
-function HttpRequest_t:Send(stream)
+WebRequest.Send = function(self, stream)
 	--self.DataStream = stream
 
 	local success, err = self:WritePreamble(stream)
@@ -124,20 +133,22 @@ end
 --]]
 
 
-local Parse = function(stream)
---print("HttpRequest.Parse() - 1.0");
+WebRequest.Parse = function(self, stream)
+	--print("WebRequest.Parse() - 1.0");
 
-	local firstline, err = stream:ReadLine(4096)
 
---print(string.format("HttpRequest.Parse() - 1.1: '%s', %s", tostring(firstline), tostring(err)));
+
+	local firstline, err = stream:readLine(4096)
+
+--print(string.format("WebRequest.Parse() - 1.1: '%s', %s", tostring(firstline), tostring(err)));
 --print("-- ISBLANK: ", firstline == "");
 
 	if not firstline or firstline == "" then
-		print("HttpRequest.Parse(), First Line: ", firstline, err)
+		print("WebRequest.Parse(), First Line: ", firstline, err)
 		return nil, err
 	end
 
---print("HttpRequest.Parse() - 2.0");
+--print("WebRequest.Parse() - 2.0");
 
 	-- For a request 
 	local method, uri, version = firstline:match'^([^ ]+) ([^ ]+) HTTP/(%d+%.%d+)$'
@@ -150,22 +161,19 @@ local Parse = function(stream)
 		return nil, "no Http method found"
 	end
 
---print("HttpRequest.Parse() - 3.0");
-	local req = HttpRequest(method, uri, nil, nil)
+--print("WebRequest.Parse() - 3.0");
+	local req = WebRequest(method, uri, nil, nil)
 	req.FirstLine = firstline
 	req.Version = version
 	req.DataStream = stream;
 
---print("HttpRequest.Parse() - 6.0");
 
-	local lastline, err = req:ReadHeaders(stream)
+--print("WebRequest.Parse() - 6.0");
+
+	local lastline, err = req:ReadHeaders(stream);
 
 	return req
 end
 
 
-return {
-	new = HttpRequest,
-	Parse = Parse,
-}
-
+return WebRequest;

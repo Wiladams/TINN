@@ -18,18 +18,17 @@ end
 local function SendFile(filename, response)
 	-- load the actual requested resource
 	local resourceBody, mimetype = loadResource(filename);
-print("SendFile(), FILE: ", filename, mimetype);
 
 	if not resourceBody then
-print("NO RESPONSE BODY")
+print("NO RESPONSE BODY: ", filename, mimetype)
 		-- send back an error response
 		response:writeHead("404", {["Content-Length"]="0"});
 		response:writeEnd();
 		return false, "Resource Not Found";
 	end
 
-print("== SENDING ==");
-print(resourceBody);
+--print("== SENDING ==");
+--print(resourceBody);
 
 	local headers = {
 		["Content-Type"] = mimetype;
@@ -40,7 +39,7 @@ print(resourceBody);
 end
 
 local function SendStaticContent(request, response, basename)
-print("SendStaticContent: ", request.Resource);
+--print("SendStaticContent: ", request.Resource);
 	basename = basename or "static";
 	local rootdir = '/'..basename;
 

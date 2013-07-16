@@ -19,11 +19,12 @@ SocketServer_mt = {
   __index = SocketServer;
 }
 
-SocketServer.init = function(self, socket, datafunc)
---print("SocketServer.init: ", socket, datafunc)
+SocketServer.init = function(self, socket, onAccept, onAcceptParam)
+--print("SocketServer.init: ", socket, onAccept, onAcceptParam)
   local obj = {
     ServerSocket = socket;
-    OnData = datafunc;
+    OnAccept = onAccept;
+    OnAcceptParam = onAcceptParam;
   };
 
   setmetatable(obj, SocketServer_mt);
@@ -31,8 +32,9 @@ SocketServer.init = function(self, socket, datafunc)
   return obj;
 end
 
-SocketServer.create = function(self, port, datafunc)
+SocketServer.create = function(self, port, onAccept, onAcceptParam)
   port = port or 9090;
+--print("SocketServer:create(): ", port, onAccept, onAcceptParam);
 
   local socket, err = IOProcessor:createServerSocket({port = port, backlog = 15});
 	
@@ -41,37 +43,16 @@ SocketServer.create = function(self, port, datafunc)
     return nil, err
   end
 
-  return self:init(socket, datafunc);
+  return self:init(socket, onAccept, onAcceptParam);
 end
 
---[[
-local handleNewSocket = function()
-  local bufflen = 1500;
-  local buff = ffi.new("uint8_t[?]", bufflen);
-    
-    local socket = IOCPSocket:init(sock, IOProcessor);
-
-    if self.OnAccepted then
-      self.OnAccepted(socket);
-      socket = nil;
-    else
-      local bytesread, err = socket:receive(buff, bufflen);
-  
-      if not bytesread then
-        print("RECEIVE ERROR: ", err);
-      elseif self.OnData ~= nil then
-        self.OnData(socket, buff, bytesread);
-      else
-        socket:closeDown();
-        socket = nil
-      end
-    end
-  end
---]]
 
 SocketServer.handleAccepted = function(self, sock)
+--print("SocketServer.handleAccepted(): ", sock);
+
   if self.OnAccept then
-    return self.OnAccept(sock)
+--print("CALLING self.OnAccept")
+    return self.OnAccept(self.OnAcceptParam, sock);
   else
     ws2_32.closesocket(sock);
   end
@@ -93,11 +74,7 @@ SocketServer.loop = function(self)
   end
 end
 
-SocketServer.run = function(self, datafunc)
-  if datafunc then
-    self.OnData = datafunc;
-  end
-
+SocketServer.run = function(self)
   print("spawn: ", spawn(self.loop, self));
   run();
 end

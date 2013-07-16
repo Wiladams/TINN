@@ -1,20 +1,26 @@
 local Computicle = require("Computicle");
+local Messenger = require("Messenger");
+
+-- create an empty computicle
+local comp = Computicle();
+local msngr = Messenger(comp);
 
 -- The following runs a primary application loop
-comp = Computicle:load("comp_msgpump");
+--comp = Computicle:load("comp_msgpump");
 
 
 -- Functions to be injected into computicle
-comp.OnIdle = function(count)
+msngr.OnIdle = function(count)
   print("IDLE", count)
 end
 
-comp.hello = function()
+---[[
+msngr.hello = function()
   print("Hello, Injector!");
 end
+--]]
 
-
-
+--[===[
 -- Functions to be executed locally
 printNumbers = function()
   comp:exec([[print(" Low: ", lowValue);]]);
@@ -55,7 +61,7 @@ end
 
 ]=]);
 end
-
+--]===]
 
 
 -- set timeout interval for idling
@@ -64,9 +70,9 @@ comp.gIdleTimeout = 1000;
 
 function main()
 print("MAIN");
+	msngr:exec([[hello()]]);
 
-	comp:exec([[hello()]]);
-
+--[[
 	setNumbers();
 	printNumbers();
 
@@ -78,6 +84,7 @@ print("MAIN");
 	
 	-- send a quit message
 	comp:quit();
+--]]
 
 	-- and wait again to see how it returns from finish
 	-- this time

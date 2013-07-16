@@ -44,34 +44,49 @@ local LongestPrefixMatch = function(resource, urlmap)
 	end
 
 local ResourceMapper = {
-	FindHandler = function(request, urlmap)
---print("FindHandler: ", request.Resource);
-
-		local funcs = LongestPrefixMatch(request.Resource, urlmap)
-		if not funcs then
-			--print("NO Functions found for resource")
-			return nil
-		end
-
-		-- If we have a method specific function
-		-- then return that
-		local method = funcs[request.Method]
-
-		--print("FindHandler: ", request.Resource, method);
-
-		if method then
-			return method
-		end
-
-		-- If we didn't have a method specific function
-		-- then look for the default function
-		method = funcs["_DEFAULT"]
-
-		return method
-	end;
-
 	ShortestPrefixMatch = ShortestPrefixMatch,
-	LongestPrefixMatch = LongestPrefixMatch,
+	LongestPrefixMatch = LongestPrefixMatch,	
 }
+setmetatable(ResourceMapper, {
+	__call = function(self, ...)
+		return self:create(...);
+	end,
+});
+
+local ResourceMapper_mt = {
+	__index = ResourceMapper;
+}
+
+ResourceMapper.init = function(self, urlmap)
+	local obj = {
+		UrlMap = urlmap;
+	};
+	setmetatable(obj, ResourceMapper_mt);
+
+	return obj;
+end
+
+ResourceMapper.create = function(self, ...)
+	return self:init(...);
+end
+
+
+ResourceMapper.getHandler = function(self, request)
+--print("ResourceMapper:findHandler(): ", request.Resource);
+
+	local funcs = LongestPrefixMatch(request.Resource, self.UrlMap)
+	local method;
+
+	if funcs then
+		method = funcs[request.Method]
+		if not method then
+			-- If we didn't have a method specific function
+			-- then look for the default function
+			method = funcs["_DEFAULT"]
+		end
+	end
+
+	return method;
+end
 
 return ResourceMapper;

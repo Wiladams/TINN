@@ -4,17 +4,7 @@ HttpMessage_mt = {
 	__index = HttpMessage_t,
 }
 
---[[
-local HttpMessage = function(obj)
-	obj = obj or {}
 
-	obj.Headers = {}
-
-	setmetatable(obj, HttpMessage_mt)
-
-	return obj
-end
---]]
 
 HttpMessage_t.AppendHeader = function(self, name, value)
 	local header = self.Headers[name];
@@ -77,12 +67,13 @@ HttpMessage_t.ReadHeaders = function(self, stream)
 	local err
     local prevname;
 
+
 	while true do
 		-- Read a line, terminated with crlf
 		-- a 'nil' return would indicate either
 		-- an error, or 'eof', so check the err
 		headerline, err = stream:ReadLine(4096)
-print("HttpMessage_t.ReadHeaders(), HEADERLINE: ", headerline, err)
+
 		if not headerline then 
 			return nil, err
 		end

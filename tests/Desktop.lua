@@ -1,7 +1,9 @@
 
 local ffi = require("ffi");
 
+local errorhandling = require("core_errorhandling_l1_1_1");
 local desktop_ffi = require("Desktop_ffi");
+local core_process = require("core_processthreads_l1_1_1");
 
 ffi.cdef[[
 typedef struct {
@@ -30,6 +32,7 @@ setmetatable(Desktop, {
 })
 
 Desktop.init = function(self, rawhandle, ownit)
+	ownit = ownit or false;
 	local obj = {
 		Handle = DesktopHandle(rawhandle, ownit)
 	}
@@ -44,27 +47,46 @@ Desktop.create = function(self, name, dwFlags, dwAccess, lpsa)
 	lpsa = lpsa or nil;
 
 	local rawhandle = desktop_ffi.CreateDesktopA(name, nil, nil, dwFlags, dwAccess, lpsa);
-	if not rawhandle then
+	if rawhandle == nil then
 		return false, errorhandling.GetLastError();
 	end
 
 	return self:init(rawhandle, true);
 end
 
-Desktop.getNativeHandle = function(self)
-	return self.Handle.Handle;
+Desktop.open = function(self, name, dwFlags, fInherit, dwAccess)
+	dwFlags = dwFlags or 0;
+	fInherit = fInherit or false;
+	dwAccess = dwAccess or 0;
+
+	local rawhandle = desktop_ffi.OpenDesktop(name, dwFlags, fInherit, dwAccess);
+
+	if rawhandle == nil then
+		return false, errorhandling.GetLastError();
+	end
+
+	return self:init(rawhandle, true);
 end
 
+Desktop.openThreadDesktop = function(self, threadid)
+	threadid = threadid or core_process.GetCurrentThreadId();
 
---jit.off(GetDesktops)
-Desktop.desktops = function(self, winsta)
+	local rawhandle = desktop_ffi.GetThreadDesktop(threadid);
+
+	if rawhandle == nil then
+		return false, errorhandling.GetLastError();
+	end
+
+	return self:init(rawhandle, false);
+end
+
+Desktop.desktopNames = function(self, winsta)
 	winsta = winsta or desktop_ffi.GetProcessWindowStation()
 
 	local desktops = {}
 
 	local counter = 0;
 
-	--jit.off(enumdesktop)
 	function enumdesktop(desktopname, lParam)
 		counter = counter + 1;
 		local name = ffi.string(desktopname)
@@ -78,15 +100,26 @@ Desktop.desktops = function(self, winsta)
 
 
 	local result = desktop_ffi.EnumDesktopsA(winsta, enumproc, 0)
-	print("RESULT: ", result);
-
-	
-	--repeat
-	--	local result = desktop_ffi.EnumDesktopsA(winsta, enumproc, 0)  
-	--	print(result, counter)
-	--until not result;
 
 	return desktops
 end
+
+
+--[[
+	Instance Methods
+--]]
+Desktop.getNativeHandle = function(self)
+	return self.Handle.Handle;
+end
+
+Desktop.makeActive = function(self)
+	local status = desktop_ffi.SwitchDesktop(self:getNativeHandle());
+	if status == 0 then
+		return false, errorhandling.GetLastError();
+	end
+
+	return true;
+end
+
 
 return Desktop

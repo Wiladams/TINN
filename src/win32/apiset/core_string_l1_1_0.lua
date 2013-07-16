@@ -3,6 +3,7 @@
 
 local ffi = require("ffi");
 local k32Lib = ffi.load("kernel32")
+local WTypes = require("WTypes");
 
 ffi.cdef[[
 static const int CP_ACP 		= 0;	// default to ANSI code page
@@ -86,8 +87,6 @@ local TEXT = function (quote)
 end
 
 return {
-	Lib = k32Lib,
-
 	toUnicode = toUnicode,
 	toAnsi = toAnsi,
 

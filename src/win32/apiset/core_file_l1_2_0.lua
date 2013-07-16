@@ -2,8 +2,10 @@
 -- api-ms-win-core-file-l1-2-0.dll	
 
 local ffi = require("ffi");
+
 local WTypes = require("WTypes");
 local WinNT = require("WinNT");
+local WinBase = require("WinBase");
 
 local Lib = ffi.load("kernel32");
 

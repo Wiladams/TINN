@@ -298,4 +298,9 @@ end
 
 return {
     parse = parse,
+
+    build_path = build_path,
+    escape = escape,
+    parse_path = parse_path,
+    unescape = unescape,
 }

@@ -10,34 +10,16 @@ local JSON = require("dkjson");
 
 local TINNThread = require("TINNThread");
 local IOCompletionPort = require("IOCompletionPort");
-
-ffi.cdef[[
-typedef struct {
-	HANDLE HeapHandle;
-	HANDLE IOCPHandle;
-	HANDLE ThreadHandle;
-} Computicle_t;
-
-typedef struct {
-	int32_t		Message;
-	UINT_PTR	Param1;
-	LONG_PTR	Param2;
-} ComputicleMsg;
-]]
-
-
+local ComputicleOps = require("ComputicleOps");
 
 
 local Computicle = {
 	Threads = {},
-	Messages = {
-		QUIT = -1,
-		CODE = -2,
-	},
 
 	Prolog = [[
 TINNThread = require("TINNThread");
 Computicle = require("Computicle");
+ComputicleOps = require("ComputicleOps");
 IOCompletionPort = require("IOCompletionPort");
 Heap = require("Heap");
 IOProcessor = require("IOProcessor");
@@ -62,12 +44,12 @@ local idlecount = 0;
 
 local handlemessages = function()
   while true do
-    local msg, err = SELFICLE:getMessage(gIdleTimeout);
+    local msg, datalen, dataPtr = SELFICLE:getMessage(gIdleTimeout);
     -- false, WAIT_TIMEOUT == timed out
     --print("MSG: ", msg, err);
 
     if not msg then
-      if err == WAIT_TIMEOUT then
+      if datalen == WAIT_TIMEOUT then
         --print("about to idle")
         idlecount = idlecount + 1;
         if OnIdle then
@@ -75,48 +57,55 @@ local handlemessages = function()
         end
       end
     else
+      msg = tonumber(msg);
+      --print("MSG: ",msg);
       local msgFullyHandled = false;
-      msg = ffi.cast("ComputicleMsg *", msg);
 
       if OnMessage then
-        msgFullyHandled = OnMessage(msg);
+        msgFullyHandled = OnMessage(msg, dataPtr, datalen);
       end
 
-      if not msgFullyHandled then
-        msg = ffi.cast("ComputicleMsg *", msg);
-        local Message = msg.Message;
-        --print("Message: ", Message, msg.Param1, msg.Param2);
-    
-        if Message == Computicle.Messages.QUIT then
+
+      if not msgFullyHandled then    
+
+
+        if msg == ComputicleOps.Messages.QUIT then
           if OnExit then
             OnExit();
           end
           break;
         end
 
-        if Message == Computicle.Messages.CODE then
-          local len = msg.Param2;
-          local codePtr = ffi.cast("const char *", msg.Param1);
+        if msg == ComputicleOps.Messages.CODE then
+          local len = datalen;
+          local codePtr = ffi.cast("const char *", dataPtr);
     
           if codePtr ~= nil and len > 0 then
             local code = ffi.string(codePtr, len);
 
-            SELFICLE:freeData(ffi.cast("void *",codePtr));
+            -- assume the data was allocated from ourself
+            -- so free it
+            --SELFICLE:freeData(ffi.cast("void *",codePtr));
 
-
+            -- execute the code chunk
             local func, err = loadstring(code);
             func();
             --print("MSG PUMP, loadstring: ", func, err);
             --print("FUNC(): ",func());
           end
         end
-        SELFICLE:freeMessage(msg);
+
+        if datalen > 0 then
+          SELFICLE:freeData(dataPtr);
+        end
       end
     end
   
-    -- give up time to other computicles
+    -- give up time to other tasks
     IOProcessor:yield();
   end
+
+  print("BROKEN OUT")
 end
 
 IOProcessor:spawn(handlemessages);
@@ -125,10 +114,15 @@ IOProcessor:run();
 }
 setmetatable(Computicle, {
 	__call = function(self, ...)
-		return self:init(...);
+		return self:create(...);
 	end,
 });
 
+local Computicle_mt = {
+	__index = Computicle;
+}
+
+--[[
 local Computicle_mt = {
 	__index = function(self, key)
 		if Computicle[key] then
@@ -140,11 +134,12 @@ local Computicle_mt = {
 	__newindex = function(self, key, value)
 		--print("Setting Value: ", key, value);
 		
-		local setvalue = key..'='..self:datumToString(value, key);
+		local setvalue = key..'='..ComputicleOps.datumToString(value, key);
 
 		return self:exec(setvalue);
 	end,
 }
+--]]
 
 Computicle.init = function(self, heapHandle, iocpHandle, threadId)
 	local obj = {
@@ -157,75 +152,6 @@ Computicle.init = function(self, heapHandle, iocpHandle, threadId)
 
 	return obj;
 end
-
-
-Computicle.datumToString = function(self, data, name)
-	local dtype = type(data);
-	local datastr = tostring(nil);
-
---print("DATUM TYPE: ", name, dtype);
-
-	if type(data) == "cdata" then
-		-- If it is a cdata type that easily converts to 
-		-- a number, then convert to a number and assign to string
-		if tonumber(data) then
-			datastr = tostring(tonumber(data));
-		else
-			-- if not easily converted to number, then just assign the pointer
-			datastr = string.format("TINNThread:StringToPointer(%s);", 
-				TINNThread:PointerToString(data));
-		end
-	elseif dtype == "table" then
-		if getmetatable(data) == Computicle_mt then
-			-- package up a computicle
-			datastr = string.format("Computicle:init(TINNThread:StringToPointer(%s),TINNThread:StringToPointer(%s));", 
-				TINNThread:PointerToString(data.Heap:getNativeHandle()), 
-				TINNThread:PointerToString(data.IOCP:getNativeHandle()));
-		elseif getmetatable(data) == getmetatable(self.IOCP) then
-			-- The data is an iocompletion port, so handle it specially
-			datastr = string.format("IOCompletionPort:init(TINNThread:StringToPointer(%s))",
-				TINNThread:PointerToString(data:getNativeHandle()));
-		else
-			-- get a json string representation of the table
-			datastr = string.format("[[ %s ]]",JSON.encode(data, {indent=true}));
-
-			--print("=== JSON ===");
-			--print(datastr)
-		end
-	elseif dtype == "function" then
-		datastr = "loadstring([==["..string.dump(data).."]==])";
-	elseif dtype == "string" then
-		datastr = string.format("[==[%s]==]", data);
-	else 
-		datastr = tostring(data);
-	end
-
-	return datastr;
-end
-
-
-
-Computicle.packParams = function(self, params, name)
-	if not params then
-		return "";
-	end
-
-	name = name or "_params";
-
-	-- First, create a table that represents the entries
-	-- as string pointers
-	local res = {};
-	for k,v in pairs(params) do
-		--print("packParams: ", k,v, type(v));
-		table.insert(res, string.format("%s['%s'] = %s", name, k, self:datumToString(v, k)));
-	end
-
-	return table.concat(res, '\n');
-end
-
-
-
-
 
 Computicle.createThreadChunk = function(self, codechunk, params, codeparams)
 	local res = {};
@@ -240,8 +166,8 @@ Computicle.createThreadChunk = function(self, codechunk, params, codeparams)
 	local paramname = "_params";
 
 	table.insert(res, string.format("%s = {};", paramname));
-	table.insert(res, self:packParams(params, paramname));
-	table.insert(res, self:packParams(codeparams, paramname));
+	table.insert(res, ComputicleOps.packParams(params, paramname));
+	table.insert(res, ComputicleOps.packParams(codeparams, paramname));
 
 	-- Create the Computicle instance that is running within 
 	-- the Computicle
@@ -334,54 +260,6 @@ Computicle.loadAndRun = function(self, name, codeparams)
 	return comp:waitForFinish();
 end
 
-Computicle.getStoned = function(self)
-	local stone = self:allocData(ffi.sizeof("Computicle_t"));
-	stone = ffi.cast("Computicle_t *", stone);
-	stone.HeapHandle = self.Heap:getNativeHandle();
-	stone.IOCPHandle = self.IOCP:getNativeHandle();
-	stone.ThreadHandle = self.Thread:getNativeHandle();
-
-	return stone;
-end
-
-Computicle.exec = function(self, codechunk)
---print("Computicle.exec:");
---print(codechunk);
-
-	if not codechunk then
-		return false, "no code specified";
-	end
-
-	-- allocate some space within the computicle's heap
-	-- to copy the piece of code into.
-	-- This is done so that the receiving side can 
-	-- safely deallocate the memory, knowing it came from 
-	-- it's own heap.
-	local codelen = #codechunk;
-
-	local buff = self:allocData(codelen+1);
-
-	-- Copy the code into the newly allocated area
-	-- make sure it is null terminated
-	ffi.copy(buff, ffi.cast("const uint8_t *", codechunk), codelen);
-	ffi.cast("uint8_t *",buff)[codelen] = 0;
-
-	-- post the message with the code chunk
-	return self:receiveMessage(Computicle.Messages.CODE, buff, codelen)
-end
-
-Computicle.import = function(self, codemodule)
-	local fs = io.open(codemodule)
-	if not fs then 
-		return false, 'could not load file'
-	end
-
-	local codechunk = fs:read("*all");
-	fs:close();
-
-	return self:exec(codechunk);
-
-end
 
 Computicle.getMessage = function(self, timeout)
 	return self.IOCP:dequeue(timeout);
@@ -396,56 +274,26 @@ Computicle.allocData = function(self, size)
 	return self.Heap:alloc(size);
 end
 
-Computicle.freeData = function(self, msg)
-	if msg ~= nil then
-		self.Heap:free(msg);
+Computicle.freeData = function(self, dataPtr, len)
+	if dataPtr ~= nil then
+		self.Heap:free(dataPtr);
 	end
 
 	return self;
 end
 
-Computicle.allocMessage = function(self, message, param1, param2)
-	local msgSize = ffi.sizeof("ComputicleMsg");
-	local newWork = self:allocData(msgSize);
-	newWork = ffi.cast("ComputicleMsg *", newWork);
-	newWork.Message = message;
-	if param1 then
-		newWork.Param1 = ffi.cast("UINT_PTR",param1);
-	else
-		newWork.Param1 = 0;
-	end
-
-	if param2 then
-		newWork.Param2 = ffi.cast("LONG_PTR",param2); 
-	else
-		newWork.Param2 = 0;
-	end
-
-	return newWork;	
-end
-
-Computicle.freeMessage = function(self, msg)
-	self:freeData(msg);
-end
-
-Computicle.receiveMessage = function(self, message, param1, param2)
+Computicle.receiveMessage = function(self, message, dataPtr, dataLen)
 	-- Create a message object to send to the thread
 	-- post it to the thread's queue
-	self.IOCP:enqueue(self:allocMessage(message, param1, param2));
+	self.IOCP:enqueue(message, dataLen, dataPtr);
 
 	return true;
 end
 
 Computicle.quit = function(self)
-	self:receiveMessage(Computicle.Messages.QUIT);
+	self:receiveMessage(ComputicleOps.Messages.QUIT);
 end
 
---[[
-Computicle.resume = function(self)
-	self.Thread:resume();
-	return self;
-end
---]]
 
 Computicle.waitForFinish = function(self, timeout)
 	local timeout = timeout or ffi.C.INFINITE;
@@ -461,5 +309,3 @@ end
 
 
 return Computicle;
-
-
