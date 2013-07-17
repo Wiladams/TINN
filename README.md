@@ -48,8 +48,7 @@ very familiar because it's the same file, with some specific modifications.
 *	cd to the src directory  
 *	run the msvcbuild.bat script  
 
-You will end up with a tinn.exe file.  To use TINN, you will need the lua51.dll, and zlib1.dll.  These are provided in the root directory of the project.  Simply copy these to some directory, along with the tinn.exe and you can then run tinn.  The root directory also contains the files msvcr100.dll and msvcp100.dll.  These are 
-the C runtime library files for Visual Studio 10.0.  If they're not already on your machine, you should include them as well.
+You will end up with a tinn.exe file located in the '.\bin' directory.  To use TINN, you will need the copy all the stuff in the '.\bin' directory to a location of your choosing.  Best is to move the directory to somewhere, and then make that part of your path.  The root directory also contains the files msvcr100.dll and msvcp100.dll.  These are the C runtime library files for Visual Studio 10.0.
 
 Using TINN
 ----------
@@ -87,9 +86,9 @@ If you then call:
 use("dsrole")
 
 The functions, DsRoleFreeMemory, and DsRoleGetPrimaryDomainInformation will become functions in the global namespace.
-this is very convenient from the programmer's perspective as it make coding look very similar to what you would do 
+this is very convenient from the programmer's perspective as it makes coding look very similar to what you would do 
 if you were simply programming in 'C' using these APIs.  At the same time, you are not forced to use this mechanism.
-If you prefer to maintain functions in their modular scoped spaces, then you can simply use the regular 'require' function.
+If you prefer to maintain functions in their modular scoped spaces, then you can simply use the regular 'require' function.  Ideally, you should not use the 'use' mechanism.
 
 Examples
 --------
