@@ -1,6 +1,6 @@
 local ffi = require "ffi"
 
-local IOProcessor = require("Processor");
+local IOProcessor = require("IOProcessor");
 local StopWatch = require("StopWatch");
 
 local hostname = "localhost"
@@ -12,7 +12,7 @@ local argc = #argv
 
 
 EchoRequest = function()
-    local socket, err = IOProcessor:createClientSocket(hostname, serviceport);
+    local socket, err = IOProcessor:createClientSocket(hostname, serviceport, true);
     
     if not socket then
         print("Socket Creation Failed: ", err);
@@ -23,6 +23,8 @@ EchoRequest = function()
     local datestr = os.date("%c");
 
     local bytessent, err = socket:send(datestr, #datestr);
+
+print("bytessent: ", bytessent, err);
 
     local bufflen = 1500;
     local buff = ffi.new("uint8_t[?]", bufflen);
@@ -58,7 +60,7 @@ loop = function()
         else
             print("Error: ", i, err);        
         end
-        
+        collectgarbage();
     end
 
     print("Transactions: ", transcount, transcount/sw:Seconds());

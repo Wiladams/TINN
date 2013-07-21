@@ -5,6 +5,7 @@ local ffi = require("ffi");
 require("WTypes");
 require("WinNT");
 local Lib = ffi.load("kernel32");
+local Ntdll = ffi.load("Ntdll.dll");
 
 
 ffi.cdef[[
@@ -32,13 +33,13 @@ ffi.cdef[[
 // SINGLE_LIST_ENTRY type.
 //
 
-#pragma warning(push)
-#pragma warning(disable:4324)   // structure padded due to align()
+//#pragma warning(push)
+//#pragma warning(disable:4324)   // structure padded due to align()
 typedef struct DECLSPEC_ALIGN(16) _SLIST_ENTRY *PSLIST_ENTRY;
 typedef struct DECLSPEC_ALIGN(16) _SLIST_ENTRY {
     PSLIST_ENTRY Next;
 } SLIST_ENTRY;
-#pragma warning(pop)
+//#pragma warning(pop)
 
 typedef struct _SLIST_ENTRY32 {
     DWORD Next;
@@ -137,6 +138,10 @@ PSLIST_ENTRY InterlockedPopEntrySList (PSLIST_HEADER ListHead);
 PSLIST_ENTRY InterlockedPushEntrySList (PSLIST_HEADER ListHead,PSLIST_ENTRY ListEntry);
 ]]
 
+ffi.cdef[[
+PSLIST_ENTRY RtlFirstEntrySList(PSLIST_HEADER ListHead);
+]]
+
 --InterlockedPushListSListEx
 ffi.cdef[[
 USHORT QueryDepthSList (PSLIST_HEADER ListHead);
@@ -154,5 +159,9 @@ return {
     InterlockedPopEntrySList = Lib.InterlockedPopEntrySList,
     InterlockedPushEntrySList = Lib.InterlockedPushEntrySList,
 --InterlockedPushListSListEx = Lib.InterlockedPushListSListEx,
+
+    RtlFirstEntrySList = Ntdll.RtlFirstEntrySList,
     QueryDepthSList = Lib.QueryDepthSList,
+
+
 }

@@ -2,7 +2,7 @@
 -- Reference
 -- http://www.iana.org/assignments/protocol-numbers/protocol-numbers.txt
 
---    Decimal     Keyword                   Protocol                  Reference
+--  Decimal   Keyword            Protocol
 
 IPProtocols = {
      { 0,    "HOPOPT",          "IPv6 Hop-by-Hop Option"},                
@@ -44,7 +44,7 @@ IPProtocols = {
      {36,    "XTP",             "XTP"},                                   
      {37,    "DDP",             "Datagram Delivery Protocol"},            
      {38,    "IDPR_CMTP",       "IDPR Control Message Transport Proto"},  
-     {39,    "TPPLUSPLUS",            "TP++ Transport Protocol"},               
+     {39,    "TPPLUSPLUS",      "TP++ Transport Protocol"},               
      {40,    "IL",              "IL Transport Protocol"},                 
      {41,    "IPv6",            "IPv6 encapsulation"},                    
      {42,    "SDRP",            "Source Demand Routing Protocol"},        

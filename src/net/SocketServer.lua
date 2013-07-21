@@ -32,11 +32,12 @@ SocketServer.init = function(self, socket, onAccept, onAcceptParam)
   return obj;
 end
 
-SocketServer.create = function(self, port, onAccept, onAcceptParam)
+SocketServer.create = function(self, port, onAccept, onAcceptParam, autoclose)
+  autoclose = autoclose or false;
   port = port or 9090;
 --print("SocketServer:create(): ", port, onAccept, onAcceptParam);
 
-  local socket, err = IOProcessor:createServerSocket({port = port, backlog = 15});
+  local socket, err = IOProcessor:createServerSocket({port = port, backlog = 15, autoclose = autoclose});
 	
   if not socket then 
     print("Server Socket not created!!")
@@ -54,6 +55,7 @@ SocketServer.handleAccepted = function(self, sock)
 --print("CALLING self.OnAccept")
     return self.OnAccept(self.OnAcceptParam, sock);
   else
+print("NO OnAccept available, closing  socket...")
     ws2_32.closesocket(sock);
   end
 end
@@ -75,7 +77,8 @@ SocketServer.loop = function(self)
 end
 
 SocketServer.run = function(self)
-  print("spawn: ", spawn(self.loop, self));
+  print("SocketServer.run()");
+  spawn(self.loop, self);
   run();
 end
 

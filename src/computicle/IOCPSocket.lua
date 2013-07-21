@@ -12,16 +12,20 @@ ffi.cdef[[
 
 typedef struct {
 	SOCKET			sock;
+
+	bool			autoClose;
 } IOCPSocketHandle;
 ]]
 
 IOCPSocketHandle = ffi.typeof("IOCPSocketHandle");
 IOCPSocketHandle_mt = {
 	__gc = function(self)
-		--print("GC: IOCPSocketHandle: ", self.sock);
+		print("GC: IOCPSocketHandle: ", self.sock, self.autoClose);
 		-- Force close on socket
 		-- To ensure it's really closed
-		local status = ws2_32.closesocket(self.sock);
+		if self.autoClose then
+			ws2_32.closesocket(self.sock);
+		end
 	end,	
 }
 ffi.metatype(IOCPSocketHandle, IOCPSocketHandle_mt);
@@ -38,26 +42,28 @@ local IOCPSocket_mt = {
 	__index = IOCPSocket,
 }
 
-IOCPSocket.init = function(self, sock, iop)
-	iop = iop or IOProcessor;
+IOCPSocket.init = function(self, sock, autoclose)
+	autoclose = autoclose or false;
 
 	local obj = {
-		SafeHandle = IOCPSocketHandle(sock),
+		SafeHandle = IOCPSocketHandle(sock, autoclose),
 	};
 	setmetatable(obj, IOCPSocket_mt);
 
-	if iop then
-		iop:observeSocketIO(obj);
+	if IOProcessor then
+		IOProcessor:observeSocketIO(obj);
 	end
 
 	return obj;
 end
 
 
-IOCPSocket.create = function(self, family, socktype, protocol, iop)
+IOCPSocket.create = function(self, family, socktype, protocol, autoclose)
 	family = family or AF_INET;
 	socktype = socktype or SOCK_STREAM;
 	protocol = protocol or 0;
+	autoclose = autoclose or false;
+
 	local lpProtocolInfo = nil;
 	local group = 0;
 	local dwFlags = WSA_FLAG_OVERLAPPED;
@@ -72,7 +78,7 @@ IOCPSocket.create = function(self, family, socktype, protocol, iop)
 	end
 				
 
-	local socket, err = self:init(sock, iop);
+	local socket, err = self:init(sock, autoclose);
 
 	if not socket then
 		return nil, err
@@ -81,7 +87,8 @@ IOCPSocket.create = function(self, family, socktype, protocol, iop)
 	return socket;
 end
 
-IOCPSocket.createClient = function(self, hostname, port, iop)
+IOCPSocket.createClient = function(self, hostname, port)
+print("IOCPSocket.createClient(): ", hostname, port);
 	local family = AF_INET;
 	local socktype = SOCK_STREAM;
 	local protocol = protocol or 0;
@@ -96,7 +103,7 @@ IOCPSocket.createClient = function(self, hostname, port, iop)
 	end
 
 
-	local socket, err = self:create(family, socktype, protocol, iop);
+	local socket, err = self:create(family, socktype, protocol, autoclose);
 
 
 	if not socket then
@@ -113,16 +120,19 @@ IOCPSocket.createClient = function(self, hostname, port, iop)
 	return socket;
 end
 
-IOCPSocket.createServer = function(self, params, iop)
+IOCPSocket.createServer = function(self, params)
+	autoclose = autoclose or false;
+
 	params = params or {port = 80, backlog = 15, nonblocking=false, nodelay = false}
 	params.backlog = params.backlog or 15
 	params.port = params.port or 80
+	params.autoclose = params.autoclose or false;
 
 	local family = AF_INET;
 	local socktype = SOCK_STREAM;
 	local protocol = protocol or 0;
 
-	local socket, err = self:create(family, socktype, protocol, iop);
+	local socket, err = self:create(family, socktype, protocol, params.autoclose);
 
 	if not socket then
 		return nil, err
@@ -142,12 +152,11 @@ IOCPSocket.createServer = function(self, params, iop)
 	end
 
 	-- turn it into a 'listening' socket
+	-- listen(sock);
 	success, err = socket:makePassive(params.backlog);
 	if not success then
 		return nil, err
 	end
-
-	success, err = socket:setNonBlocking(params.nonblocking);
 
 	return socket
 end
@@ -164,6 +173,13 @@ end
 --[[
 	Setting various options
 --]]
+IOCPSocket.setAutoClose = function(self, autoclose)
+	autoclose = autoclose or false;
+	self.SafeHandle.autoClose = autoclose;
+
+	return self;
+end
+
 --
 -- SetKeepAlive
 -- Note: timeout and interval are in milliseconds

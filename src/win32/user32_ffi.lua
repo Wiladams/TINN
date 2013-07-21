@@ -230,8 +230,6 @@ BOOL PostThreadMessageA(DWORD idThread, UINT Msg, WPARAM wParam, LPARAM lParam);
 // SendMessage
 int SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-//int SendMessageW([In] IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
-
 // TranslateMessage
 BOOL TranslateMessage(const MSG *lpMsg);
 
@@ -329,7 +327,7 @@ BOOL InvalidateRect(HWND hWnd, const RECT* lpRect, BOOL bErase);
 // WINDOW UTILITIES
 
 
-typedef BOOL (*WNDENUMPROC)(HWND hwnd, LPARAM l);
+typedef BOOL (__stdcall *WNDENUMPROC)(HWND hwnd, LPARAM l);
 
 int EnumWindows(WNDENUMPROC func, LPARAM l);
 

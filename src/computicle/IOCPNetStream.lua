@@ -47,14 +47,14 @@ function IOCPNetStream:init(socket)
 	return obj;
 end
 
-function IOCPNetStream.create(self, hostname, port, iocore)
-	local socket, err = IOProcessor:createClientSocket(hostname, port);
+function IOCPNetStream.create(self, hostname, port, autoclose)
+	local socket, err = IOProcessor:createClientSocket(hostname, port, autoclose);
 
 	if not socket then
 		return nil, err
 	end
 
-	return self:init(socket, iocore)
+	return self:init(socket)
 end
 
 

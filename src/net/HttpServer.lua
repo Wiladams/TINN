@@ -26,7 +26,6 @@ HttpServer.init = function(self, port, onRequest, onRequestParam)
 	setmetatable(obj, HttpServer_mt);
 	
 	obj.SocketServer = SocketServer(port, HttpServer.OnAccept, obj);
-	obj.SocketServer.OnAccept = self.OnAccept;
 
 	return obj;
 end
@@ -39,10 +38,8 @@ end
 --[[
 	Instance Methods
 --]]
-HttpServer.OnAccept = function(self, sock)
---print("HttpServer.OnAccept(): ", self, sock, self.OnRequest);
-
-  local socket = IOCPSocket:init(sock, IOProcessor);
+HttpServer.HandlePreamblePending = function(self, sock)
+  local socket = IOCPSocket:init(sock);
   local stream, err = IOCPNetStream:init(socket);
 
   if self.OnRequest then
@@ -56,8 +53,15 @@ HttpServer.OnAccept = function(self, sock)
 		print("HandleSingleRequest, Dump stream: ", err)
 	end
   else
-  	-- do nothing and let the socket close
+  	socket:closeDown();
   end
+
+  stream = nil;
+end
+
+HttpServer.OnAccept = function(self, sock)
+--print("HttpServer.OnAccept(): ", self, sock, self.OnRequest);
+	self:HandlePreamblePending(sock);
 end
 
 HttpServer.run = function(self)

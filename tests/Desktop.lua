@@ -30,6 +30,9 @@ setmetatable(Desktop, {
 		return self:create(...);
 	end,
 })
+local Desktop_mt = {
+	__index = Desktop;
+}
 
 Desktop.init = function(self, rawhandle, ownit)
 	ownit = ownit or false;
@@ -96,11 +99,12 @@ Desktop.desktopNames = function(self, winsta)
 		return true
 	end
 	
-	local enumproc = ffi.cast("DESKTOPENUMPROCA", enumdesktop);
+	local cb = ffi.cast("DESKTOPENUMPROCA", enumdesktop);
 
 
-	local result = desktop_ffi.EnumDesktopsA(winsta, enumproc, 0)
-
+	local result = desktop_ffi.EnumDesktopsA(winsta, cb, 0)
+	cb:free();
+	
 	return desktops
 end
 
@@ -121,5 +125,24 @@ Desktop.makeActive = function(self)
 	return true;
 end
 
+Desktop.getWindowHandles = function(self)
+	local wins = {};
+
+	--jit.off(enumwindows);
+	local function enumwindows(hwnd, param)
+		local key = tostring(hwnd);
+		print(key);
+		wins[key]  = hwnd;
+		return true;
+	end
+
+	local cb = ffi.cast("WNDENUMPROC", enumwindows);
+	local status = desktop_ffi.EnumDesktopWindows(self:getNativeHandle(), cb, 0);
+	
+	-- once done with the callback, free the resources
+	cb:free();
+
+	return wins;
+end
 
 return Desktop

@@ -34,7 +34,7 @@ end
 --]]
 
 IOProcessor.createClientSocket = function(self, hostname, port)
-	local socket = IOCPSocket:createClient(hostname, port, self)
+	local socket = IOCPSocket:createClient(hostname, port)
 	
 	-- see if we already think there is an active socket with the 
 	-- native socket handle.
@@ -54,7 +54,7 @@ IOProcessor.createClientSocket = function(self, hostname, port)
 end
 
 IOProcessor.createServerSocket = function(self, params)
-	local socket = IOCPSocket:createServer(params, self)
+	local socket = IOCPSocket:createServer(params)
 
 	-- add the socket to the active socket table
 	self.ActiveSockets[socket:getNativeSocket()] = socket;

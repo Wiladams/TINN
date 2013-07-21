@@ -1,14 +1,13 @@
 
 local ffi = require("ffi");
 
-local SocketServer = require("SocketServer2");
+local SocketServer = require("SocketServer");
 local IOCPSocket = require("IOCPSocket");
-local IOCPSocketIo = require("IOCPSocketIo")
 local IOCPNetStream = require("IOCPNetStream")
 
-local OnAccept = function(sock)
+local OnAccept = function(param, sock)
   -- create a socket wrapper
-  local socket = IOCPSocket:init(sock, IOProcessor);
+  local socket = IOCPSocket:init(sock, false);
   local netstream = IOCPNetStream:init(socket);
 
   -- read a line from the socket
@@ -24,9 +23,8 @@ local OnAccept = function(sock)
   --socket:send(buff, bytesread); 
 end
 
-local server = SocketServer(9090);
-server.OnAccept = OnAccept;
+local server = SocketServer(9090, OnAccept);
 
-server:run(OnData);
+server:run();
 
 

@@ -62,7 +62,7 @@ function strcmp(s1, s2)
 end
 
 
-function strncmp(str1, str2, num)
+local function strncmp(str1, str2, num)
 	local ptr1 = ffi.cast("const uint8_t*", str1)
 	local ptr2 = ffi.cast("const uint8_t*", str2)
 
@@ -303,7 +303,8 @@ end
 return {
 	strlen = strlen,
 	strcpy = strcpy,
-	
+	strncmp = strncmp,
+
 	bintohex = bintohex,
 	hextobin = hextobin,
 }

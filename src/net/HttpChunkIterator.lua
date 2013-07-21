@@ -139,9 +139,13 @@ local function ReadChunks(response)
 			--print("-- HTTPChunked: Content-Length: ", length);
 			local chunk
 			if length > 0 then
-				chunk = input:ReadString(length)
+				chunk, err = input:ReadString(length)
 			end
 			returnedLast = true
+
+			if not chunk then
+				return nil, err;
+			end
 
 			return chunk, length
 		elseif connection and connection == "close" then
@@ -150,12 +154,23 @@ local function ReadChunks(response)
 			-- or whatever we can read
 			-- and return that
 			local chunksize = 1024*8
-			return input:ReadString(chunksize)
+			local str, err = input:ReadString(chunksize)
+--print("HttpChunkIterator.ReadChunks(), connection(close): ",str, err);
+			if not str then
+				return nil;
+			end
+
+			return str;
 		else
 			--print("-- UNKNOWN CONTENT SIZE");
 			-- assume 'connection:close'
 			local chunksize = 1024*8
-			return input:ReadString(chunksize)			
+			local str, err = input:ReadString(chunksize)
+			if not str then
+				return nil;
+			end
+
+			return str;		
 		end
 
 		return nil

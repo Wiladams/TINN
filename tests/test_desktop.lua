@@ -8,5 +8,16 @@ function test_GetDesktops()
 	end
 end
 
-test_GetDesktops()
+function test_desktopwindows()
+	local dtop = Desktop:openThreadDesktop();
 
+	local wins = dtop:getWindowHandles();
+
+	for winid, hwnd in pairs(wins) do
+		print("HWND: ", winid, hwnd);
+	end
+end
+
+
+--test_GetDesktops();
+test_desktopwindows();
