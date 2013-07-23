@@ -49,19 +49,23 @@ HttpServer.HandlePreamblePending = function(self, sock)
 		request.Url = URL.parse(request.Resource);
 		local response = WebResponse:OpenResponse(request.DataStream)
 		self.OnRequest(self.OnRequestParam, request, response);
+
+		-- Once we're done with this single request
+		-- send it back aroud again in case there is
+		-- more to be processed.
+		self:OnAccept(sock);
 	else
 		print("HandleSingleRequest, Dump stream: ", err)
+		socket:closeDown();
 	end
   else
   	socket:closeDown();
   end
-
-  stream = nil;
 end
 
 HttpServer.OnAccept = function(self, sock)
 --print("HttpServer.OnAccept(): ", self, sock, self.OnRequest);
-	self:HandlePreamblePending(sock);
+	spawn(self.HandlePreamblePending, self, sock);
 end
 
 HttpServer.run = function(self)

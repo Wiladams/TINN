@@ -88,19 +88,16 @@ Desktop.desktopNames = function(self, winsta)
 
 	local desktops = {}
 
-	local counter = 0;
 
 	function enumdesktop(desktopname, lParam)
-		counter = counter + 1;
 		local name = ffi.string(desktopname)
-		--print("Desktop: ", counter, name)
+		--print("Desktop: ", name)
 		table.insert(desktops, name)
 
 		return true
 	end
 	
 	local cb = ffi.cast("DESKTOPENUMPROCA", enumdesktop);
-
 
 	local result = desktop_ffi.EnumDesktopsA(winsta, cb, 0)
 	cb:free();

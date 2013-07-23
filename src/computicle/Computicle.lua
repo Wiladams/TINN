@@ -122,24 +122,6 @@ local Computicle_mt = {
 	__index = Computicle;
 }
 
---[[
-local Computicle_mt = {
-	__index = function(self, key)
-		if Computicle[key] then
-			return Computicle[key];
-		end
-		print("Computicle LOOKUP: ", key);
-	end,
-
-	__newindex = function(self, key, value)
-		--print("Setting Value: ", key, value);
-		
-		local setvalue = key..'='..ComputicleOps.datumToString(value, key);
-
-		return self:exec(setvalue);
-	end,
-}
---]]
 
 Computicle.init = function(self, heapHandle, iocpHandle, threadId)
 	local obj = {
@@ -176,12 +158,12 @@ Computicle.createThreadChunk = function(self, codechunk, params, codeparams)
 
 
 	-- Stuff in the user's code
-	table.insert(res, [[main = function()]]);
+	table.insert(res, [[_cmain = function()]]);
 	table.insert(res, codechunk);
 	table.insert(res, [[end]]);
 
 	-- make sure the user's code is running in a coroutine
-	table.insert(res, [[IOProcessor:spawn(main)]]);
+	table.insert(res, [[IOProcessor:spawn(_cmain)]]);
 
 	-- What we want to execute after the user's code is loaded
 	-- By default, this will be a message pump
@@ -294,7 +276,11 @@ Computicle.quit = function(self)
 	self:receiveMessage(ComputicleOps.Messages.QUIT);
 end
 
-
+--[[
+	Block the calling thread waiting for the computicle
+	to finish.  The finish is indicated when the thread
+	that is running the computicle exits.
+--]]
 Computicle.waitForFinish = function(self, timeout)
 	local timeout = timeout or ffi.C.INFINITE;
 	local status = core_synch.WaitForSingleObject(self.Thread:getNativeHandle(), timeout);

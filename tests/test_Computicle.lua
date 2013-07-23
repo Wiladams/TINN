@@ -28,8 +28,8 @@ local test_loadandrun = function()
 end
 
 
-test_single();
---test_parallel();
+--test_single();
+test_parallel();
 
 --test_loadandrun();
 

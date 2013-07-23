@@ -3,6 +3,7 @@
 local synch = require("core_synch_l1_2_0");
 local WindowKind = require("WindowKind");
 local NativeWindow = require("NativeWindow");
+local IOProcessor = require("IOProcessor");
 
 local WindowProc = function(hwnd, msg, wparam, lparam)
 -- lookup which window object is associated with the
@@ -31,8 +32,15 @@ for k,v in pairs(windowkind) do
 	print(k,v);
 end
 
-local win = windowkind:createWindow(640, 480, "Window Title");
-win:Show();
-win:Maximize();
+local function main()
+	local win = windowkind:createWindow(640, 480, "Window Title");
+	win:Show();
+	win:Maximize();
 
-synch.Sleep(5000);
+	synch.Sleep(5000);
+end
+
+main();
+
+--spawn(main);
+

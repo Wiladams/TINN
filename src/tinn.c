@@ -526,7 +526,7 @@ int RunLuaScript(void *s)
 
   // execute the specified script
   //printf("RunLuaScript: %s\n", codechunk);
-  dostring(L, codechunk, "threadprogram");
+  status = dostring(L, codechunk, "threadprogram");
   //status = luaL_dostring(L, codechunk);
 
   lua_close(L);

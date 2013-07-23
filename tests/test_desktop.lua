@@ -19,5 +19,5 @@ function test_desktopwindows()
 end
 
 
---test_GetDesktops();
-test_desktopwindows();
+test_GetDesktops();
+--test_desktopwindows();

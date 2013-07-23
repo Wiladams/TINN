@@ -239,7 +239,7 @@ if exist tinnsh.exe.manifest^
 @echo === Successfully built TINN for Windows/%LJARCH% ===
 move tinn.exe bin 
 move tinnsh.exe bin
-copy /Y init.lua bin
+@rem copy /Y init.lua bin
 @goto :END
 :BAD
 @echo.

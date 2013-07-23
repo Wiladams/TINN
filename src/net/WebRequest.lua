@@ -143,9 +143,14 @@ WebRequest.Parse = function(self, stream)
 --print(string.format("WebRequest.Parse() - 1.1: '%s', %s", tostring(firstline), tostring(err)));
 --print("-- ISBLANK: ", firstline == "");
 
-	if not firstline or firstline == "" then
-		print("WebRequest.Parse(), First Line: ", firstline, err)
-		return nil, err
+	if not firstline then
+		print("WebRequest.Parse(), first line error: ", err);
+		return nil, err;
+	end
+
+	if firstline == "" then
+		print("WebRequest.Parse(), First Line, blank");
+		return nil, "eof"
 	end
 
 --print("WebRequest.Parse() - 2.0");
@@ -157,8 +162,9 @@ WebRequest.Parse = function(self, stream)
 	--method, uri, reqmajor, reqminor = peg.Match(peg.Request_Line, firstline);
 --print("--",method, uri,version)
 
-	if (not method)  then
-		return nil, "no Http method found"
+	if not method  then
+		print("WebRequest.Parse(), First Line, no method found");
+		return nil, "eof"
 	end
 
 --print("WebRequest.Parse() - 3.0");

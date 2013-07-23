@@ -223,22 +223,26 @@ local CR = string.byte("\r")
 local LF = string.byte("\n")
 
 local function readOneLine(socket, buff, size)
---print("IOCPSocketIo.ReadLine()")
+--print("IOCPSocketIo.readOneLine()")
 	local nchars = 0;
 	local ptr = ffi.cast("uint8_t *", buff);
 	local bytesread, err
 
 	while nchars < size do
 		bytesread, err = socket:receive(ptr, 1);
-		
+		--io.write(string.format("%02x",ptr[0]));
+
 		if not bytesread then
 			-- err is either "eof" or some other socket error
 			break
 		else
-			if ptr[0] == LF then
+			if ptr[0] == 0 then
+				break
+			elseif ptr[0] == LF then
 				--io.write("LF]\n")
 				break
 			elseif ptr[0] == CR then
+				-- swallow it and continue on
 				--io.write("[CR")
 			else
 				-- Just a regular character
