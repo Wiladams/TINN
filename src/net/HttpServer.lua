@@ -38,6 +38,14 @@ end
 --[[
 	Instance Methods
 --]]
+HttpServer.HandleRequestFinished = function(self, request)
+	-- Once we're done with this single request
+	-- send it back aroud again in case there is
+	-- more to be processed.
+	local sock = request.DataStream.Socket:getNativeSocket();
+	self:OnAccept(sock);
+end
+
 HttpServer.HandlePreamblePending = function(self, sock)
   local socket = IOCPSocket:init(sock);
   local stream, err = IOCPNetStream:init(socket);
@@ -49,11 +57,6 @@ HttpServer.HandlePreamblePending = function(self, sock)
 		request.Url = URL.parse(request.Resource);
 		local response = WebResponse:OpenResponse(request.DataStream)
 		self.OnRequest(self.OnRequestParam, request, response);
-
-		-- Once we're done with this single request
-		-- send it back aroud again in case there is
-		-- more to be processed.
-		self:OnAccept(sock);
 	else
 		print("HandleSingleRequest, Dump stream: ", err)
 		socket:closeDown();

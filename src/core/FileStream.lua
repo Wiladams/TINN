@@ -4,6 +4,12 @@ local stream = require "stream"
 
 
 local FileStream = {}
+setmetatable(FileStream, {
+	__call = function(self, ...)
+		return FileStream.new(...);
+	end,
+});
+
 local FileStream_mt = {
 	__index = FileStream,
 }
@@ -147,5 +153,10 @@ function FileStream:WriteLine(line)
 
 	return status, err
 end
+
+FileStream.writeString = FileStream.WriteString;
+FileStream.writeLine = FileStream.WriteLine;
+FileStream.writeByte = FileStream.WriteByte;
+FileStream.writeBytes = FileStream.WriteBytes;
 
 return FileStream;

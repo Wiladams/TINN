@@ -1332,34 +1332,34 @@ WSAResetEvent = Lib.WSAResetEvent,
     WSASend = Lib.WSASend,
 
 --[[
-WSASendDisconnect
-WSASendMsg
-WSASendTo
-WSASetBlockingHook
+WSASendDisconnect = Lib.
+WSASendMsg = Lib.
+WSASendTo = Lib.
+WSASetBlockingHook = Lib.
 --]]
 
     WSASetEvent = Lib.WSASetEvent,
 
 --[[
-WSASetLastError
-WSASetServiceA
-WSASetServiceW
+    WSASetLastError = Lib.WSASetLastError,
+    WSASetServiceA = Lib.WSASetServiceA,
+    WSASetServiceW = Lib.WSASetServiceW,
 --]]
 
     WSASocketA = Lib.WSASocketA,
 
 --[[
-WSASocketW
+    WSASocketW = Lib.WSASocketW,
 --]]
 
     WSAStartup = Lib.WSAStartup,
 
 --[[
-WSAStringToAddressA
-WSAStringToAddressW
-WSAUnadvertiseProvider
-WSAUnhookBlockingHook
-WSAWaitForMultipleEvents
+WSAStringToAddressA = Lib.
+WSAStringToAddressW = Lib.
+WSAUnadvertiseProvider = Lib.
+WSAUnhookBlockingHook = Lib.
+WSAWaitForMultipleEvents = Lib.
 --]]
 
 --[[
