@@ -429,7 +429,16 @@ typedef struct __WSABUF {
 	char * buf;
 } WSABUF,  *LPWSABUF;
 ]]
+WSABUF = ffi.typeof("WSABUF");
+WSABUF_mt = {
+    __new = function(ct, buf, len)
+        return ffi.new(ct, len, ffi.cast("char *", buf));
+    end,
 
+    __index = {
+
+    },
+}
 --
 -- MSTcpIP.h
 --
@@ -988,6 +997,18 @@ int WSARecv(
     LPWSAOVERLAPPED lpOverlapped,
     void* lpCompletionRoutine);
 
+int
+WSARecvFrom(
+    SOCKET s,
+    LPWSABUF lpBuffers,
+    DWORD dwBufferCount,
+    LPDWORD lpNumberOfBytesRecvd,
+    LPDWORD lpFlags,
+    struct sockaddr * lpFrom,
+    LPINT lpFromlen,
+    LPWSAOVERLAPPED lpOverlapped,
+    LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+
 
 int WSASend(SOCKET s, 
 	LPWSABUF lpBuffers, 
@@ -1321,10 +1342,10 @@ WSApSetPostRoutine = Lib.WSApSetPostRoutine,
 --]]
 
     WSARecv = Lib.WSARecv,
+    WSARecvFrom = Lib.WSARecvFrom,
 
 --[[
 WSARecvDisconnect = Lib.WSARecvDisconnect,
-WSARecvFrom = Lib.WSARecvFrom,
 WSARemoveServiceClass = Lib.WSARemoveServiceClass,
 WSAResetEvent = Lib.WSAResetEvent,
 --]]
@@ -1334,9 +1355,11 @@ WSAResetEvent = Lib.WSAResetEvent,
 --[[
 WSASendDisconnect = Lib.
 WSASendMsg = Lib.
-WSASendTo = Lib.
-WSASetBlockingHook = Lib.
 --]]
+
+    WSASendTo = Lib.WSASendTo,
+
+-- deprecated: WSASetBlockingHook = Lib.
 
     WSASetEvent = Lib.WSASetEvent,
 

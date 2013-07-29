@@ -34,17 +34,28 @@ local SToken_mt = {
 	end,
 
 	__eq = function(self, other)
-	print("SToken:__eq()");
-		local maxbytes = math.min(self.Length, other.Length);
+		-- print("SToken:__eq(): ", type(self), type(other));
+
+		local otherData = ffi.cast("const uint8_t *", other);
+		local otherLength = #other;
+		local otherOffset = 0;
+
+		if type(other) == "string" then
+		else
+			otherOffset = other.Offset;
+		end
+
+
+		local maxbytes = math.min(self.Length, otherLength);
 
 		for i=0,maxbytes-1 do
-			if self.Data[self.Offset+i] > other.Data[other.Offset+i] then 
-				print("RETURN 1.0");
+			if self.Data[self.Offset+i] > otherData[otherOffset+i] then 
+				--print("RETURN 1.0");
 				return false 
 			end
 
-			if self.Data[self.Offset+i] < other.Data[other.Offset+i] then
-				print("RETURN 2.0");
+			if self.Data[self.Offset+i] < otherData[otherOffset+i] then
+				--print("RETURN 2.0");
 				return false 
 			end
 		end

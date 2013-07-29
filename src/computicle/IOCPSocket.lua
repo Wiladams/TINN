@@ -205,14 +205,14 @@ IOCPSocket.setKeepAlive = function(self, keepalive, timeout, interval)
 	return success, err
 end
 
-		IOCPSocket.setNoDelay = function(self, nodelay)
-			local oneint = ffi.new("int[1]");
-			if nodelay then
-				oneint[0] = 1
-			end
+IOCPSocket.setNoDelay = function(self, nodelay)
+	local oneint = ffi.new("int[1]");
+	if nodelay then
+		oneint[0] = 1
+	end
 
-			return WinSock.setsockopt(self:getNativeSocket(), IPPROTO_TCP, TCP_NODELAY, oneint, ffi.sizeof(oneint))
-		end
+	return WinSock.setsockopt(self:getNativeSocket(), IPPROTO_TCP, TCP_NODELAY, oneint, ffi.sizeof(oneint))
+end
 		
 IOCPSocket.setNonBlocking = function(self, nonblocking)
 	local oneint = ffi.new("int[1]");
@@ -223,23 +223,23 @@ IOCPSocket.setNonBlocking = function(self, nonblocking)
 	return WinSock.ioctlsocket(self:getNativeSocket(), FIONBIO, oneint);
 end
 		
-		IOCPSocket.setReuseAddress = function(self, reuse)
-			local oneint = ffi.new("int[1]");
-			if reuse then
-				oneint[0] = 1
-			end
+IOCPSocket.setReuseAddress = function(self, reuse)
+	local oneint = ffi.new("int[1]");
+	if reuse then
+		oneint[0] = 1
+	end
 
-			return WinSock.setsockopt(self:getNativeSocket(), SOL_SOCKET, SO_REUSEADDR, oneint, ffi.sizeof(oneint))
-		end
+	return WinSock.setsockopt(self:getNativeSocket(), SOL_SOCKET, SO_REUSEADDR, oneint, ffi.sizeof(oneint))
+end
 		
-		IOCPSocket.setExclusiveAddress = function(self, exclusive)
-			local oneint = ffi.new("int[1]");
-			if exclusive then
-				oneint[0] = 1
-			end
+IOCPSocket.setExclusiveAddress = function(self, exclusive)
+	local oneint = ffi.new("int[1]");
+	if exclusive then
+		oneint[0] = 1
+	end
 
-			return WinSock.setsockopt(self:getNativeSocket(), SOL_SOCKET, SO_EXCLUSIVEADDRUSE, oneint, ffi.sizeof(oneint))
-		end
+	return WinSock.setsockopt(self:getNativeSocket(), SOL_SOCKET, SO_EXCLUSIVEADDRUSE, oneint, ffi.sizeof(oneint))
+end
 		
 		--[[
 			Reading Socket Options
@@ -474,6 +474,55 @@ IOCPSocket.send = function(self, buff, bufflen)
     return bytes;
 end
 
+IOCPSocket.sendTo = function(self, lpTo, iTolen, buff, bufflen)
+	if lpTo == nil then
+		return false;
+	end
+
+
+	bufflen = bufflen or #buff
+
+	local lpBuffers = ffi.new("WSABUF", bufflen, ffi.cast("char *",buff));
+	local dwBufferCount = 1;
+	local lpNumberOfBytesSent = nil;
+	local dwFlags = 0;
+	local lpOverlapped = self:createOverlapped(ffi.cast("uint8_t *",buff), bufflen, SocketOps.WRITE);
+	local lpCompletionRoutine = nil;
+
+	local status = ws2_32.WSASendTo(self:getNativeSocket(),
+    	lpBuffers,
+    	dwBufferCount,
+    	lpNumberOfBytesSent,
+    	dwFlags,
+    	ffi.cast("const struct sockaddr *", lpTo),
+    	iTolen,
+    	ffi.cast("OVERLAPPED *",lpOverlapped),
+    	lpCompletionRoutine);
+
+
+	-- Do the following if we want to handle
+	-- immediate success
+	if status == 0 then
+		--print("#### IOCPSocket, WSASend STATUS == 0 ####")
+		-- return the number of bytes transferred
+		--return lpNumberOfBytesSent[0];
+	else
+		local err = ws2_32.WSAGetLastError();
+		if err ~= WSA_IO_PENDING then
+			print("    IOCPSocket.send, ERROR: ", err);
+			return false, err;
+		end
+	end
+    
+    local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.WRITE, lpOverlapped.opcounter);
+
+--print("WSASEND: ", key, bytes, ovl);
+
+    -- BUGBUG
+    return bytes;
+end
+
+
 
 
 IOCPSocket.receive = function(self, buff, bufflen)
@@ -523,6 +572,58 @@ IOCPSocket.receive = function(self, buff, bufflen)
     return bytes;
 end
 
+
+IOCPSocket.receiveFrom = function(self, lpFrom, fromLen, buff, bufflen)
+
+	local lpBuffers = ffi.new("WSABUF", bufflen, buff);
+	local dwBufferCount = 1;
+--	local lpNumberOfBytesRecvd = ffi.new("DWORD[1]");
+	-- if we're going to use io completion ports, then
+	-- the numberOfBytesRecvd MUST be == nil
+	local lpNumberOfBytesRecvd = nil;
+	local lpFlags = ffi.new("DWORD[1]");
+	local lpOverlapped = self:createOverlapped(buff, bufflen, SocketOps.READ);
+	local lpCompletionRoutine = nil;
+	local lpFromlen = ffi.new("DWORD[1]", fromLen);
+
+	local status = ws2_32.WSARecvFrom(self:getNativeSocket(),
+    	lpBuffers,
+    	dwBufferCount,
+    	lpNumberOfBytesRecvd,
+    	lpFlags,
+    	ffi.cast("struct sockaddr *", lpFrom),
+    	lpFromlen,
+    	ffi.cast("OVERLAPPED *",lpOverlapped),
+    	lpCompletionRoutine);
+
+
+--print("IOCPSocket.receive, WSARecv(), STATUS: ", status);
+
+	-- if the return value is == 0, then the transfer
+	-- to the network stack has already completed, 
+	-- but the completion notification has not necessarily
+	-- happened, so treat it the same as PENDING 
+	if status == 0 then
+		--print("#### IOCPSocket.WSARecv, STATUS == 0 ####");
+		
+		--return lpNumberOfBytesRecvd[0];
+	else
+		-- didn't get bytes immediately, so see if it's a 'pending'
+		-- or some other error
+		local err = ws2_32.WSAGetLastError();
+	
+    	if err ~= WSA_IO_PENDING then
+    		print("IOCPSocket.WSARecv, ERROR: ", err);
+        	return false, err;
+    	end
+    end
+
+    local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.READ, lpOverlapped.opcounter);
+
+print("WSARecvFrom: ", key, bytes, ovl);
+
+    return bytes;
+end
 
 
 

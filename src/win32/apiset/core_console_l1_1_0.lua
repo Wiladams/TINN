@@ -86,4 +86,20 @@ WriteConsoleW(HANDLE hConsoleOutput,
      LPVOID lpReserved);
 ]]
 
-return k32Lib;
+return {
+    AllocConsole = k32Lib.AllocConsole,
+    GetConsoleCP = k32Lib.GetConsoleCP,
+    GetConsoleMode = k32Lib.GetConsoleMode,
+    GetConsoleOutputCP = k32Lib.GetConsoleOutputCP,
+    GetNumberOfConsoleInputEvents = k32Lib.GetNumberOfConsoleInputEvents,
+    PeekConsoleInputA = k32Lib.PeekConsoleInputA,
+    ReadConsoleA = k32Lib.ReadConsoleA,
+    ReadConsoleInputA = k32Lib.ReadConsoleInputA,
+    ReadConsoleInputW = k32Lib.ReadConsoleInputW,
+    ReadConsoleW = k32Lib.ReadConsoleW,
+    SetConsoleCtrlHandler = k32Lib.SetConsoleCtrlHandler,
+    SetConsoleMode = k32Lib.SetConsoleMode,
+    WriteConsoleA = k32Lib.WriteConsoleA,
+    WriteConsoleW = k32Lib.WriteConsoleW,
+}
+

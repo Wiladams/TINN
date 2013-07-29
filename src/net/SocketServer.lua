@@ -49,7 +49,7 @@ end
 
 
 SocketServer.handleAccepted = function(self, sock)
---print("SocketServer.handleAccepted(): ", sock);
+print("SocketServer.handleAccepted(): ", sock);
 
   if self.OnAccept then
 --print("CALLING self.OnAccept")

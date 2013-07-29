@@ -2,9 +2,8 @@ local ffi = require("ffi");
 
 local NOGDI = true;
 
-ffi.cdef[[
-typedef int16_t     SHORT;
-]]
+local basetsd = require("basetsd");
+
 
 ffi.cdef[[
 typedef struct _COORD {
@@ -245,7 +244,7 @@ static const int ENABLE_WRAP_AT_EOL_OUTPUT  = 0x0002;
 
 
 
-typedef BOOL ( *PHANDLER_ROUTINE)(DWORD CtrlType);
+typedef BOOL (__stdcall *PHANDLER_ROUTINE)(DWORD CtrlType);
 
 typedef struct _CONSOLE_READCONSOLE_CONTROL {
     ULONG nLength;

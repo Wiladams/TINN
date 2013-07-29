@@ -19,7 +19,18 @@ local OnAccept = function(param, sock)
   print("LINE: ", line);
 
   -- write the line back out to the socket
-  socket:send(line, #line); 
+  local body = "<html><body>"..line.."</body></html>\r\n"
+  local content = [[
+HTTP/1.1 200 OK
+Connection: close
+
+]]..body
+
+print("CONTENT");
+print(content);
+
+  socket:send(content, #content); 
+  socket:closeDown();
   --socket:send(buff, bytesread); 
 end
 
