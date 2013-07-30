@@ -416,6 +416,14 @@ IOCPSocket.bind = function(self, addr, addrlen)
 	return WinSock.bind(self:getNativeSocket(), addr, addrlen)
 end
 
+IOCPSocket.bindToPort = function(self, port)
+	local addr = sockaddr_in(port);
+	local addrlen = ffi.sizeof(addr);
+
+	return self:bind(addr,addrlen)
+end
+
+
 --[[
 	Data Transport
 --]]
@@ -620,7 +628,7 @@ IOCPSocket.receiveFrom = function(self, lpFrom, fromLen, buff, bufflen)
 
     local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.READ, lpOverlapped.opcounter);
 
-print("WSARecvFrom: ", key, bytes, ovl);
+--print("WSARecvFrom: ", key, bytes, ovl);
 
     return bytes;
 end

@@ -14,13 +14,13 @@ local serviceport = 9090
 local argv = {...}
 local argc = #argv
 
-local EchoRequest = function(socket, addr, addrlen)
+local EchoRequest = function(socket, addr, addrlen, phrase)
     -- fill the buffer with current time
-    local datestr = os.date("%c");
+    phrase = phrase or os.date("%c");
 
-    local bytessent, err = socket:sendTo(addr, addrlen, datestr, #datestr);
+    local bytessent, err = socket:sendTo(addr, addrlen, phrase, #phrase);
 
-print("bytessent: ", bytessent, err);
+--print("bytessent: ", bytessent, err);
 
     if not bytessent then
         print("sendTo ERROR: ", bytessent, err);
@@ -40,8 +40,9 @@ print("bytessent: ", bytessent, err);
     end
 
     if bytesreceived > 0 then
-        print("RECEIVED: ", bytesreceived);
-        return ffi.string(buff, bytesreceived);
+        --print("RECEIVED: ", bytesreceived);
+        --return ffi.string(buff, bytesreceived);
+        return true
     end
 
     return string.format("bytesreceived == %d", bytesreceived);
@@ -49,10 +50,11 @@ end
 
 
 
-loop = function()
+loop = function(phrase)
     local sw = StopWatch();
 
     local iterations = tonumber(argv[1]) or 1;
+
     --print("iterations: ", iterations);
 
 
@@ -73,19 +75,19 @@ loop = function()
     local transcount = 0;
 
     for i=1,iterations do
-        local dtc, err = EchoRequest(socket, addr, addrlen);
+        local dtc, err = EchoRequest(socket, addr, addrlen, phrase);
     
         if dtc then
             transcount = transcount + 1;
-            print(transcount, dtc, transcount/sw:Seconds());
+            --print(transcount, dtc, transcount/sw:Seconds());
         else
             print("Error: ", i, err);        
         end
-        collectgarbage();
+        --collectgarbage();
     end
 
     print("Transactions: ", transcount, transcount/sw:Seconds());
 end
 
-run(loop);
+run(loop, "Hello, World!");
 
