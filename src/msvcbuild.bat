@@ -41,11 +41,12 @@
 %LUAC% SimpleFiber.lua SimpleFiber.obj
 %LUAC% core/stream.lua stream.obj
 %LUAC% core/stringzutils.lua stringzutils.obj
+%LUAC% core/tabutils.lua tabutils.obj
 %LUAC% TINNThread.lua TINNThread.obj
 %LUAC% core/Vector.lua Vector.obj
 %LUAC% vkeys.lua vkeys.obj
 %LUAC% core/zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj luajit_ffi.obj LuaState.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Runtime.obj Shell.obj SimpleFiber.obj stream.obj stringzutils.obj TINNThread.obj Vector.obj vkeys.obj zlib.obj
+@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj luajit_ffi.obj LuaState.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Runtime.obj Shell.obj SimpleFiber.obj stream.obj stringzutils.obj tabutils.obj TINNThread.obj Vector.obj vkeys.obj zlib.obj
 
 @rem The Net library
 %LUAC% net/CoSocketIo.lua CoSocketIo.obj

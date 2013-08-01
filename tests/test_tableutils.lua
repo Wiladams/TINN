@@ -14,3 +14,10 @@ tabutils.binsert(tab, 2);
 for k,v in pairs(tab) do
 	print(k,v);
 end
+
+local nEntries = #tab
+for i=1,nEntries do
+	table.remove(tab, 1);
+end
+
+print("Entries After Remove: ", #tab)

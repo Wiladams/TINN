@@ -11,12 +11,16 @@ local ws2_32 = require("ws2_32");
 local WinError = require("win_error");
 local core_synch = require("core_synch_l1_2_0");
 
+local tabutils = require("tabutils");
+
 IOProcessor = {
 	Clock = StopWatch();
 	fibers = Collections.Queue.new();
 	coroutines = {};
 	EventFibers = {};
 	FibersAwaitingEvent = {};
+	FibersAwaitingTime = {};
+
 	ActiveSockets = {};
 
 	IOEventQueue = IOCompletionPort:create();
@@ -156,7 +160,51 @@ print("IOProcessor.yieldForIo:  NO CURRENT FIBER");
 	return nil;
 end
 
+local function compareTaskDueTime(task1, task2)
+	if task1.DueTime < task2.DueTime then
+		return true
+	end
+	
+	return false;
+end
 
+IOProcessor.yieldUntilTime = function(self, atime)
+	--print("IOProcessor.yieldUntilTime: ", atime, self.Clock:Milliseconds())
+
+	if self.CurrentFiber ~= nil then
+		self.CurrentFiber.DueTime = atime;
+		tabutils.binsert(self.FibersAwaitingTime, self.CurrentFiber, compareTaskDueTime);
+
+		return self:yield();
+	end
+
+	return false;
+end
+
+
+IOProcessor.stepTimeEvents = function(self)
+	local currentTime = self.Clock:Milliseconds();
+
+	-- traverse through the fibers that are waiting
+	-- on time
+	local nAwaiting = #self.FibersAwaitingTime;
+--print("Timer Events Waiting: ", nAwaiting)
+	for i=1,nAwaiting do
+
+		local fiber = self.FibersAwaitingTime[1];
+		if fiber.DueTime <= currentTime then
+			--print("ACTIVATE: ", fiber.DueTime, currentTime);
+			-- put it back into circulation
+			-- preferably at the front of the list
+			fiber.DueTime = 0;
+			self:scheduleFiber(fiber);
+
+			-- Remove the fiber from the list of fibers that are
+			-- waiting on time
+			table.remove(self.FibersAwaitingTime, 1);
+		end
+	end
+end
 
 
 IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
@@ -276,16 +324,16 @@ IOProcessor.stepFibers = function(self)
 			--   if the fiber is dead, 
 			--     then remove it from the list of live fibers 
 			--     to be run
-			--   if it's not dead, but there, it is waiting for IO
+			--   if it's not dead, but waiting for IO
+			--   or waiting for timer
 			--     then don't put it in the running list
 			if fiber:getStatus() == "dead" then
-				--print("FIBER FINISHED")
-				--print("-- ",values)
-				-- remove coroutine from dictionary
 				--print("INNER FIBER DEAD")
 				self:removeFiber(fiber)
 			elseif  not self.FibersAwaitingEvent[fiber] then
-				self:scheduleFiber(fiber, results);
+				if fiber.DueTime and fiber.DueTime < self.Clock:Milliseconds() then
+					self:scheduleFiber(fiber, results);
+				end
 			end
 		else
 			print("OUTER FIBER DEAD")
@@ -295,20 +343,25 @@ IOProcessor.stepFibers = function(self)
 end
 
 IOProcessor.step = function(self)
+	self:stepTimeEvents();
 	self:stepFibers();
 	self:stepIOEvents();
-	
+
 	local fibersawaitio = false;
+
 
 	for fiber in pairs(self.FibersAwaitingEvent) do
 		fibersawaitio = true;
 		break;
 	end
 
+	local fibersawaittime = #self.FibersAwaitingTime > 0
+
 	--print("IOProcessor.step, fibersawaitio: ", fibersawaitio);
 	
 	if self.fibers:Len() < 1 and
-		not fibersawaitio then
+		not fibersawaitio and
+		not fibersawaittime then
 		return false
 	end
 
@@ -354,6 +407,14 @@ end
 
 stop = function()
 	return IOProcessor:stop();
+end
+
+wait = function(millis)
+	local nextTime = IOProcessor.Clock:Milliseconds() + millis;
+
+--	print("IOProcessor:wait(): ", IOProcessor.Clock:Milliseconds(), millis)
+
+	return IOProcessor:yieldUntilTime(nextTime);
 end
 
 yield = function()

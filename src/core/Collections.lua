@@ -140,7 +140,7 @@ function Queue.new(name)
 	return Queue:init(1, 0, name);
 end
 
-function Queue:Enqueue(value)
+function Queue:enqueue(value)
 	--self.MyList:PushRight(value)
 	local last = self.last + 1
 	self.last = last
@@ -149,7 +149,14 @@ function Queue:Enqueue(value)
 	return value
 end
 
-function Queue:Dequeue(value)
+function Queue:pushFront(value)
+	-- PushLeft
+	local first = self.first - 1;
+	self.first = first;
+	self[first] = value;
+end
+
+function Queue:dequeue(value)
 	-- return self.MyList:PopLeft()
 	local first = self.first
 
@@ -164,13 +171,15 @@ function Queue:Dequeue(value)
 	return value	
 end
 
-function Queue:Len()
+function Queue:length()
 	return self.last - self.first+1
 end
 
+-- Returns an iterator over all the current 
+-- values in the queue
 function Queue:Entries(func, param)
 	local starting = self.first-1;
-	local len = self:Len();
+	local len = self:length();
 
 	local closure = function()
 		starting = starting + 1;
@@ -180,6 +189,9 @@ function Queue:Entries(func, param)
 	return closure;
 end
 
+Queue.Enqueue = Queue.enqueue;
+Queue.Dequeue = Queue.dequeue;
+Queue.Len = Queue.length;
 
 return {
 	List = List;

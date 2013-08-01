@@ -19,17 +19,14 @@ local fcomp_default = function( a,b )
    return a < b 
 end
 
-local function binsert(t, value, fcomp)
-   -- Initialise compare function
+local function getIndex(t, value, fcomp)
    local fcomp = fcomp or fcomp_default
-   
-   --  Initialise numbers
+
    local iStart = 1;
    local iEnd = #t;
    local iMid = 1;
    local iState = 0;
-   
-   -- Get insert position
+
    while iStart <= iEnd do
       -- calculate middle
       iMid = floor( (iStart+iEnd)/2 );
@@ -43,12 +40,18 @@ local function binsert(t, value, fcomp)
             iState = 1;
       end
    end
-   
-   insert( t,(iMid+iState),value );
+
    return (iMid+iState);
+end
+
+local function binsert(t, value, fcomp)
+   local idx = getIndex(t, value, fcomp);
+   insert( t, idx, value);
+   return idx;
 end
 
 
 return {
+   getIndex = getIndex,
    binsert = binsert,
 }
