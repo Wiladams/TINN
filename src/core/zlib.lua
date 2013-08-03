@@ -1,17 +1,8 @@
 local ffi = require( "ffi" )
 
---[[
-local libs = ffi_zlib_libs or {
-   Windows = { x86 = "bin/Windows/x86/zlib.dll", x64 = "bin/Windows/x64/zlib.dll" },
-}
 
-local zlib = ffi.load( ffi_zlib_lib or libs[ ffi.os ][ ffi.arch ] or "z" )
---]]
-local zlib = ffi.load("zlib1.dll");
 
-ffi.cdef[[
-
-enum {
+local zlib = {
      ZLIB_VERNUM          = 0x1250,
      ZLIB_VER_MAJOR       = 1,
      ZLIB_VER_MINOR       = 2,
@@ -56,8 +47,9 @@ enum {
      Z_DEFLATED            =  8,
 /* The deflate compression method (the only one supported in this version) */
      Z_NULL                =  0,  /* for initializing zalloc, zfree, opaque */
-};
+}
 
+ffi.cdef[[
 typedef void* gzFile;
 
 typedef void*    (* z_alloc_func)( void* opaque, unsigned items, unsigned size );
@@ -181,7 +173,28 @@ unsigned long crc32_combine(        unsigned long, unsigned long, long );
 const unsigned long* get_crc_table( void );
 ]]
 
-if ... then
-   return zlib
-end
+local Lib = ffi.load("zlib1.dll");
+
+return {
+compress = Lib.compress,
+compress2 = Lib.compress2,
+compressBound = Lib.compressBound,
+
+deflate = Lib.deflate,
+deflateEnd = Lib.deflateEnd,
+deflateSetDictionary = Lib.deflateSetDictionary,
+deflateCopy = Lib.deflateCopy,
+deflateReset = Lib.deflateReset,
+deflateParams = Lib.deflateParams,
+deflateTune = Lib.deflateTune,
+deflateBound = Lib.deflateBound,
+deflatePrime = Lib.deflatePrime,
+deflateSetHeader = Lib.deflateSetHeader,
+deflateInit_ = Lib.deflateInit_,
+deflateInit2_ = Lib.deflateInit2_,
+
+uncompress = Lib.uncompress,
+}
+
+
 
