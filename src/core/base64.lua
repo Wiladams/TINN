@@ -14,7 +14,7 @@ local bit = require "bit"
 local band = bit.band
 local rshift = bit.rshift
 
-base64={}
+local base64={}
 base64.base64bytes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 -- ' ' 0x20, '\t' 0x09, '\n' 0x0a, '\v' 0x0b, '\f' 0x0c, '\r' 0x0d

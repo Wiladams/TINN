@@ -22,15 +22,21 @@ local function SendFile(filename, response)
 	if not resourceBody then
 print("NO RESPONSE BODY: ", filename, mimetype)
 		-- send back an error response
-		response:writeHead("404", {["Content-Length"]="0"});
+		local respHeader = {
+			["Connection"] = "Keep-Alive",
+			["Content-Length"]="0",
+		};
+		response:writeHead("404", respHeader);
 		response:writeEnd();
 		return false, "Resource Not Found";
 	end
 
---print("== SENDING ==");
+print("== StaticService.SENDING ==");
+print("FILE: ", filename, mimetype);
 --print(resourceBody);
 
 	local headers = {
+		["Connection"] = "Keep-Alive",
 		["Content-Type"] = mimetype;
 	}
 

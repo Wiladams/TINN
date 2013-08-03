@@ -621,7 +621,7 @@ IOCPSocket.receiveFrom = function(self, lpFrom, fromLen, buff, bufflen)
 		local err = ws2_32.WSAGetLastError();
 	
     	if err ~= WSA_IO_PENDING then
-    		print("IOCPSocket.WSARecv, ERROR: ", err);
+    		print("IOCPSocket.WSARecvFrom, ERROR: ", err);
         	return false, err;
     	end
     end
