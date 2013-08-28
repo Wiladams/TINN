@@ -1096,7 +1096,8 @@ function CryptoProvider.ImportRawKey(self, derivedKey, derivedKeyLen, algId, imp
 
 	local blobLength = 12+derivedKeyLen;
 	local blob = ffi.new("uint8_t[?]", blobLength);
-	local mstream = MemoryStream.Open(blob, blobLength, blobLength)
+	--local mstream = MemoryStream.Open(blob, blobLength, blobLength)
+	local mstream = MemoryStream(blob, blobLength)
 	mstream:Seek(0);
 	local bstream = BinaryStream.new(mstream);
 

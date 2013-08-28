@@ -10,7 +10,7 @@ local HttpRequest_t = {}
 local HttpRequest_mt = {
 --[[
 	__tostring = function(self)
-		local mstream = MemoryStream.new(8192)
+		local mstream = MemoryStream(8192)
 		self:Send(mstream)
 
 		local str = mstream:ToString()

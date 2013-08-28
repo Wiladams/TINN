@@ -13,8 +13,6 @@ local OnAccept = function(param, sock)
   -- read a line from the socket
   --local bufflen = 1500;
   --local buff = ffi.new("uint8_t[1500]");
-  --local bytesread, err = IOCPSocketIo.ReadLine(socket, buff, bufflen);
-  --print("LINE: ", bytesread, err);
   local line, err = netstream:readLine();
   print("LINE: ", line);
 

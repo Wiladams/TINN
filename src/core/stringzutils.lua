@@ -32,48 +32,39 @@ local lshift = bit.lshift
 
 
 function strcmp(s1, s2)
-	local s1ptr = ffi.cast("const uint8_t *", s1);
-	local s2ptr = ffi.cast("const uint8_t *", s2);
-
-	-- uint8_t
-	local uc1;
-	local uc2;
+--	local s1ptr = ffi.cast("const uint8_t *", s1);
+--	local s2ptr = ffi.cast("const uint8_t *", s2);
 
 	-- Move s1 and s2 to the first differing characters
 	-- in each string, or the ends of the strings if they
 	-- are identical.
-	while (s1ptr[0] ~= 0 and s1ptr[0] == s2ptr[0]) do
-		s1ptr = s1ptr + 1
-		s2ptr = s2ptr + 1
+	local pos = 0;
+	while s1[pos] == s2[pos] do
+		if s1[pos] == 0 then
+			return 0
+		end
+		pos = pos + 1;
 	end
 
-     -- Compare the characters as unsigned char and
-     --   return the difference.
-     uc1 = s1ptr[0];
-     uc2 = s2ptr[0];
-
-	if (uc1 < uc2) then
-		return -1
-	elseif (uc1 > uc2) then
-		return 1
-	end
-
-	return 0
+	return s1[pos] - s2[pos]
 end
 
 
 local function strncmp(str1, str2, num)
-	local ptr1 = ffi.cast("const uint8_t*", str1)
-	local ptr2 = ffi.cast("const uint8_t*", str2)
+	local pos = 0;
+	while str1[pos] == str2[pos] do
+		if str1[pos] == 0 then
+			return 0;
+		end
 
-	for i=0,num-1 do
-		if str1[i] == 0 or str2[i] == 0 then return 0 end
+		if pos >= num then
+			break;
+		end
 
-		if ptr1[i] > ptr2[i] then return 1 end
-		if ptr1[i] < ptr2[i] then return -1 end
+		pos = pos + 1; 
 	end
 
-	return 0
+	return str1[pos] - str2[pos]
 end
 
 function strncasecmp(str1, str2, num)
@@ -116,57 +107,38 @@ function strlen(str)
 	return idx
 end
 
-function strndup(str,n)
-	local len = strlen(str)
-	local len = math.min(n,len)
-
-	local newstr = ffi.new("char["..(len+1).."]");
-	ffi.copy(newstr, str, len)
-	newstr[len] = 0
-
-	return newstr
-end
-
-function strdup(str)
-	str = ffi.cast("const char *", str)
-	-- use strlen because we don't know what kind of string
-	-- we're being passed.  It could be a Lua string, or a byte array
-	local len = strlen(str)
-
-	local newstr = ffi.new("uint8_t[?]",len+1);
-	ffi.copy(newstr, str, len)
-	newstr[len] = 0
-
-	return newstr
-end
-
-function strcpy(dst, src)
-	local dstptr = ffi.cast("char *", dst)
-	local srcptr = ffi.cast("const char *", src)
-
-	-- Do the copying in a loop.
-	while (srcptr[0] ~= 0) do
-		dstptr[0] = srcptr[0];
-		dstptr = dstptr + 1;
-		srcptr = srcptr + 1;
-	end
-
-	-- Return the destination string.
-	return dst;
-end
-
 function strlcpy(dst, src, size)
 	local dstptr = ffi.cast("char *", dst)
 	local srcptr = ffi.cast("const char *", src)
 
 	local len = strlen(src)
-	local len = math.min(size-1,len)
+	len = math.min(size-1,len)
 
 	ffi.copy(dstptr, srcptr, len)
 	dstptr[len] = 0
 
 	return len
 end
+
+function strndup(str,n)
+	local newstr = ffi.new("char[?]", n+1);
+	strlcpy(newstr, str, n);
+
+	return newstr
+end
+
+function strdup(str)
+	-- use strlen because we don't know what kind of string
+	-- we're being passed.  It could be a Lua string, or a byte array
+	return strndup(str, strlen(str));
+end
+
+function strcpy(dst, src)
+	local len = strlen(src);
+	strlcpy(dst, src, len);
+end
+
+
 
 function strlcat(dst, src, size)
 	local dstptr = ffi.cast("char *", dst)

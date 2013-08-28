@@ -4,34 +4,24 @@ local stream = require "stream"
 
 
 local MemoryStream = {}
+setmetatable(MemoryStream, {
+	__call = function(self, ...)
+		return self:create(...);
+	end,
+})
+
 local MemoryStream_mt = {
 	__index = MemoryStream;
 }
 
-function MemoryStream.new(size, buff, byteswritten)
-	size = size or 8192
-	byteswritten = byteswritten or 0
-	buff = buff or ffi.new("uint8_t[?]", size)
-
-	return MemoryStream.Open(buff, size, byteswritten)
-end
-
-function MemoryStream.Open(buff, bufflen, byteswritten)
-	if not buff then return nil end
-
-
-	offset = offset or 0
-	--byteswritten = byteswritten or 0
-
-	if not bufflen then
-		if type(buff) == "string" then
-			bufflen = #buff
-		elseif type(buff) == "ctype" then
-			bufflen = ffi.sizeof(buff)
-		end
+function MemoryStream.init(self, buff, bufflen, offset, byteswritten)
+	if not buff then
+		return nil, "no buffer specified"
 	end
 
-	byteswritten = byteswritten or bufflen;
+	bufflen = bufflen or 0
+	offset = offset or 0
+	byteswritten = byteswritten or 0
 
 	local obj = {
 		Length = bufflen,
@@ -45,6 +35,47 @@ function MemoryStream.Open(buff, bufflen, byteswritten)
 
 	return obj
 end
+
+-- Parameters
+--		size
+-- OR
+--		buff
+--		bufflen
+--		offset
+--		byteswritten
+function MemoryStream.create(self, ...)
+	local nargs = select('#', ...);
+	local buff = nil;
+	local bufflen = 0;
+	local offset = 0;
+	local byteswritten = 0;
+
+	if nargs == 1 and type(select(1,...)) == "number" then
+		-- allocate a buffer of the given size
+		bufflen = select(1,...)
+		buff = ffi.new("uint8_t[?]", bufflen);
+	else
+		buff = ffi.cast("unit8_t *", select(1,...))
+		if nargs >= 2 and type(select(2,...)) == "number" then
+			bufflen = select(2,...);
+			byteswritten = bufflen;
+
+			if nargs >= 3 then
+				offset = select(3,...);
+			end
+			if nargs >= 4 then
+				byteswritten = select(4,...);
+			end
+		else
+			bufflen = #select(1,...);
+			byteswritten = bufflen;
+		end
+	end
+
+	return self:init(buff, bufflen, offset, byteswritten);
+end
+
+
 
 function MemoryStream:Reset()
 	self.Offset = 0
@@ -276,8 +307,6 @@ end
 function MemoryStream:WriteString(str, count, offset)
 	offset = offset or 0
 	count = count or #str
-
-	--print("-- MemoryStream:WriteString():", str);
 
 	return self:WriteBytes(str, count, offset)
 end

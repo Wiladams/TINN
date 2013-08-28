@@ -1,11 +1,9 @@
 
 local ffi = require "ffi"
---local Stream = require "stream"
 
 local IOProcessor = require("IOProcessor");
-local IOCPSocketIo = require("IOCPSocketIo");
 local StopWatch = require ("StopWatch")
-
+local MemoryStream = require("MemoryStream");
 
 
 local IOCPNetStream = {}
@@ -28,7 +26,6 @@ function IOCPNetStream:init(socket)
 
 	local obj = {
 		Socket = socket,
-		IoCore = IOCPSocketIo,
 		CanSeek = false,
 
 		ReadTimer = StopWatch(),
@@ -40,6 +37,8 @@ function IOCPNetStream:init(socket)
 		rb_onebyte = ffi.new("uint8_t[1]"),
 		wb_onebyte = ffi.new("uint8_t[1]"),
 		LineBuffer = ffi.new("uint8_t[1024]"),
+
+		ReadingBuffer = MemoryStream(1500);
 	}
 
 	setmetatable(obj, IOCPNetStream_mt)
@@ -141,16 +140,121 @@ end
 --[[
 	READING
 --]]
-function IOCPNetStream:CanReadWithoutBlocking()
-	return self.Socket:canReadWithoutBlocking();
-end
 
+
+function IOCPNetStream:refillReadingBuffer()
+	print("IOCPNetStream:RefillReadingBuffer()");
+
+	-- Use the buffer of the memory stream to
+	-- read in a bunch of bytes
+	local err
+	local bytesread
+
+	bytesread, err = self.Socket:receive(self.ReadingBuffer.Buffer, self.ReadingBuffer.Length)
+
+	if not bytesread then
+		return false, err;
+	end
+
+	-- if we already got bytes, then return them immediately
+	print("-- LOADED BYTES: ", bytesread);
+
+	if bytesread == 0 then
+		return nil, "eof"
+	end
+
+	self.ReadingBuffer:Reset()
+	self.ReadingBuffer.BytesWritten = bytesread
+
+	return bytesread
+end
+--]]
 
 
 --[[
 	Read a byte.
 	Return the single byte read, or nil
 --]]
+--[[
+function IOCPNetStream:readByte()
+	-- First see if we can get a byte out of the
+	-- Reading buffer
+	local abyte,err = self.ReadingBuffer:ReadByte()
+
+	if abyte then
+		return abyte
+	end
+
+	-- If we did not get a byte out of the reading buffer
+	-- try refilling the buffer, and try again
+	local bytesread, err = self:refillReadingBuffer()
+
+	if bytesread then
+		abyte, err = self.ReadingBuffer:ReadByte()
+		return abyte, err
+	end
+
+	-- If there was an error
+	-- then return that error immediately
+	print("-- IOCPNetStream:readByte, ERROR: ", err)
+	return false, err
+end
+
+
+--]]
+
+-- The Bytes() function is an iterator on bytes
+-- from the stream.  The iterator will return characters one
+-- at a time up to maxbytes specified.  An error on the stream will 
+-- terminate the iterator.
+
+--[[
+function IOCPNetStream:Bytes(maxbytes)
+	maxbytes = maxbytes or math.huge
+	local bytesleft = maxbytes
+
+	--print("NetStream:Bytes() BYTES LEFT: ", bytesleft);
+
+	local function f()
+		--print("-- NetStream:Bytes(), REMAINING: ", bytesleft)
+		-- if we've read the maximum number of bytes
+		-- then just return nil to indicate finished
+		if bytesleft == 0 then
+			return
+		end
+
+		local abyte
+		local err
+		local res
+
+		while (true) do
+			-- try to read a byte
+			-- if we're a blocking socket, we'll just wait
+			-- here forever, or until a system specified timeout
+			local abyte, err = self:ReadByte()
+
+			-- The return of Socket:Read() is the number of
+			-- bytes read if successful, nil on failure
+			if abyte then
+				bytesleft = bytesleft-1
+				return abyte
+			end
+
+			-- If there was an error other than wouldblock
+			-- then return that error immediately
+			if err ~= WSAEWOULDBLOCK then
+				bytesleft = 0
+				--print("-- NetStream:Bytes ERROR: ", err)
+				return nil, err
+			end
+		end
+	end
+
+	return f
+end
+--]]
+
+
 
 function IOCPNetStream:readByte()
 	local abyte
@@ -180,35 +284,70 @@ function IOCPNetStream:readBytes(buffer, len, offset)
 	-- Reset the stopwatch
 	self.ReadTimer:Reset();
 
-	return self.IoCore.ReadN(self.Socket, buffer, len);
+	local nleft = len;
+	local nread = 0;
+	local err
+	local ptr = ffi.cast("uint8_t *",buffer+offset);
+
+	while nleft > 0 do
+		nread, err = self.Socket:receive(ptr, nleft);
+
+		--print("IOCPNetStream.readBytes: ", nread, err)
+
+		if not nread then
+			--print("IOCPNetStream.readBytes, ERROR: ", nread, err)
+			break;
+		end
+
+		if nread == 0 then
+			break
+		end
+
+		nleft = nleft - nread;
+		if nleft == 0 then
+			break
+		end
+
+		ptr = ptr + nread;
+	end
+
+	local bytesread = len - nleft
+
+	-- There are two cases where the number of bytes read 
+	-- could == 0
+	-- 1) We actually read 0 bytes, in which case an 'eof'
+	--    is indicated.
+	-- 2) There was an error while reading, so the actual
+	--    error should be reported.
+	if bytesread == 0 then
+		if err then 
+			return false, err;
+		end
+
+		return false, "eof"
+	end
+
+	return bytesread
 end
 
 
 function IOCPNetStream:readString(bufflen)
-	bufflen = bufflen or 8192
+	bufflen = bufflen or 1500
 
---print("NS:ReadString: 1.0: ", bufflen);
+--print("IOCPNetStream:ReadString: 1.0: ", bufflen);
 
 	local buff = ffi.new("uint8_t[?]", bufflen);
 	if not buff then
-		return nil, "out of memory"
+		return false, "out of memory"
 	end
 
-	self.ReadTimer:Reset();
-
---print("NS:ReadSring, 2.0: ");
-
-	local bytesread, err = self.IoCore.ReadN(self.Socket, buff, bufflen);
+	local bytesread, err = self:readBytes(buff, bufflen, 0);
 
 	if not bytesread then
 		return false, err;
 	end
 
---print("NS:ReadString, 3.0: ", bytesread, err);
-
 	local str = ffi.string(buff, bytesread)
-
---print("NS:readString(): ", str);
 
 	return str;
 end
@@ -313,16 +452,33 @@ function IOCPNetStream:writeByte(value)
 end
 
 function IOCPNetStream:writeBytes(buffer, len, offset)
-	len = len or 0
+	len = len or #buffer
 	offset = offset or 0
-	local ptr = buffer;
+	local ptr = ffi.cast("const uint8_t *", buffer)+offset;
 
-	if type(buffer) == "string" then
-		ptr = ffi.cast("const uint8_t *", buffer)
-		len = len or #buffer
+
+	local nleft = len;
+	local nwritten = 0;
+	local err
+
+	while nleft > 0 do
+		nwritten, err = self.Socket:send(ptr, nleft)
+
+--print("WriteN, send, err: ", nwritten, err);
+		if not nwritten then
+			break;
+		end
+
+		nleft = nleft - nwritten
+
+		if nwritten == 0 then
+			break
+		end
+					
+		ptr = ptr + nwritten;
 	end
 
-	local byteswritten, err = self.IoCore.WriteN(self.Socket, ptr, len)
+	local byteswritten =  len-nleft
 
 	-- reset the write timer
 	self.WriteTimer:Reset();
@@ -339,18 +495,24 @@ end
 
 
 function IOCPNetStream:writeLine(line)
-
-	local status, err
-	if line then
-		status, err = self:writeBytes(line, #line, 0)
+	local BytesWritten = 0;
+	local err = nil;
+	
+	if line and #line > 0 then
+		byteswritten, err = self:writeBytes(line, #line, 0)
+	
 		if err then
-			return nil, err
+			return false, err
 		end
 	end
 
-	status, err = self:writeBytes("\r\n", 2, 0);
+	local morebytes, err = self:writeBytes("\r\n", 2, 0);
 
-	return status, err
+	if err then
+		return false, err;
+	end
+
+	return byteswritten + morebytes;
 end
 
 

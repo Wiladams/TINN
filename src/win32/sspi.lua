@@ -4,8 +4,8 @@ local bit = require("bit");
 local bor = bit.bor;
 local band = require("bit").band;
 
-
-local sspi_cli = require("sspicli");
+local sspi_ffi = require("sspi_ffi");
+--local sspicli = require("sspicli");
 local SecError = require ("SecError");
 local sspilib = ffi.load("secur32");
 local schannel = require("schannel");

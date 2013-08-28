@@ -1004,7 +1004,8 @@ local mime={
 }
 }
 
-mime.DefaultType = "application/octet-stream";
+--mime.DefaultType = "application/octet-stream";
+mime.DefaultType = "text/plain";
 
 mime.GetType = function(path)
   return mime.types[path:lower():match("[^.]*$")] or mime.DefaultType

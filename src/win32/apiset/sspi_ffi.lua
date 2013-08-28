@@ -7,7 +7,8 @@ local rshift = bit.rshift;
 local lshift = bit.lshift;
 
 local core_string = require("core_string_l1_1_0");
-local require("ntstatus");
+local ntstatus = require("ntstatus");
+require("sspicli");
 
 local L = core_string.toUnicode;
 
@@ -1704,5 +1705,4 @@ end
 
 
 
-require("sspicli");
 

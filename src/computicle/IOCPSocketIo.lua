@@ -3,6 +3,7 @@ local ffi = require ("ffi");
 
 -- Read the number of bytes specified by the 'size'
 -- parameter.
+--[[
 local function ReadN(socket, buff, size)
 
 	local nleft = size;
@@ -44,7 +45,7 @@ local function ReadN(socket, buff, size)
 
 	return bytesread
 end
-
+--]]
 
 --[[
 	Read a single line terminated with one of:
@@ -93,6 +94,7 @@ end
 --[[
 	Writing routines
 --]]
+--[[
 local function WriteN(sock, buff, size)
 --io.write("WriteN: ", buff, size, '\n')
 	local nleft = size;
@@ -119,6 +121,7 @@ local function WriteN(sock, buff, size)
 
 	return size-nleft
 end
+--]]
 
 return {
 	ReadN = ReadN,

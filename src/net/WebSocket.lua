@@ -134,15 +134,17 @@ WebSocket_t.Connect = function(self, url, onconnected)
 end
 
 WebSocket_t.RespondWithServerHandshake = function(self, request, response)
-	--print("WebSocket_t.RespondWithServerHandshake()")
+	--print("WebSocket_t.RespondWithServerHandshake(): ", self, request, response)
 	self.Request = request
 	self.DataStream = request.DataStream;
 
 	-- formulate a websocket handshake response
 	local clientkey = request:GetHeader("sec-websocket-key");
+	--print("WebSocket_t.RespondWithServerHandshake(), clientkey: ", clientkey)
 	
 	local acceptkey = clientkey..webSocketGUID;
 	acceptkey, binbuff, binbufflen = CryptUtils.SHA1(acceptkey);
+	--print("WebSocket_t.RespondWithServerHandshake(), SHA1: ", acceptkey, binbuff, binbufflen)
 
 	acceptkey = base64.encode(binbuff, binbufflen);
 --print("ACCEPT KEY: ", acceptkey);
@@ -155,9 +157,11 @@ WebSocket_t.RespondWithServerHandshake = function(self, request, response)
 		["Sec-WebSocket-Accept"] = acceptkey,
 	}
 	response:writeHead("101", headers)
-	response:writeEnd();
+	local byteswritten, err = response:writeEnd();
 
-	return false;
+--print("RespondWithServerHandshake, END: ", byteswritten, err);
+
+	return byteswritten, err;
 end
 
 --[[
@@ -206,7 +210,7 @@ WebSocket_t.ReadFrameHeader = function(self)
 
 	-- Read the first two bytes to get up to the initial
 	-- payload length
-	local bytesread, err = self.DataStream:ReadBytes(headerbuff, 2);
+	local bytesread, err = self.DataStream:readBytes(headerbuff, 2);
 --print("WebSocket_t.ReadFrameHeader, 2 byte header: ", bytesread, err)
 
 	if not bytesread then

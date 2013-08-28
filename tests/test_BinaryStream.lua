@@ -6,7 +6,7 @@ local MemoryStream = require("MemoryStream")
 local BinaryStream = require("BinaryStream")
 
 local test_WriteByte = function()
-	local mstream = MemoryStream.new(1024);
+	local mstream = MemoryStream(1024);
 	local bstream = BinaryStream.new(mstream);
 
 	bstream:WriteByte(string.byte('H'))
@@ -20,7 +20,7 @@ local test_WriteByte = function()
 end
 
 local test_Int16 = function()
-	local mstream = MemoryStream.new(1024);
+	local mstream = MemoryStream(1024);
 	local bstream = BinaryStream.new(mstream, true);
 
 	bstream:WriteInt16(0x00ff);
@@ -47,7 +47,7 @@ end
 
 
 local test_Int32 = function()
-	local mstream = MemoryStream.new(1024);
+	local mstream = MemoryStream(1024);
 	local bstream = BinaryStream.new(mstream);
 
 
@@ -74,7 +74,7 @@ local test_Int32 = function()
 end
 
 local test_Int64 = function()
-	local mstream = MemoryStream.new(1024);
+	local mstream = MemoryStream(1024);
 	local bstream = BinaryStream.new(mstream);
 
 
@@ -105,7 +105,7 @@ local test_Int64 = function()
 end
 
 local test_Single = function()
-	local mstream = MemoryStream.new(1024);
+	local mstream = MemoryStream(1024);
 	local bstream = BinaryStream.new(mstream);
 
 
@@ -133,11 +133,11 @@ end
 
 
 
---test_WriteByte();
+test_WriteByte();
 
 --test_Int16();
 --test_Int32();
-test_Int64();
+--test_Int64();
 --test_Single();
 
 

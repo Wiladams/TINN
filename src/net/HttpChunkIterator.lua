@@ -3,7 +3,7 @@ local ffi = require "ffi"
 local MemoryStream = require "MemoryStream"
 
 local function CreatePreambleChunk(preamble)
-	local mstream = MemoryStream.new()
+	local mstream = MemoryStream();
 	local success = preamble:WritePreamble(mstream)
 	len = mstream:GetPosition()
 	mstream:Seek(0)
