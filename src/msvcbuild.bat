@@ -49,19 +49,15 @@
 @set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj luajit_ffi.obj LuaState.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Runtime.obj Shell.obj SimpleFiber.obj stream.obj stringzutils.obj tabutils.obj TINNThread.obj Vector.obj vkeys.obj zlib.obj
 
 @rem The Net library
-%LUAC% net/CoSocketIo.lua CoSocketIo.obj
 %LUAC% net/httpstatus.lua httpstatus.obj
 %LUAC% net/HttpChunkIterator.lua HttpChunkIterator.obj
 %LUAC% net/HttpHeaders.lua HttpHeaders.obj
 %LUAC% net/HttpMessage.lua HttpMessage.obj
-%LUAC% net/HttpRequest.lua HttpRequest.obj
-%LUAC% net/HttpResponse.lua HttpResponse.obj
 %LUAC% net/HttpServer.lua HttpServer.obj
 %LUAC% net/mime.lua mime.obj
-%LUAC% net/peg_http.lua peg_http.obj
 %LUAC% net/ResourceMapper.lua ResourceMapper.obj
 %LUAC% net/SocketServer.lua SocketServer.obj
-%LUAC% net/StaticService.lua StaticService.obj
+%LUAC% net/FileService.lua FileService.obj
 %LUAC% net/url.lua url.obj
 %LUAC% net/utils.lua utils.obj
 %LUAC% net/WebApp.lua WebApp.obj
@@ -69,7 +65,7 @@
 %LUAC% net/WebResponse.lua WebResponse.obj
 %LUAC% net/WebSocket.lua WebSocket.obj
 
-@set NETLIB=CoSocketIo.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpRequest.obj HttpResponse.obj HttpServer.obj mime.obj peg_http.obj SocketServer.obj StaticService.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
+@set NETLIB=CoSocketIo.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj mime.obj SocketServer.obj FileService.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
 
 @rem Core windows API set
 %LUAC% Win32/apiset/core_console_l1_1_0.lua core_console_l1_1_0.obj
@@ -124,6 +120,13 @@
 @set WINCOREAPI=core_console_l1_1_0.obj core_console_l2_1_0.obj core_datetime_l1_1_1.obj core_debug_l1_1_1.obj core_errorhandling_l1_1_1.obj core_file_l1_2_0.obj core_file_l2_1_0.obj core_firmware_l1_1_0.obj core_interlocked.obj core_io_l1_1_1.obj core_libraryloader_l1_1_1.obj core_memory_l1_1_1.obj core_namedpipe_l1_2_0.obj core_processenvironment.obj core_processthreads_l1_1_1.obj core_profile_l1_1_0.obj core_psapi_l1_1_0.obj core_shutdown_l1_1_0.obj core_string_l1_1_0.obj core_synch_l1_2_0.obj core_sysinfo_l1_2_0.obj core_timezone_l1_1_0.obj crypt.obj dsrole.obj Handle_ffi.obj Heap_ffi.obj httpapi.obj lmcons.obj mswsock.obj NTSecAPI.obj power_base_l1_1_0.obj samcli.obj security_base_l1_2_0.obj security_credentials_l1_1_0.obj security_lsalookup_l2_1_0.obj security_sddl_l1_1_0.obj service_core_l1_1_1.obj service_management_l1_1_0.obj sspi_ffi.obj sspicli.obj SubAuth.obj UMS_ffi.obj Util_ffi.obj WinBer_ffi.obj WinCon.obj wkscli.obj wldap32_ffi.obj ws2_32.obj
 
 
+%LUAC% eventscheduler/CoSocketIo.lua CoSocketIo.obj
+%LUAC% eventscheduler/EventScheduler.lua EventScheduler.obj
+%LUAC% eventscheduler/HttpRequest.lua HttpRequest.obj
+%LUAC% eventscheduler/HttpResponse.lua HttpResponse.obj
+%LUAC% eventscheduler/NetStream.lua NetStream.obj
+%LUAC% eventscheduler/SocketIoPool.lua SocketIoPool.obj
+
 @rem Create the Win32 specific stuff
 %LUAC% Win32/basetsd.lua basetsd.obj
 %LUAC% Win32/BCrypt.lua BCrypt.obj
@@ -134,7 +137,6 @@
 %LUAC% Win32/Desktop.lua Desktop.obj
 %LUAC% Win32/Desktop_ffi.lua Desktop_ffi.obj
 %LUAC% Win32/dbghelp_ffi.lua dbghelp_ffi.obj
-%LUAC% Win32/EventScheduler.lua EventScheduler.obj
 %LUAC% Win32/FileSystemItem.lua FileSystemItem.obj
 %LUAC% Win32/FsHandles.lua FsHandles.obj
 %LUAC% Win32/GDI32.lua GDI32.obj
@@ -147,7 +149,6 @@
 %LUAC% Win32/logoncli_ffi.lua logoncli_ffi.obj
 %LUAC% Win32/NativeWindow.lua NativeWindow.obj
 %LUAC% Win32/NativeSocket.lua NativeSocket.obj
-%LUAC% Win32/NetStream.lua NetStream.obj
 %LUAC% Win32/netutils.lua netutils.obj
 %LUAC% Win32/netutils_ffi.lua netutils_ffi.obj
 %LUAC% Win32/Network.lua Network.obj
@@ -157,7 +158,6 @@
 %LUAC% Win32/processenvironment.lua processenvironment.obj
 %LUAC% Win32/SCManager.lua SCManager.obj
 %LUAC% Win32/SID.lua SID.obj
-%LUAC% Win32/SocketIoPool.lua SocketIoPool.obj
 %LUAC% Win32/SocketPool.lua SocketPool.obj
 %LUAC% Win32/SocketUtils.lua SocketUtils.obj
 %LUAC% Win32/schannel.lua schannel.obj
@@ -180,7 +180,7 @@
 %LUAC% Win32/Workstation.lua Workstation.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj Desktop.obj Desktop_ffi.obj EventScheduler.obj FileSystemItem.obj FsHandles.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj logoncli_ffi.obj NativeSocket.obj NativeWindow.obj NetStream.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketIoPool.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WindowKind.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
+@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj Desktop.obj Desktop_ffi.obj FileSystemItem.obj FsHandles.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj logoncli_ffi.obj NativeSocket.obj NativeWindow.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WindowKind.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
  
 @rem Create the computicle specific stuff
 %LUAC% computicle/comp_msgpump.lua comp_msgpump.obj

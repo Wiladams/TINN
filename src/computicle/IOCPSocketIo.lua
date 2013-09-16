@@ -91,37 +91,7 @@ local function ReadLine(socket, buff, size)
 end
 
 
---[[
-	Writing routines
---]]
---[[
-local function WriteN(sock, buff, size)
---io.write("WriteN: ", buff, size, '\n')
-	local nleft = size;
-	local nwritten = 0;
-	local err
-	local ptr = ffi.cast("const uint8_t *", buff)
 
-	while nleft > 0 do
-		nwritten, err = sock:send(ptr, nleft)
-
---print("WriteN, send, err: ", nwritten, err);
-		if not nwritten then
-			break;
-		end
-
-		nleft = nleft - nwritten
-
-		if nwritten == 0 then
-			break
-		end
-					
-		ptr = ptr + nwritten;
-	end
-
-	return size-nleft
-end
---]]
 
 return {
 	ReadN = ReadN,

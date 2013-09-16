@@ -11,7 +11,7 @@ webserver.HandleSingleRequest = function(stream)
 	local HttpRequest = require "HttpRequest"
 	local HttpResponse = require "HttpResponse"
 	local URL = require("url");
-	local StaticService = require("StaticService");
+	local FileService = require("FileService");
 
 	local request, err  = HttpRequest.Parse(stream);
 
@@ -41,7 +41,7 @@ webserver.HandleSingleRequest = function(stream)
 	
 		local response = HttpResponse.Open(stream);
 
-		StaticService.SendFile(filename, response)
+		FileService.SendFile(filename, response)
 	end
 --]]
 end

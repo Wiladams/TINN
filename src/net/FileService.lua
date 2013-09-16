@@ -31,7 +31,7 @@ print("NO RESPONSE BODY: ", filename, mimetype)
 		return false, "Resource Not Found";
 	end
 
-print("== StaticService.SENDING ==");
+print("== FileService.SENDING ==");
 print("FILE: ", filename, mimetype);
 --print(resourceBody);
 

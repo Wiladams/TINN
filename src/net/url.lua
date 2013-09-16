@@ -299,8 +299,11 @@ end
 return {
     parse = parse,
 
+    absolute = absolute,
+    build = build,
     build_path = build_path,
     escape = escape,
     parse_path = parse_path,
+    protect_segment = protect_segment,
     unescape = unescape,
 }

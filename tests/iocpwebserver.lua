@@ -14,7 +14,7 @@ local IOCPSocketIo = require("IOCPSocketIo");
 local HttpRequest = require "HttpRequest"
 local HttpResponse = require "HttpResponse"
 local URL = require("url");
-local StaticService = require("StaticService");
+local FileService = require("FileService");
 
 local sched = Scheduler();
 
@@ -54,7 +54,7 @@ local HandleSingleRequest = function(stream, pendingqueue)
 	
 		local response = HttpResponse.Open(stream);
 
-		StaticService.SendFile(filename, response)
+		FileService.SendFile(filename, response)
 	end
 
 	-- recycle the stream in case a new request comes 

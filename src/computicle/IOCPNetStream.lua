@@ -402,23 +402,16 @@ end
 function IOCPNetStream:readLine(size)
 	size = size or 1024;
 
---print("NS:ReadLine()");
-
 	if size > ffi.sizeof(self.LineBuffer) then
 		self.LineBuffer = ffi.new("uint8_t[?]", size);
 	end
 
 	assert(self.LineBuffer, "out of memory");
---print("NS:ReadLine(), after assert")
 
 	--local bytesread, err = self.Socket:receive(self.LineBuffer, size);
 	local bytesread, err = readOneLine(self.Socket, self.LineBuffer, size)
 
---print("NS:ReadLine(), ReadLine: ", bytesread, err)
-
 --	self.ReadTimer:Reset();
-
---print("AFTER Reset()");
 
 	if not bytesread then
 		print("NS:ReadLine(), Error: ", err)

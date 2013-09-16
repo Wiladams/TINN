@@ -4,6 +4,7 @@ local httpmsg = require("HttpMessage")
 
 local HttpMessage = httpmsg.HttpMessage;
 local HttpMessage_t = httpmsg.HttpMessage_t;
+local HttpChunkIterator = require("HttpChunkIterator")
 
 local HttpStatus = require ("httpstatus");
 
@@ -51,6 +52,50 @@ WebResponse.create = function(self, body, headers, status, phrase)
 	return self:init(body, headers, status, phrase);
 end
 
+WebResponse.OpenResponse = function(self, stream)
+	local obj = WebResponse(nil, nil, nil, nil);
+	obj.DataStream = stream;
+
+	return obj
+end
+
+WebResponse.Parse = function(self, stream)
+--print("WebResponse.Parse() - 1.0");
+
+	local firstline, err = stream:ReadLine(4096);
+
+--print(string.format("WebResponse.Parse() - 1.1: '%s', %s", tostring(firstline), tostring(err)));
+--print("-- ISBLANK: ", firstline == "");
+
+	if not firstline then
+		print("WebResponse.Parse(), NO First Line: ", err)
+		return nil, err
+	end
+
+--print("WebResponse.Parse() - 2.0");
+	-- For a response stream
+	--HTTP-Version SP Status-Code SP Reason-Phrase CRLF
+	local version, status, phrase = firstline:match'^HTTP/(%d+%.%d+) (%d%d%d) ?(.*)$'
+
+	if (not status) then
+		print(firstline)
+		return nil, "no status"
+	end
+
+
+--print("WebResponse.Parse() - 3.0");
+	local resp = WebResponse(body, headers, status, phrase)
+	resp.Version = version;
+	resp.DataStream = stream;
+	resp.FirstLine = firstline;
+
+--print("WebResponse.Parse() - 6.0");
+
+	local lastline, err = resp:ReadHeaders(stream)
+--print("WebResponse.Parse() - 7.0");
+
+	return resp
+end
 
 function WebResponse:writeHead(status, headers)
 	self.Status = tostring(status);
@@ -112,7 +157,7 @@ function WebResponse:WritePreamble(stream)
 	return success, err
 end
 
-function WebResponse:Send(stream)
+function WebResponse:send(stream)
 --print("WebResponse:Send() ", stream)
 
 	if not self.Status then
@@ -154,50 +199,13 @@ function WebResponse:writeEnd(body)
 	return self:Send(self.DataStream);
 end
 
-WebResponse.OpenResponse = function(self, stream)
-	local obj = WebResponse(nil, nil, nil, nil);
-	obj.DataStream = stream;
-
-	return obj
+function WebResponse:chunks()
+	return HttpChunkIterator.ReadChunks(self);
 end
 
-WebResponse.Parse = function(self, stream)
---print("WebResponse.Parse() - 1.0");
 
-	local firstline, err = stream:ReadLine(4096);
+WebResponse.Send = WebResponse.send;
 
---print(string.format("WebResponse.Parse() - 1.1: '%s', %s", tostring(firstline), tostring(err)));
---print("-- ISBLANK: ", firstline == "");
-
-	if not firstline then
-		print("WebResponse.Parse(), NO First Line: ", err)
-		return nil, err
-	end
-
---print("WebResponse.Parse() - 2.0");
-	-- For a response stream
-	--HTTP-Version SP Status-Code SP Reason-Phrase CRLF
-	local version, status, phrase = firstline:match'^HTTP/(%d+%.%d+) (%d%d%d) ?(.*)$'
-
-	if (not status) then
-		print(firstline)
-		return nil, "no status"
-	end
-
-
---print("WebResponse.Parse() - 3.0");
-	local resp = WebResponse(body, headers, status, phrase)
-	resp.Version = version;
-	resp.DataStream = stream;
-	resp.FirstLine = firstline;
-
---print("WebResponse.Parse() - 6.0");
-
-	local lastline, err = resp:ReadHeaders(stream)
---print("WebResponse.Parse() - 7.0");
-
-	return resp
-end
 
 return WebResponse;
 
