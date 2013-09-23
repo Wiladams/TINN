@@ -14,7 +14,6 @@
 local floor = math.floor;
 local insert = table.insert;
 
--- Avoid heap allocs for performance
 local fcomp_default = function( a,b ) 
    return a < b 
 end

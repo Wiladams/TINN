@@ -175,6 +175,10 @@ function setbitstobytes(bytes, startbit, bitcount, value, bigendian)
 end
 
 return {
+	isset = isset,
+	clearbit = clearbit,
+	setbit = setbit, 
+	
 	binarytonumber = binarytonumber,
 	bytestobinary = bytestobinary,
 	getbitstring = getbitstring,

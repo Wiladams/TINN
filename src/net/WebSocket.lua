@@ -11,7 +11,7 @@ local base64 = require("base64")
 local CryptUtils = require("BCryptUtils")
 local UrlParser = require("url");
 
-local HttpResponse = require ("WebResponse");
+local WebResponse = require ("WebResponse");
 
 local b64 = require("base64");
 
@@ -99,9 +99,7 @@ WebSocket_t.InitiateClientHandshake = function(self, url, origin)
 	end
 
 	-- Get the response back
-	local response, err = HttpResponse:Parse(self.DataStream);
-
-
+	local response, err = WebResponse:Parse(self.DataStream);
 
 	if not response then 
 		print("Response Error: ", err);

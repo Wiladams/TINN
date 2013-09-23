@@ -59,7 +59,7 @@ WebResponse.OpenResponse = function(self, stream)
 	return obj
 end
 
-WebResponse.Parse = function(self, stream)
+WebResponse.parse = function(self, stream)
 --print("WebResponse.Parse() - 1.0");
 
 	local firstline, err = stream:ReadLine(4096);
@@ -204,6 +204,7 @@ function WebResponse:chunks()
 end
 
 
+WebResponse.Parse = WebResponse.parse;
 WebResponse.Send = WebResponse.send;
 
 

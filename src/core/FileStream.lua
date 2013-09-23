@@ -6,7 +6,7 @@ local stream = require "stream"
 local FileStream = {}
 setmetatable(FileStream, {
 	__call = function(self, ...)
-		return FileStream.new(...);
+		return self:create(...);
 	end,
 });
 
@@ -14,10 +14,7 @@ local FileStream_mt = {
 	__index = FileStream,
 }
 
-function FileStream.new(handle)
-	handle = handle or io.stdout
-	--if not handle then return nil end
-
+FileStream.init = function(self, handle)
 	local obj = {
 		FileHandle = handle,
 		}
@@ -27,17 +24,19 @@ function FileStream.new(handle)
 	return obj;
 end
 
-
-function FileStream.Open(filename, mode)
-	if not filename then return nil end
+FileStream.create = function(self, filename, mode)
+	if not filename then
+		return self:init(io.stdout)
+	end
 
 	mode = mode or "wb+"
 	local handle = io.open(filename, mode)
 
 	if not handle then return nil end
 
-	return FileStream.new(handle)
+	return self:init(handle)
 end
+
 
 
 function FileStream:Close()
@@ -104,12 +103,12 @@ end
 
 
 
-function FileStream:WriteByte(value)
+function FileStream:writeByte(value)
 	self.FileHandle:write(string.char(value))
 	return 1
 end
 
-function FileStream:WriteBytes(buffer, len, offset)
+function FileStream:writeBytes(buffer, len, offset)
 	offset = offset or 0
 
 	if type(buffer) == "string" then
@@ -125,7 +124,7 @@ function FileStream:WriteBytes(buffer, len, offset)
 	return len
 end
 
-function FileStream:WriteString(str, count, offset)
+function FileStream:writeString(str, count, offset)
 	if type(str) == "string" or type(str) == "number" then
 		self.FileHandle:write(str);
 		return #str
@@ -138,7 +137,7 @@ function FileStream:WriteString(str, count, offset)
 	return self:WriteBytes(strptr, count, offset)
 end
 
-function FileStream:WriteLine(line)
+function FileStream:writeLine(line)
 	local status, err
 
 	if line then
@@ -154,9 +153,10 @@ function FileStream:WriteLine(line)
 	return status, err
 end
 
-FileStream.writeString = FileStream.WriteString;
-FileStream.writeLine = FileStream.WriteLine;
-FileStream.writeByte = FileStream.WriteByte;
-FileStream.writeBytes = FileStream.WriteBytes;
+FileStream.WriteString = FileStream.writeString;
+FileStream.WriteLine = FileStream.writeLine;
+FileStream.WriteByte = FileStream.writeByte;
+FileStream.WriteBytes = FileStream.writeBytes;
+FileStream.Open = FileStream.create
 
 return FileStream;

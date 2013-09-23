@@ -65,7 +65,7 @@
 %LUAC% net/WebResponse.lua WebResponse.obj
 %LUAC% net/WebSocket.lua WebSocket.obj
 
-@set NETLIB=CoSocketIo.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj mime.obj SocketServer.obj FileService.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
+@set NETLIB=httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj mime.obj SocketServer.obj FileService.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
 
 @rem Core windows API set
 %LUAC% Win32/apiset/core_console_l1_1_0.lua core_console_l1_1_0.obj
@@ -188,7 +188,6 @@
 %LUAC% computicle/ComputicleOps.lua ComputicleOps.obj
 %LUAC% computicle/IOCPNetStream.lua IOCPNetStream.obj
 %LUAC% computicle/IOCPSocket.lua IOCPSocket.obj
-@rem %LUAC% computicle/IOCPSocketIo.lua IOCPSocketIo.obj
 %LUAC% computicle/IOProcessor.lua IOProcessor.obj
 %LUAC% computicle/Messenger.lua Messenger.obj
 %LUAC% computicle/SocketOps.lua SocketOps.obj

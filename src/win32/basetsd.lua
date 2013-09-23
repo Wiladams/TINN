@@ -1,7 +1,7 @@
 
 local ffi = require("ffi");
 
-_WIN64 = ffi.os == "Windows" and ffi.abi("64bit");
+_WIN64 = (ffi.os == "Windows") and ffi.abi("64bit");
 
 -- intsafe.h contains many of these base
 -- definitions as well.

@@ -26,7 +26,7 @@ local LOWORD = function(param)
 end
 
 local HIWORD = function(param)
-	return rshift(band(param, 0xffff0000), 16);
+	return band(rshift(param, 16), 0x0000ffff);
 end
 
 
