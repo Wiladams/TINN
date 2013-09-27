@@ -154,7 +154,7 @@ function MemoryStream:Bytes(maxbytes)
 	return closure
 end
 
-function MemoryStream:ReadByte()
+function MemoryStream:readByte()
 	local buffptr = ffi.cast("uint8_t *", self.Buffer);
 
 	local pos = self.Position
@@ -166,7 +166,7 @@ function MemoryStream:ReadByte()
 	return nil, "eof"
 end
 
-function MemoryStream:ReadBytes(buff, count, offset)
+function MemoryStream:readBytes(buff, count, offset)
 	offset = offset or 0
 
 	local pos = self.Position
@@ -186,7 +186,7 @@ function MemoryStream:ReadBytes(buff, count, offset)
 	return maxbytes
 end
 
-function MemoryStream:ReadString(count)
+function MemoryStream:readString(count)
 	local pos = self.Position
 	local remaining = self.Length - pos
 
@@ -206,7 +206,7 @@ end
 local CR = string.byte("\r")
 local LF = string.byte("\n")
 
-function MemoryStream:ReadLine(maxbytes)
+function MemoryStream:readLine(maxbytes)
 --print("-- MemoryStream:ReadLine()");
 
 	local readytoberead = self:BytesReadyToBeRead()
@@ -258,14 +258,16 @@ end
 	Writing interface
 --]]
 
-function MemoryStream:WriteByte(byte)
+function MemoryStream:writeByte(byte)
 	-- don't write a nil value
 	-- a nil is not the same as a '0'
-	if not byte then return end
+	if not byte then 
+		return false
+	end
 
 	local pos = self.Position
-	if pos < self.Length-1 then
-		(ffi.cast("uint8_t *", self.Buffer)+pos)[0] = byte
+	if pos < self.Length then
+		ffi.cast("uint8_t *", self.Buffer)[pos] = byte
 
 		self.Position = pos + 1
 		if self.Position > self.BytesWritten then
@@ -278,7 +280,7 @@ function MemoryStream:WriteByte(byte)
 	return false
 end
 
-function MemoryStream:WriteBytes(buff, count, offset)
+function MemoryStream:writeBytes(buff, count, offset)
 	count = count or #buff;
 	offset = offset or 0;
 	local pos = self.Position;
@@ -377,5 +379,13 @@ function MemoryStream:ToString()
 
 	return nil
 end
+
+MemoryStream.ReadByte = MemoryStream.readByte;
+MemoryStream.ReadBytes = MemoryStream.readBytes;
+MemoryStream.ReadString = MemoryStream.readString;
+MemoryStream.ReadLine = MemoryStream.readLine;
+
+MemoryStream.WriteByte = MemoryStream.writeByte;
+MemoryStream.WriteBytes = MemoryStream.writeBytes;
 
 return MemoryStream;

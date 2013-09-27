@@ -20,7 +20,7 @@ typedef struct {
 IOCPSocketHandle = ffi.typeof("IOCPSocketHandle");
 IOCPSocketHandle_mt = {
 	__gc = function(self)
-		print("GC: IOCPSocketHandle: ", self.sock, self.autoClose);
+		--print("GC: IOCPSocketHandle: ", self.sock, self.autoClose);
 		-- Force close on socket
 		-- To ensure it's really closed
 		if self.autoClose then

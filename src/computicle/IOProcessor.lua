@@ -6,7 +6,6 @@ local StopWatch = require("StopWatch");
 local IOCPSocket = require("IOCPSocket");
 local SimpleFiber = require("SimpleFiber");
 local IOCompletionPort = require("IOCompletionPort");
-local SocketOps = require("SocketOps");
 local ws2_32 = require("ws2_32");
 local WinError = require("win_error");
 local core_synch = require("core_synch_l1_2_0");
@@ -34,8 +33,6 @@ IOProcessor.setMessageQuanta = function(self, millis)
 	self.MessageQuanta = millis;
 	return self;
 end
-
---]]
 
 IOProcessor.createClientSocket = function(self, hostname, port)
 	local socket = IOCPSocket:createClient(hostname, port)

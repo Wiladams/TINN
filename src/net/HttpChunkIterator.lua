@@ -74,7 +74,7 @@ assert(chunksize, "expected a valid number ", chunksizeline);
 
 	local buff = ffi.new("uint8_t[?]", chunksize);
 
-	bytesread, err = stream:ReadBytes(buff, chunksize);
+	bytesread, err = stream:readBytes(buff, chunksize);
 --print("-- ReadSingleChunk(), bytesread: ", bytesread, err)
 
 	if not bytesread then
@@ -86,7 +86,7 @@ assert(chunksize, "expected a valid number ", chunksizeline);
 	end
 
 	-- Read past the blank line
-	blankline, err = stream:ReadLine(1024);
+	blankline, err = stream:readLine(1024);
 	--if not blankline then
 	--	return nil, "eof"
 	--end
@@ -96,27 +96,32 @@ end
 
 
 
+local function IsChunked(response)
+	local transferencoding = response:GetHeader("transfer-encoding");
+
+	if transferencoding and transferencoding:lower() == "chunked" then
+		return true;
+	end
+
+	return false;
+end
 
 local function ReadChunks(response)
 	local input = response.DataStream
-	local transferencoding = response:GetHeader("transfer-encoding");
-	local ischunked = false;
 	local contentLength = response:GetHeader("content-length")
 	local connection = response:GetHeader("connection")
+	
 	if connection then
 		connection = connection:lower();
 	end
 
+	local isChunked = IsChunked(response);
+
+	print("HttpChunkIterator.new() IsChunked: ", isChunked)
+	print("--contentLength: ", contentLength);
+	print("--connection: ", connection);
+
 	local returnedLast = false
-
-
-	if transferencoding and transferencoding:lower() == "chunked" then
-		ischunked = true;
-	end
-	
-	--print("HttpChunkIterator.new() IsChunked: ", ischunked)
-	--print("--contentLength: ", contentLength);
-	--print("--connection: ", connection);
 
 	local function closure()
 		local chunkbuffer;
@@ -125,7 +130,7 @@ local function ReadChunks(response)
 			return nil
 		end
 
-		if ischunked then
+		if isChunked then
 			local chunk, size = ReadSingleChunk(input)
 
 			if not chunk then
@@ -136,10 +141,10 @@ local function ReadChunks(response)
 			return chunk, size
 		elseif contentLength then
 			local length = tonumber(contentLength)
-			--print("-- HTTPChunked: Content-Length: ", length);
+			print("-- HTTPChunked: Content-Length: ", length);
 			local chunk
 			if length > 0 then
-				chunk, err = input:ReadString(length)
+				chunk, err = input:readString(length)
 			end
 			returnedLast = true
 
@@ -149,7 +154,7 @@ local function ReadChunks(response)
 
 			return chunk, length
 		elseif connection and connection == "close" then
-			--print("NOT CHUNKED, NOR CONTENT-LENGTH")
+			print("CONNECTION == 'CLOSE'")
 			-- retrieve a chunk of 8k in size
 			-- or whatever we can read
 			-- and return that
@@ -162,7 +167,7 @@ local function ReadChunks(response)
 
 			return str;
 		else
-			--print("-- UNKNOWN CONTENT SIZE");
+			print("-- UNKNOWN CONTENT SIZE");
 			-- assume 'connection:close'
 			local chunksize = 1024*8
 			local str, err = input:ReadString(chunksize)
@@ -180,6 +185,7 @@ local function ReadChunks(response)
 end
 
 return {
+	IsChunked = IsChunked,
 	ReadSingleChunk = ReadSingleChunk,
 	ReadChunks = ReadChunks,
 	WriteChunk = WriteChunk,
