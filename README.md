@@ -30,10 +30,10 @@ This scheduler supports a cooperative multi-tasking networking module, as well a
 model for seamlessly dealing with cooperative processing.  
   
 Here is a very simple example of getting the IP address of the networking interface:  
-
-`local net = require("Network")()`  
-`print(net:GetLocalInterface())`  
-  
+```
+local net = require("Network")()`  
+print(net:GetLocalInterface())`  
+```  
   
 The general philosophy behind TINN is to make fairly mundane things very easy, make very hard things very approachable, and keep really easy things really easy.  
   
@@ -73,11 +73,13 @@ use('dsrole')
 The 'use()' function is slightly different.  It will also perform a 'require' on the module, but it will also make global anything that is returned from the call.  This assumes that what is returned from the call is a table.  This is useful for
 quickly turning a module into a set of globally accessible functions.  So, if you have a module that looks like the following:
 
+```
 -- dsrole.lua
 local dsrole = {
     DsRoleFreeMemory = Lib.DsRoleFreeMemory,
     DsRoleGetPrimaryDomainInformation = Lib.DsRoleGetPrimaryDomainInformation,    
 };
+```
 
 return dsrole
 
@@ -106,8 +108,10 @@ The primary benefit of the API sets is to create a layering within the Wondows A
 
 The general approach of these ffi interfaces is to provide basic FFI access to the core routines in each set.  They are relatively unadorned, meaning there are no wrappers to make thing easier.  The basic interfaces are there and that's it.  The one benefit is that each file returns a table that contains all the referenced API calls.  This makes it convenient to do something like the following:
 
+```
 local console = require("core_console_l1_1_0");
 console.AllocConsole();
+```
 
 The user does not need to know which library contains the AllocConsole call.  This also makes helps to keep the names out of the global namespace, but provide a mechanism to export them into the global namespace if that is desirable.
 
