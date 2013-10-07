@@ -58,6 +58,7 @@
 %LUAC% net/ResourceMapper.lua ResourceMapper.obj
 %LUAC% net/SocketServer.lua SocketServer.obj
 %LUAC% net/FileService.lua FileService.obj
+%LUAC% net/TcpSplice.lua TcpSplice.obj
 %LUAC% net/url.lua url.obj
 %LUAC% net/utils.lua utils.obj
 %LUAC% net/WebApp.lua WebApp.obj
@@ -65,7 +66,7 @@
 %LUAC% net/WebResponse.lua WebResponse.obj
 %LUAC% net/WebSocket.lua WebSocket.obj
 
-@set NETLIB=httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj mime.obj SocketServer.obj FileService.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
+@set NETLIB=httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj mime.obj SocketServer.obj FileService.obj TcpSplice.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
 
 @rem Core windows API set
 %LUAC% Win32/apiset/core_console_l1_1_0.lua core_console_l1_1_0.obj
