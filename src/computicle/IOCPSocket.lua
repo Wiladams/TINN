@@ -88,7 +88,7 @@ IOCPSocket.create = function(self, family, socktype, protocol, autoclose)
 end
 
 IOCPSocket.createClient = function(self, hostname, port)
-print("IOCPSocket.createClient(): ", hostname, port);
+--print("IOCPSocket.createClient(): ", hostname, port);
 	local family = AF_INET;
 	local socktype = SOCK_STREAM;
 	local protocol = protocol or 0;

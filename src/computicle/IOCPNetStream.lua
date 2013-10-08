@@ -143,7 +143,7 @@ end
 
 
 function IOCPNetStream:refillReadingBuffer()
-	print("IOCPNetStream:RefillReadingBuffer(): ",self.ReadingBuffer:BytesReadyToBeRead());
+	--print("IOCPNetStream:RefillReadingBuffer(): ",self.ReadingBuffer:BytesReadyToBeRead());
 
 	-- if the buffer already has data in it
 	-- then just return the number of bytes that
@@ -159,7 +159,7 @@ function IOCPNetStream:refillReadingBuffer()
 
 	bytesread, err = self.Socket:receive(self.ReadingBuffer.Buffer, self.ReadingBuffer.Length)
 
-	print("-- LOADED BYTES: ", bytesread, err);
+	--print("-- LOADED BYTES: ", bytesread, err);
 
 	if not bytesread then
 		return false, err;
@@ -203,7 +203,7 @@ function IOCPNetStream:readByte()
 
 	-- If there was an error
 	-- then return that error immediately
-	print("-- IOCPNetStream:readByte, ERROR: ", err)
+	--print("-- IOCPNetStream:readByte, ERROR: ", err)
 	return false, err
 end
 
