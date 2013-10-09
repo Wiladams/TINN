@@ -117,9 +117,9 @@ local function ReadChunks(response)
 
 	local isChunked = IsChunked(response);
 
-	print("HttpChunkIterator.new() IsChunked: ", isChunked)
-	print("--contentLength: ", contentLength);
-	print("--connection: ", connection);
+	--print("HttpChunkIterator.new() IsChunked: ", isChunked)
+	--print("--contentLength: ", contentLength);
+	--print("--connection: ", connection);
 
 	local returnedLast = false
 
@@ -141,7 +141,7 @@ local function ReadChunks(response)
 			return chunk, size
 		elseif contentLength then
 			local length = tonumber(contentLength)
-			print("-- HTTPChunked: Content-Length: ", length);
+			--print("-- HTTPChunked: Content-Length: ", length);
 			local chunk
 			if length > 0 then
 				chunk, err = input:readString(length)
@@ -154,7 +154,7 @@ local function ReadChunks(response)
 
 			return chunk, length
 		elseif connection and connection == "close" then
-			print("CONNECTION == 'CLOSE'")
+			--print("CONNECTION == 'CLOSE'")
 			-- retrieve a chunk of 8k in size
 			-- or whatever we can read
 			-- and return that
