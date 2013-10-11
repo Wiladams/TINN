@@ -30,23 +30,26 @@
 %LUAC% core/dkjson.lua dkjson.obj
 %LUAC% core/FileStream.lua FileStream.obj
 %LUAC% core/langutils.lua langutils.obj
-%LUAC% luajit_ffi.lua luajit_ffi.obj
-%LUAC% LuaState.lua LuaState.obj
 %LUAC% core/MemoryStream.lua MemoryStream.obj
 %LUAC% core/re.lua re.obj
 %LUAC% REPL.lua REPL.obj
-%LUAC% Runtime.lua Runtime.obj
 %LUAC% core/Query.lua Query.obj
 %LUAC% Shell.lua Shell.obj
-%LUAC% SimpleFiber.lua SimpleFiber.obj
 %LUAC% core/stream.lua stream.obj
 %LUAC% core/stringzutils.lua stringzutils.obj
 %LUAC% core/tabutils.lua tabutils.obj
-%LUAC% TINNThread.lua TINNThread.obj
 %LUAC% core/Vector.lua Vector.obj
 %LUAC% vkeys.lua vkeys.obj
 %LUAC% core/zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj luajit_ffi.obj LuaState.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Runtime.obj Shell.obj SimpleFiber.obj stream.obj stringzutils.obj tabutils.obj TINNThread.obj Vector.obj vkeys.obj zlib.obj
+@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stream.obj stringzutils.obj tabutils.obj Vector.obj vkeys.obj zlib.obj
+
+@rem TINN Task library
+%LUAC% task/luajit_ffi.lua luajit_ffi.obj
+%LUAC% task/LuaState.lua LuaState.obj
+%LUAC% task/SimpleFiber.lua SimpleFiber.obj
+%LUAC% task/TINNThread.lua TINNThread.obj
+@set TASKLIB=luajit_ffi.obj LuaState.obj SimpleFiber.obj TINNThread.obj
+
 
 @rem The Net library
 %LUAC% net/httpstatus.lua httpstatus.obj
@@ -66,7 +69,7 @@
 %LUAC% net/WebResponse.lua WebResponse.obj
 %LUAC% net/WebSocket.lua WebSocket.obj
 
-@set NETLIB=httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj mime.obj SocketServer.obj FileService.obj TcpSplice.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
+@set TINNNET=httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj mime.obj SocketServer.obj FileService.obj TcpSplice.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
 
 @rem Core windows API set
 %LUAC% Win32/apiset/core_console_l1_1_0.lua core_console_l1_1_0.obj
@@ -120,13 +123,6 @@
 
 @set WINCOREAPI=core_console_l1_1_0.obj core_console_l2_1_0.obj core_datetime_l1_1_1.obj core_debug_l1_1_1.obj core_errorhandling_l1_1_1.obj core_file_l1_2_0.obj core_file_l2_1_0.obj core_firmware_l1_1_0.obj core_interlocked.obj core_io_l1_1_1.obj core_libraryloader_l1_1_1.obj core_memory_l1_1_1.obj core_namedpipe_l1_2_0.obj core_processenvironment.obj core_processthreads_l1_1_1.obj core_profile_l1_1_0.obj core_psapi_l1_1_0.obj core_shutdown_l1_1_0.obj core_string_l1_1_0.obj core_synch_l1_2_0.obj core_sysinfo_l1_2_0.obj core_timezone_l1_1_0.obj crypt.obj dsrole.obj Handle_ffi.obj Heap_ffi.obj httpapi.obj lmcons.obj mswsock.obj NTSecAPI.obj power_base_l1_1_0.obj samcli.obj security_base_l1_2_0.obj security_credentials_l1_1_0.obj security_lsalookup_l2_1_0.obj security_sddl_l1_1_0.obj service_core_l1_1_1.obj service_management_l1_1_0.obj sspi_ffi.obj sspicli.obj SubAuth.obj UMS_ffi.obj Util_ffi.obj WinBer_ffi.obj WinCon.obj wkscli.obj wldap32_ffi.obj ws2_32.obj
 
-
-%LUAC% eventscheduler/CoSocketIo.lua CoSocketIo.obj
-%LUAC% eventscheduler/EventScheduler.lua EventScheduler.obj
-%LUAC% eventscheduler/HttpRequest.lua HttpRequest.obj
-%LUAC% eventscheduler/HttpResponse.lua HttpResponse.obj
-%LUAC% eventscheduler/NetStream.lua NetStream.obj
-%LUAC% eventscheduler/SocketIoPool.lua SocketIoPool.obj
 
 @rem Create the Win32 specific stuff
 %LUAC% Win32/basetsd.lua basetsd.obj
@@ -224,7 +220,7 @@
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinn.exe tinn.obj %CLIBS% %COMPUTICLELIB% %NETLIB% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
+%LJLINK% /out:tinn.exe tinn.obj %CLIBS% %COMPUTICLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinn.exe.manifest^
   %LJMT% -manifest tinn.exe.manifest -outputresource:tinn.exe
