@@ -134,7 +134,7 @@ end
 local SCManager = {}
 setmetatable(SCManager, {
 	__call = function(self, ...)
-		return self:new(...);
+		return self:create(...);
 	end,
 });
 
@@ -142,18 +142,22 @@ SCManager_mt = {
 	__index = SCManager,	
 }
 
-SCManager.new = function(self, desiredAccess)
+SCManager.init = function(self, rawHandle)
+	local obj = {
+		Handle = rawHandle;
+	};
+	setmetatable(obj, SCManager_mt);
+
+	return obj;
+end
+
+SCManager.create = function(self, desiredAccess)
 	local handle = openServiceManager(desiredAccess);
 	if not handle then
 		return false, err;
 	end
 
-	local obj = {
-		Handle = handle;
-	};
-	setmetatable(obj, SCManager_mt);
-
-	return obj;
+	return self:init(handle)
 end
 
 SCManager.openService = function(self, serviceName, dwDesiredAccess)
