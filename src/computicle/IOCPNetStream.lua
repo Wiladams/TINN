@@ -210,7 +210,7 @@ end
 
 function IOCPNetStream:readBytes(buffer, len, offset)
 	offset = offset or 0
-print("IOCPNetStream:readBytes: ", buffer, len, offset);
+--print("IOCPNetStream:readBytes: ", buffer, len, offset);
 
 	-- Reset the stopwatch
 	--self.ReadTimer:Reset();
@@ -222,7 +222,7 @@ print("IOCPNetStream:readBytes: ", buffer, len, offset);
 	while nleft > 0 do
 		local refilled, refillErr = self:refillReadingBuffer();
 
-print("BytesReady: ", refilled, refillErr)
+--print("BytesReady: ", refilled, refillErr)
 
 		if not refilled then
 			err = refillErr
@@ -233,7 +233,7 @@ print("BytesReady: ", refilled, refillErr)
 		local maxbytes = math.min(nleft, refilled)
 		nread, err = self.ReadingBuffer:readBytes(buffer, maxbytes, offset + len-nleft)
 
-print("IOCPNetStream:readBytes()loop: ", nread, err)
+--print("IOCPNetStream:readBytes()loop: ", nread, err)
 
 		nleft = nleft - nread;
 	end
@@ -255,7 +255,7 @@ end
 function IOCPNetStream:readString(bufflen)
 	bufflen = bufflen or 1500
 
-print("IOCPNetStream:ReadString: 1.0: ", bufflen);
+--print("IOCPNetStream:ReadString: 1.0: ", bufflen);
 
 	local buff = ffi.new("uint8_t[?]", bufflen);
 	if not buff then
@@ -449,6 +449,7 @@ IOCPNetStream.ReadByte = IOCPNetStream.readByte;
 IOCPNetStream.ReadBytes = IOCPNetStream.readBytes;
 IOCPNetStream.ReadLine = IOCPNetStream.readLine;
 IOCPNetStream.ReadString = IOCPNetStream.readString;
+IOCPNetStream.WriteBytes = IOCPNetStream.writeBytes;
 IOCPNetStream.WriteLine = IOCPNetStream.writeLine;
 
 return IOCPNetStream;

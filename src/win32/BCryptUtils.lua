@@ -134,12 +134,10 @@ BCryptHash_mt = {
 			local pbInput = chunk
 			local cbInput
 			local flags = 0
-
+print("HashMore: ", chunk, chunksize)
 			if type(chunk) == "string" then
 				pbInput = ffi.cast("const uint8_t *", chunk);
-				if not chunksize then
-					cbInput = #chunk
-				end
+				cbInput = chunksie or #chunk
 			else
 				cbInput = cbInput or 0
 			end
@@ -166,7 +164,7 @@ BCryptHash_mt = {
 			local outlen = self:GetHashDigestLength();
 			local outbuff = ffi.new("uint8_t[?]", outlen);
 
-			self:HashMore(input);
+			self:HashMore(input, inputLength);
 			self:Finish(outbuff, outlen);
 
 			local hex = bintohex(outbuff, outlen);
@@ -294,9 +292,9 @@ CryptUtils.ECDH_P521Algorithm = CryptUtils.BCryptAlgorithm(BCrypt.BCRYPT_ECDH_P5
 	Hash Functions
 --]]
 CryptUtils.Hashes = {
-	MD2 = CryptUtils.MD2Algorithm:CreateHash();
-	MD4 = CryptUtils.MD4Algorithm:CreateHash();
-	MD5 = CryptUtils.MD5Algorithm:CreateHash();
+--	MD2 = CryptUtils.MD2Algorithm:CreateHash();
+--	MD4 = CryptUtils.MD4Algorithm:CreateHash();
+--	MD5 = CryptUtils.MD5Algorithm:CreateHash();
 
 	SHA1 = CryptUtils.SHA1Algorithm:CreateHash();
 	SHA256 = CryptUtils.SHA256Algorithm:CreateHash();
@@ -305,15 +303,19 @@ CryptUtils.Hashes = {
 }
 
 CryptUtils.MD2 = function(content, len)
-	return CryptUtils.Hashes.MD2:CreateDigest(content, len);
+	local MD2 = CryptUtils.MD2Algorithm:CreateHash();
+	return MD2:CreateDigest(content, len);
 end
 
 CryptUtils.MD4 = function(content, len)
-	return CryptUtils.Hashes.MD4:CreateDigest(content, len);
+	local MD4 = CryptUtils.MD4Algorithm:CreateHash();
+	return MD4:CreateDigest(content, len);
 end
 
 CryptUtils.MD5 = function(content, len)
-	return CryptUtils.Hashes.MD5:CreateDigest(content, len);
+	local MD5 = CryptUtils.MD5Algorithm:CreateHash();
+	
+	return MD5:CreateDigest(content, len);
 end
 
 

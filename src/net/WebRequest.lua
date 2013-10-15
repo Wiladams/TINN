@@ -122,7 +122,7 @@ WebRequest.Send = function(self, stream)
 		local len = self:GetHeader("content-length")
 		local bodylen = tonumber(len);
 		local bodyptr = ffi.cast("const uint8_t *", self.Body);
-		success, err = stream:WriteBytes(bodyptr, bodylen, 0)
+		success, err = stream:writeBytes(bodyptr, bodylen, 0)
 	end
 
 	return success, err
@@ -149,7 +149,7 @@ WebRequest.Parse = function(self, stream)
 	end
 
 	if firstline == "" then
-		print("WebRequest.Parse(), First Line, blank");
+		--print("WebRequest.Parse(), First Line, blank");
 		return nil, "eof"
 	end
 
@@ -163,7 +163,7 @@ WebRequest.Parse = function(self, stream)
 --print("--",method, uri,version)
 
 	if not method  then
-		print("WebRequest.Parse(), First Line, no method found");
+		--print("WebRequest.Parse(), First Line, no method found");
 		return nil, "eof"
 	end
 

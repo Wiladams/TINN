@@ -49,13 +49,13 @@ end
 
 
 SocketServer.handleAccepted = function(self, sock)
-print("SocketServer.handleAccepted(): ", sock);
+--print("SocketServer.handleAccepted(): ", sock);
 
   if self.OnAccept then
 --print("CALLING self.OnAccept")
     return self.OnAccept(self.OnAcceptParam, sock);
   else
-print("NO OnAccept available, closing  socket...")
+--print("NO OnAccept available, closing  socket...")
     ws2_32.closesocket(sock);
   end
 end

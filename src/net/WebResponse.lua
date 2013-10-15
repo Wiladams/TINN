@@ -203,6 +203,15 @@ function WebResponse:chunks()
 	return HttpChunkIterator.ReadChunks(self);
 end
 
+function WebResponse:readBody()
+	local body = {}
+	for chunk in HttpChunkIterator.ReadChunks(self) do
+		table.insert(body, chunk)
+	end
+
+	return table.concat(body)
+end
+
 
 WebResponse.Parse = WebResponse.parse;
 WebResponse.Send = WebResponse.send;
