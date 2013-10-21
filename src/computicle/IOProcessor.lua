@@ -3,14 +3,13 @@ local ffi = require("ffi");
 
 local Collections = require("Collections");
 local StopWatch = require("StopWatch");
-local IOCPSocket = require("IOCPSocket");
 local SimpleFiber = require("SimpleFiber");
 local IOCompletionPort = require("IOCompletionPort");
-local ws2_32 = require("ws2_32");
 local WinError = require("win_error");
 local core_synch = require("core_synch_l1_2_0");
 
 local tabutils = require("tabutils");
+
 
 IOProcessor = {
 	Clock = StopWatch();
@@ -20,90 +19,43 @@ IOProcessor = {
 	FibersAwaitingEvent = {};
 	FibersAwaitingTime = {};
 
-	ActiveSockets = {};
-
 	IOEventQueue = IOCompletionPort:create();
-	MessageQuanta = 10;		-- 15 milliseconds
+	MessageQuanta = 10;		-- milliseconds
 
 	OperationId = 0;
 };
 
+
+--[[
+	The message quanta is the amount of time we will wait on the 
+	primary message queue, before timing out.
+
+	This is the fasest the single thread can switch between 
+	tasks.
+--]]
 IOProcessor.setMessageQuanta = function(self, millis)
 --print("setMessageQuanta: ", millis);
 	self.MessageQuanta = millis;
 	return self;
 end
 
-IOProcessor.createClientSocket = function(self, hostname, port)
-	local socket = IOCPSocket:createClient(hostname, port)
-	
-	-- see if we already think there is an active socket with the 
-	-- native socket handle.
-	-- if there is, it means that the socket was closed, but we never
-	-- cleaned up the associated object.
-	-- So, clean it up, before creating a new one.
-	local alreadyActive = self.ActiveSockets[socket:getNativeSocket()];
-	if alreadyActive then
-		print("IOProcessor.createClientSocket(), ALREADY ACTIVE: ", socket:getNativeSocket());
-		self.ActiveSockets[socket:getNativeSocket()] = nil;
-	end
-
-	-- add the socket to the active socket table
-	self.ActiveSockets[socket:getNativeSocket()] = socket;
-
-	return socket;
-end
-
-IOProcessor.createServerSocket = function(self, params)
-	local socket = IOCPSocket:createServer(params)
-
-	-- add the socket to the active socket table
-	self.ActiveSockets[socket:getNativeSocket()] = socket;
-
-	return socket;
-end
-
-IOProcessor.removeDeadSocket = function(self, sock)
-	local socketentry = self.ActiveSockets[sock];
-	if socketentry then
-		print("REMOVING DEAD SOCKET: ", sock);
-		self.ActiveSockets[sock] = nil;
-	end
-
-	return true;
-end
-
-
-IOProcessor.observeSocketIO = function(self, socket)
-	return self.IOEventQueue:addIoHandle(socket:getNativeHandle(), socket:getNativeSocket());
-end
-
-IOProcessor.getCompletionStatus = function(self, sock, Overlapped)
-	local lpcbTransfer = ffi.new("DWORD[1]");
-	local Flags = ffi.new("DWORD[1]");
-
-	local status = ws2_32.WSAGetOverlappedResult(sock,
-		ffi.cast("OVERLAPPED *",Overlapped),
-		lpcbTransfer,
-        0, 
-        Flags);
-
-	--print(string.format("IOProcessor.getCompletionStatus: status(%d), sock(%d), bytes(%d), flags(%d)",
-	--	status, sock, lpcbTransfer[0], Flags[0]));
-
-	if status == 0 then
-		local err = ws2_32.WSAGetLastError();
-		print("    ERR: ", err);
-		return false, err;
-	end
-
-	return lpcbTransfer[0], Flags[0];
-end
 
 IOProcessor.getNextOperationId = function(self)
 	self.OperationId = self.OperationId + 1;
 	return self.OperationId;
 end
+
+
+--
+-- Given a handle, add it to the list of handles
+-- we will observe for io events.
+--
+IOProcessor.observeIOEvent = function(self, handle, param)
+	return self.IOEventQueue:addIoHandle(handle, param);
+end
+
+
+
 
 
 --[[

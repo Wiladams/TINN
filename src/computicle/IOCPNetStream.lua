@@ -1,9 +1,9 @@
 
 local ffi = require "ffi"
 
-local IOProcessor = require("IOProcessor");
 local StopWatch = require ("StopWatch")
 local MemoryStream = require("MemoryStream");
+local IOCPSocket = require("IOCPSocket");
 
 
 local IOCPNetStream = {}
@@ -47,7 +47,7 @@ function IOCPNetStream:init(socket)
 end
 
 function IOCPNetStream.create(self, hostname, port, autoclose)
-	local socket, err = IOProcessor:createClientSocket(hostname, port, autoclose);
+	local socket, err = IOCPSocket:createClient(hostname, port);
 
 	if not socket then
 		return nil, err

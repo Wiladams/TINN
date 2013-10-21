@@ -20,6 +20,13 @@ local FsHandle_mt = {
 		isValid = function(self)
 			return self.Handle ~= INVALID_HANDLE_VALUE;
 		end,
+
+		free = function(self)
+			if self.Handle ~= nil then
+				core_file.CloseHandle(self.Handle);
+				self.Handle = nil;
+			end
+		end,
 	},
 };
 
