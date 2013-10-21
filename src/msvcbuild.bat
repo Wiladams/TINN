@@ -39,9 +39,8 @@
 %LUAC% core/stringzutils.lua stringzutils.obj
 %LUAC% core/tabutils.lua tabutils.obj
 %LUAC% core/Vector.lua Vector.obj
-%LUAC% vkeys.lua vkeys.obj
 %LUAC% core/zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stream.obj stringzutils.obj tabutils.obj Vector.obj vkeys.obj zlib.obj
+@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stream.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
 
 @rem TINN Task library
 %LUAC% task/luajit_ffi.lua luajit_ffi.obj
@@ -165,6 +164,7 @@
 %LUAC% Win32/UIOSimulator.lua UIOSimulator.obj
 %LUAC% Win32/User32.lua User32.obj
 %LUAC% Win32/user32_ffi.lua user32_ffi.obj
+%LUAC% Win32/vkeys.lua vkeys.obj
 %LUAC% Win32/win_error.lua win_error.obj
 %LUAC% Win32/win_socket.lua win_socket.obj
 %LUAC% Win32/WinBase.lua WinBase.obj
@@ -176,7 +176,7 @@
 %LUAC% Win32/Workstation.lua Workstation.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj Desktop.obj Desktop_ffi.obj FileSystemItem.obj FsHandles.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj logoncli_ffi.obj NativeWindow.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WindowKind.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
+@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj Desktop.obj Desktop_ffi.obj FileSystemItem.obj FsHandles.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj logoncli_ffi.obj NativeWindow.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  vkeys.obj win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WindowKind.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
  
 @rem Create the computicle specific stuff
 %LUAC% computicle/comp_msgpump.lua comp_msgpump.obj
