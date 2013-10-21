@@ -187,7 +187,7 @@ end
 
 function WebResponse:writeEnd(body)
 	if body then
-		self:SetBody(body);
+		self:SetBody(body, #body);
 	end
 	
 	if not self.Body then

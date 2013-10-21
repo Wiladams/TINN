@@ -3,7 +3,6 @@ local ffi = require "ffi"
 local bit = require "bit"
 local band = bit.band
 
-local NativeSocket = require "NativeSocket"
 local ws2_32 = require("ws2_32");
 
 -- pass in a sockaddr
@@ -92,7 +91,7 @@ end
 --[[
 	Helper Functions
 --]]
-
+--[=[
 local CreateTcpServerSocket = function(params)
 	params = params or {port = 80, backlog = 15, nonblocking=false, nodelay = false}
 	params.backlog = params.backlog or 15
@@ -153,7 +152,7 @@ local CreateTcpClientSocket = function(hostname, port)
 
 	return sock
 end
-
+--]=]
 
 return {
 	host_serv = host_serv,
@@ -161,6 +160,6 @@ return {
 	CreateIPV4WildcardAddress = CreateIPV4WildcardAddress,
 	CreateSocketAddress = CreateSocketAddress,
 
-	CreateTcpServerSocket = CreateTcpServerSocket,
-	CreateTcpClientSocket = CreateTcpClientSocket,
+	--CreateTcpServerSocket = CreateTcpServerSocket,
+	--CreateTcpClientSocket = CreateTcpClientSocket,
 }

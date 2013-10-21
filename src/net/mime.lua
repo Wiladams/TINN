@@ -1001,6 +1001,7 @@ local mime={
 ['avi'] = 'video/x-msvideo',
 ['movie'] = 'video/x-sgi-movie',
 ['smv'] = 'video/x-smv',
+['lua'] = 'application/x-lua',
 }
 }
 

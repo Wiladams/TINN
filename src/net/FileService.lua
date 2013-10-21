@@ -28,7 +28,7 @@ print("NO RESPONSE BODY: ", filename, mimetype)
 		};
 		response:writeHead("404", respHeader);
 		response:writeEnd();
-		return false, "Resource Not Found";
+		return false
 	end
 
 print("== FileService.SENDING ==");
@@ -41,7 +41,7 @@ print("FILE: ", filename, mimetype);
 	}
 
 	response:writeHead(200, headers);
-	return response:writeEnd(resourceBody);
+	response:writeEnd(resourceBody);
 end
 
 local function SendStaticContent(request, response, basename)
@@ -57,7 +57,7 @@ local function SendStaticContent(request, response, basename)
 	-- need to scrub for '../'
 	local filename = basename..'/'..resource;
 
-	return SendFile(filename, response);
+	SendFile(filename, response);
 end
 
 return {
