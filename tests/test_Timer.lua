@@ -10,22 +10,19 @@ local count = 0;
 local function counter(timer)
 	count = count + 1;
 	if count >= 5 then
-		timer:stop();
+		timer:cancel();
 	end
 	print("counter: ",count)
 end
 
-local function main(func)
-	local timer = Timer {Delay = 1*1000, Period = 300, TimerFunc = func}
-
-	timer:start();
-
+local function testDelays()
+	local timer = Timer {Delay = 1*1000, Period = 300, OnTime = printThis}
 
 	-- wait a few seconds, then stop the time
 	print("wait 4 seconds...")
 	wait(4*1000)
 	print("stop timer")
-	timer:stop(1000*4);
+	timer:cancel(1000*4);
 
 	-- Wait a few more seconds then exit
 	print("wait 2 seconds...")
@@ -33,11 +30,14 @@ local function main(func)
 end
 
 local testCounter = function()
-	local timer = Timer {Period = 200, TimerFunc = counter, Running=true}
+	local timer = Timer {Period = 500, OnTime = counter}
 end
 
 
---run(main, printThis)
---run(main, counter)
-run(testCounter)
+local function main()
+	spawn(testDelays, printThis)
+	spawn(testCounter)
+end
+
+run(main)
 

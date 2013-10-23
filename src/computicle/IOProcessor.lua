@@ -7,6 +7,7 @@ local SimpleFiber = require("SimpleFiber");
 local IOCompletionPort = require("IOCompletionPort");
 local WinError = require("win_error");
 local core_synch = require("core_synch_l1_2_0");
+local IOOps = require("IOOps")
 
 local tabutils = require("tabutils");
 
@@ -130,6 +131,11 @@ IOProcessor.yieldUntilTime = function(self, atime)
 	return false;
 end
 
+IOProcessor.yieldForTime = function(self, millis)
+	local nextTime = self.Clock:Milliseconds() + millis;
+
+	return self:yieldUntilTime(nextTime);
+end
 
 IOProcessor.stepTimeEvents = function(self)
 	local currentTime = self.Clock:Milliseconds();
@@ -157,33 +163,7 @@ end
 
 
 IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
-	--local keyhandle = ffi.cast("IOCPSocketHandle *", key);
-	local ovl = ffi.cast("SocketOverlapped *", overlapped);
-	local sock = ovl.sock;
-
-	--print(string.format("IOProcessor.processIOEvent(): keysock(%d), ovlsock(%d), operation(%d), transid(%d), bytes(%d)", 
-	--	key, ovl.sock, ovl.operation, ovl.opcounter, numbytes));
-
-
-	-- an invalid socket can occur for a couple of reasons
-	-- 1) The socket was intentionally set that way in the 
-	--    overlap data.  this might be the case if some routine
-	--    is trying to indicate the overlap is no longer relevant.
-
-	--if sock == INVALID_SOCKET then
-	--	print("IOProcessor.processIOEvent(), INVALID_SOCKET");
-	--	return false, "invalid socket"
-	--end
-
-	-- Get the io completion data from the socket
-	--local transferred, flags = self:getCompletionStatus(sock, ovl);
-
-	-- if nothing was transferred, an error is indicated
-	-- so, return that error
-	--if not transferred then
-	--	print("IOProcessor.processIOEvent(), TRANSFERRED == NIL, : ", flags);
-	--	return false, flags;
-	--end
+	local ovl = ffi.cast("IOOverlapped *", overlapped);
 
 	-- Find the waiting task that is waiting for this IO event
 	ovl.bytestransferred = numbytes;
@@ -194,10 +174,7 @@ IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
 		self.EventFibers[ovl.opcounter] = nil;
 		self.FibersAwaitingEvent[fiber] = nil;
 	else
-		--local achar = string.format("0x%02x",ovl.Buffer[0]);
-		local achar = ffi.string(ovl.Buffer, numbytes);
-		print("IOProcessor.processIOEvent,NO FIBER WAITING FOR SOCKET EVENT: ", sock, achar)
-		--self:removeDeadSocket(sock);
+		print("IOProcessor.processIOEvent,NO FIBER WAITING FOR IO EVENT: ", ovl.opcounter)
 	end
 
 	return true;
@@ -222,12 +199,13 @@ IOProcessor.stepIOEvents = function(self)
 		-- be socket specific errors
 		-- If the error is ERROR_NETNAME_DELETED
 		-- a socket has closed, so do something about it?
+--[[
 		if param2 == ERROR_NETNAME_DELETED then
 			print("Processor.stepIOEvents(), ERROR_NETNAME_DELETED: ", param3);
 		else
 			print("Processor.stepIOEvents(), ERROR: ", param3, param2);
 		end
-
+--]]
 		key = param3;
 		bytes = param4;
 		ovl = param5; 
@@ -359,11 +337,7 @@ stop = function()
 end
 
 wait = function(millis)
-	local nextTime = IOProcessor.Clock:Milliseconds() + millis;
-
---	print("IOProcessor:wait(): ", IOProcessor.Clock:Milliseconds(), millis)
-
-	return IOProcessor:yieldUntilTime(nextTime);
+	return IOProcessor:yieldForTime(millis)
 end
 
 yield = function()

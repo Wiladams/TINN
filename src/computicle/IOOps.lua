@@ -1,16 +1,20 @@
--- SocketOps.lua
-local IOOps = require("IOOps")
-
+-- IOOps.lua
 
 local ffi = require("ffi");
 
 ffi.cdef[[
 typedef struct {
-	IOOverlapped OVL;
+	OVERLAPPED OVL;
 
-	SOCKET sock;
+	// Data Buffer
+	uint8_t * Buffer;
+	int BufferLength;
 
-} SocketOverlapped;
+	int operation;
+	int bytestransferred;
+	int opcounter;
+
+} IOOverlapped;
 ]]
 
 ffi.cdef[[

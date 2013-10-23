@@ -241,38 +241,38 @@ IOCPSocket.setExclusiveAddress = function(self, exclusive)
 	return WinSock.setsockopt(self:getNativeSocket(), SOL_SOCKET, SO_EXCLUSIVEADDRUSE, oneint, ffi.sizeof(oneint))
 end
 		
-		--[[
-			Reading Socket Options
-		--]]
-		IOCPSocket.getConnectionTime = function(self)
-			local poptvalue = ffi.new('int[1]')
-			local poptsize = ffi.new('int[1]',ffi.sizeof('int'))
-			local size = ffi.sizeof('int')
+--[[
+	Reading Socket Options
+--]]
+IOCPSocket.getConnectionTime = function(self)
+	local poptvalue = ffi.new('int[1]')
+	local poptsize = ffi.new('int[1]',ffi.sizeof('int'))
+	local size = ffi.sizeof('int')
 
-			local success, err = WinSock.getsockopt(self:getNativeSocket(), SOL_SOCKET, SO_CONNECT_TIME, poptvalue, poptsize)
+	local success, err = WinSock.getsockopt(self:getNativeSocket(), SOL_SOCKET, SO_CONNECT_TIME, poptvalue, poptsize)
 		
-		--print("GetConnectionTime, getsockopt:", success, err)
-			if not success then
-				return nil, err
-			end
+	--print("GetConnectionTime, getsockopt:", success, err)
+	if not success then
+		return nil, err
+	end
 
-			return poptvalue[0];		
-		end
+	return poptvalue[0];		
+end
 
-		IOCPSocket.getLastError = function(self)
-			local poptvalue = ffi.new('int[1]')
-			local poptsize = ffi.new('int[1]',ffi.sizeof('int'))
-			local size = ffi.sizeof('int')
+IOCPSocket.getLastError = function(self)
+	local poptvalue = ffi.new('int[1]')
+	local poptsize = ffi.new('int[1]',ffi.sizeof('int'))
+	local size = ffi.sizeof('int')
 
-			local success, err = WinSock.getsockopt(self:getNativeSocket(), SOL_SOCKET, SO_ERROR, poptvalue, poptsize)
+	local success, err = WinSock.getsockopt(self:getNativeSocket(), SOL_SOCKET, SO_ERROR, poptvalue, poptsize)
 		
-			if not success then
-				return err
-				--return nil, err
-			end
+	if not success then
+		return err
+		--return nil, err
+	end
 
-			return poptvalue[0];
-		end
+	return poptvalue[0];
+end
 
 --[[
 			Connection Management
@@ -294,9 +294,7 @@ IOCPSocket.closeDown = function(self)
 	return WinSock.closesocket(self:getNativeSocket());
 end
 
-IOCPSocket.CloseDown = function(self)
-	return self:closeDown();
-end
+
 
 
 IOCPSocket.forceClose = function(self)
@@ -317,12 +315,12 @@ end
 IOCPSocket.createOverlapped = function(self, buff, bufflen, operation)
 	local obj = ffi.new("SocketOverlapped");
 	obj.sock = self:getNativeSocket();
-	obj.operation = operation;
-	obj.opcounter = IOProcessor:getNextOperationId();
-	obj.Buffer = buff;
-	obj.BufferLength = bufflen;
+	obj.OVL.operation = operation;
+	obj.OVL.opcounter = IOProcessor:getNextOperationId();
+	obj.OVL.Buffer = buff;
+	obj.OVL.BufferLength = bufflen;
 
-	return obj, obj.opcounter;
+	return obj, obj.OVL.opcounter;
 end
 
 
@@ -404,7 +402,7 @@ IOCPSocket.accept = function(self)
 	-- so we should yield, and we'll continue when completion is indicated
 --print("++ IOCPSocket.accept(), before YIELD: ", IOProcessor, IOProcessor.yieldForIo);
 
-   	local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.ACCEPT, lpOverlapped.opcounter);
+   	local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.ACCEPT, lpOverlapped.OVL.opcounter);
 
 --print("++ IOCPSocket.accept(), after YIELD: ", key, bytes, ovl);
 
@@ -427,9 +425,6 @@ end
 --[[
 	Data Transport
 --]]
-
-
-
 
 IOCPSocket.send = function(self, buff, bufflen)
 	bufflen = bufflen or #buff
@@ -472,7 +467,7 @@ IOCPSocket.send = function(self, buff, bufflen)
 		end
 	end
     
-    local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.WRITE, lpOverlapped.opcounter);
+    local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.WRITE, lpOverlapped.OVL.opcounter);
 
 --print("WSASEND: ", key, bytes, ovl);
 
@@ -522,7 +517,7 @@ IOCPSocket.sendTo = function(self, lpTo, iTolen, buff, bufflen)
 		end
 	end
     
-    local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.WRITE, lpOverlapped.opcounter);
+    local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.WRITE, lpOverlapped.OVL.opcounter);
 
 --print("WSASEND: ", key, bytes, ovl);
 
@@ -573,7 +568,7 @@ IOCPSocket.receive = function(self, buff, bufflen)
     	end
     end
 
-    local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.READ, lpOverlapped.opcounter);
+    local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.READ, lpOverlapped.OVL.opcounter);
 
 --print("WSARECV: ", key, bytes, ovl);
 
@@ -626,13 +621,16 @@ IOCPSocket.receiveFrom = function(self, lpFrom, fromLen, buff, bufflen)
     	end
     end
 
-    local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.READ, lpOverlapped.opcounter);
+    local key, bytes, ovl = IOProcessor:yieldForIo(self, SocketOps.READ, lpOverlapped.OVL.opcounter);
 
 --print("WSARecvFrom: ", key, bytes, ovl);
 
     return bytes;
 end
 
+
+-- Some aliases
+IOCPSocket.CloseDown = IOCPSocket.closeDown
 
 
 return IOCPSocket;

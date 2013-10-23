@@ -46,8 +46,9 @@
 %LUAC% task/luajit_ffi.lua luajit_ffi.obj
 %LUAC% task/LuaState.lua LuaState.obj
 %LUAC% task/SimpleFiber.lua SimpleFiber.obj
+%LUAC% task/Timer.lua Timer.obj
 %LUAC% task/TINNThread.lua TINNThread.obj
-@set TASKLIB=luajit_ffi.obj LuaState.obj SimpleFiber.obj TINNThread.obj
+@set TASKLIB=luajit_ffi.obj LuaState.obj SimpleFiber.obj Timer.obj TINNThread.obj
 
 
 @rem The Net library
@@ -184,11 +185,12 @@
 %LUAC% computicle/ComputicleOps.lua ComputicleOps.obj
 %LUAC% computicle/IOCPNetStream.lua IOCPNetStream.obj
 %LUAC% computicle/IOCPSocket.lua IOCPSocket.obj
+%LUAC% computicle/IOOps.lua IOOps.obj
 %LUAC% computicle/IOProcessor.lua IOProcessor.obj
 %LUAC% computicle/Messenger.lua Messenger.obj
 %LUAC% computicle/SocketOps.lua SocketOps.obj
 
-@set COMPUTICLELIB=comp_msgpump.obj Computicle.obj ComputicleOps.obj IOCPNetStream.obj IOCPSocket.obj IOProcessor.obj Messenger.obj SocketOps.obj
+@set COMPUTICLELIB=comp_msgpump.obj Computicle.obj ComputicleOps.obj IOCPNetStream.obj IOCPSocket.obj IOOps.obj IOProcessor.obj Messenger.obj SocketOps.obj
 
 
 

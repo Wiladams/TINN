@@ -8,11 +8,26 @@ local core_file = require("core_file_l1_2_0");
 local errorhandling = require("core_errorhandling_l1_1_1");
 local FsHandles = require("FsHandles")
 local WinBase = require("WinBase")
+local IOOps = require("IOOps")
+
+
+ffi.cdef[[
+typedef struct {
+	IOOverlapped OVL;
+
+	// Our specifics
+	HANDLE file;
+} FileOverlapped;
+]]
+
 
 
 -- A win32 file interfaces
 -- put the standard async stream interface onto a file
-local NativeFile={}
+local NativeFile={
+	READ = 3;
+	WRITE = 4;
+}
 setmetatable(NativeFile, {
 	__call = function(self, ...)
 		return self:create(...);
@@ -29,6 +44,10 @@ NativeFile.init = function(self, rawHandle)
 	}
 	setmetatable(obj, NativeFile_mt)
 
+	if IOProcessor then
+		IOProcessor:observeIOEvent(obj:getNativeHandle(), obj:getNativeHandle());
+	end
+
 	return obj;
 end
 
@@ -40,7 +59,7 @@ NativeFile.create = function(self, lpFileName, dwDesiredAccess, dwCreationDispos
 	dwCreationDisposition = dwCreationDisposition or OPEN_ALWAYS;
 	dwShareMode = dwShareMode or bor(FILE_SHARE_READ, FILE_SHARE_WRITE);
 	local lpSecurityAttributes = nil;
-	local dwFlagsAndAttributes = ffi.C.FILE_ATTRIBUTE_NORMAL;
+	local dwFlagsAndAttributes = bor(ffi.C.FILE_ATTRIBUTE_NORMAL, FILE_FLAG_OVERLAPPED);
 	local hTemplateFile = nil;
 
 	local rawHandle = core_file.CreateFileA(
@@ -63,35 +82,75 @@ NativeFile.getNativeHandle = function(self)
 	return self.Handle.Handle 
 end
 
+-- Cancel current IO operation
 NativeFile.cancel = function(self)
 	local res = core_file.CancelIo(self:getNativeHandle());
 end
 
 
+-- Close the file handle
 NativeFile.close = function(self)
 	self.Handle:free();
 	self.Handle = nil;
 end
 
+NativeFile.createOverlapped = function(self, buff, bufflen, operation)
+	if not IOProcessor then 
+		return nil 
+	end
 
+	local obj = ffi.new("FileOverlapped");
+	
+	obj.file = self:getNativeHandle();
+	obj.OVL.operation = operation;
+	obj.OVL.opcounter = IOProcessor:getNextOperationId();
+	obj.OVL.Buffer = buff;
+	obj.OVL.BufferLength = bufflen;
+
+	return obj, obj.OVL.opcounter;
+end
+
+
+-- Write bytes to the file
 NativeFile.writeBytes = function(self, buff, nNumberOfBytesToWrite, offset)
 	if not self.Handle then
 		return nil;
 	end
 
 	local lpBuffer = ffi.cast("const char *",buff) + offset or 0
-	local lpNumberOfBytesWritten = ffi.new("DWORD[1]")
-	local lpOverlapped = nil;
+	local lpNumberOfBytesWritten = nil;
+	local lpOverlapped = self:createOverlapped(ffi.cast("uint8_t *",buff)+offset, 
+		nNumberOfBytesToWrite, 
+		IOOps.WRITE);
+
+
+	if lpOverlapped == nil then
+		lpNumberOfBytesWritten = ffi.new("DWORD[1]")
+	end
+
+--print("lpOverlapped: ", lpOverlapped)
+--print("lpNumberOfBytesWritten: ", lpNumberOfBytesWritten)
 
 	local res = core_file.WriteFile(self:getNativeHandle(), lpBuffer, nNumberOfBytesToWrite,
 		lpNumberOfBytesWritten,
-  		lpOverlapped);
+  		ffi.cast("OVERLAPPED *",lpOverlapped));
 
+--print("WriteFile res: ", res)
 	if res == 0 then
-		return false, errorhandling.GetLastError();
-	end 
+		local err = errorhandling.GetLastError();
+		if err ~= ERROR_IO_PENDING then
+			return false, err
+		end
+	else
+		return lpNumberOfBytesWritten[0];
+	end
 
-	return lpNumberOfBytesWritten[0];
+
+	if IOProcessor then
+    	local key, bytes, ovl = IOProcessor:yieldForIo(self, IOOps.WRITE, lpOverlapped.OVL.opcounter);
+--print("key, bytes, ovl: ", key, bytes, ovl)
+	    return bytes
+	end
 end
 
 NativeFile.writeString = function(self, astring)
@@ -102,8 +161,15 @@ end
 NativeFile.readBytes = function(self, buff, nNumberOfBytesToRead, offset)
 	offset = offset or 0
 	local lpBuffer = ffi.cast("char *",buff) + offset
-	local lpNumberOfBytesRead = ffi.new("DWORD[1]")
-	local lpOverlapped = nil;
+	local lpNumberOfBytesRead = nil
+	local lpOverlapped = self:createOverlapped(ffi.cast("uint8_t *",buff)+offset, 
+		nNumberOfBytesToRead, 
+		IOOps.READ);
+
+	if lpOverlapped == nil then
+		lpNumberOfBytesRead = ffi.new("DWORD[1]")
+	end
+
 
 	local res = core_file.ReadFile(self:getNativeHandle(), lpBuffer, nNumberOfBytesToRead,
 		lpNumberOfBytesRead,
@@ -111,10 +177,20 @@ NativeFile.readBytes = function(self, buff, nNumberOfBytesToRead, offset)
 
 
 	if res == 0 then
-		return false, errorhandling.GetLastError();
-	end 
+		local err = errorhandling.GetLastError();
+		if err ~= ERROR_IO_PENDING then
+			return false, err
+		end
+	else
+		return lpNumberOfBytesRead[0];
+	end
 
-	return lpNumberOfBytesRead[0];
+	if IOProcessor then
+    	local key, bytes, ovl = IOProcessor:yieldForIo(self, IOOps.WRITE, lpOverlapped.OVL.opcounter);
+--print("key, bytes, ovl: ", key, bytes, ovl)
+	    return bytes
+	end
+
 end
 
 
