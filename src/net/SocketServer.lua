@@ -37,7 +37,7 @@ SocketServer.create = function(self, port, onAccept, onAcceptParam, autoclose)
   port = port or 9090;
 --print("SocketServer:create(): ", port, onAccept, onAcceptParam);
 
-  local socket, err = IOProcessor:createServerSocket({port = port, backlog = 15, autoclose = autoclose});
+  local socket, err = IOCPSocket:createServer({port = port, backlog = 15, autoclose = autoclose})
 	
   if not socket then 
     print("Server Socket not created!!")
