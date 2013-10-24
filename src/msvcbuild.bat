@@ -43,12 +43,14 @@
 @set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stream.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
 
 @rem TINN Task library
+%LUAC% task/IOOps.lua IOOps.obj
+%LUAC% task/IOProcessor.lua IOProcessor.obj
 %LUAC% task/luajit_ffi.lua luajit_ffi.obj
 %LUAC% task/LuaState.lua LuaState.obj
 %LUAC% task/SimpleFiber.lua SimpleFiber.obj
 %LUAC% task/Timer.lua Timer.obj
 %LUAC% task/TINNThread.lua TINNThread.obj
-@set TASKLIB=luajit_ffi.obj LuaState.obj SimpleFiber.obj Timer.obj TINNThread.obj
+@set TASKLIB=IOOps.obj IOProcessor.obj luajit_ffi.obj LuaState.obj SimpleFiber.obj Timer.obj TINNThread.obj
 
 
 @rem The Net library
@@ -57,10 +59,13 @@
 %LUAC% net/HttpHeaders.lua HttpHeaders.obj
 %LUAC% net/HttpMessage.lua HttpMessage.obj
 %LUAC% net/HttpServer.lua HttpServer.obj
+%LUAC% net/IOCPNetStream.lua IOCPNetStream.obj
+%LUAC% net/IOCPSocket.lua IOCPSocket.obj
 %LUAC% net/mime.lua mime.obj
 %LUAC% net/ResourceMapper.lua ResourceMapper.obj
 %LUAC% net/SocketServer.lua SocketServer.obj
 %LUAC% net/FileService.lua FileService.obj
+%LUAC% net/SocketOps.lua SocketOps.obj
 %LUAC% net/TcpSplice.lua TcpSplice.obj
 %LUAC% net/url.lua url.obj
 %LUAC% net/utils.lua utils.obj
@@ -69,7 +74,7 @@
 %LUAC% net/WebResponse.lua WebResponse.obj
 %LUAC% net/WebSocket.lua WebSocket.obj
 
-@set TINNNET=httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj mime.obj SocketServer.obj FileService.obj TcpSplice.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
+@set TINNNET=httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj IOCPNetStream.obj IOCPSocket.obj mime.obj SocketServer.obj FileService.obj SocketOps.obj TcpSplice.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
 
 @rem Core windows API set
 %LUAC% Win32/apiset/core_console_l1_1_0.lua core_console_l1_1_0.obj
@@ -183,14 +188,9 @@
 %LUAC% computicle/comp_msgpump.lua comp_msgpump.obj
 %LUAC% computicle/Computicle.lua Computicle.obj
 %LUAC% computicle/ComputicleOps.lua ComputicleOps.obj
-%LUAC% computicle/IOCPNetStream.lua IOCPNetStream.obj
-%LUAC% computicle/IOCPSocket.lua IOCPSocket.obj
-%LUAC% computicle/IOOps.lua IOOps.obj
-%LUAC% computicle/IOProcessor.lua IOProcessor.obj
 %LUAC% computicle/Messenger.lua Messenger.obj
-%LUAC% computicle/SocketOps.lua SocketOps.obj
 
-@set COMPUTICLELIB=comp_msgpump.obj Computicle.obj ComputicleOps.obj IOCPNetStream.obj IOCPSocket.obj IOOps.obj IOProcessor.obj Messenger.obj SocketOps.obj
+@set COMPUTICLELIB=comp_msgpump.obj Computicle.obj ComputicleOps.obj  Messenger.obj
 
 
 

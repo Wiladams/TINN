@@ -9,7 +9,7 @@ local serverPort = 9091
 local acceptedSockets = IOCompletionPort();
 
 local function setup()
-	serverSocket, err = IOProcessor:createServerSocket({port = serverPort, backlog = 15});
+	serverSocket, err = IOCPSocket:createServer({port = serverPort, backlog = 15});
 	
 	if not serverSocket then 
 		print("Server Socket not created!!")
@@ -36,7 +36,7 @@ print("POST accept: ", acceptedsock, err);
 	end
 end
 
-local function loop()
+local function main()
 	while true do
 		--local sock, err = acceptedSockets:dequeue(15);
 		local sock, err = serverSocket:accept();
@@ -72,4 +72,4 @@ end
 setup();
 --spawn(acceptor);
 
-run(loop);
+run(main);

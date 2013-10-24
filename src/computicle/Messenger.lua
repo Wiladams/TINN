@@ -16,17 +16,7 @@ typedef struct {
 } ComputicleMsg;
 ]]
 
---[[
-Computicle.getStoned = function(self)
-	local stone = self:allocData(ffi.sizeof("Computicle_t"));
-	stone = ffi.cast("Computicle_t *", stone);
-	stone.HeapHandle = self.Heap:getNativeHandle();
-	stone.IOCPHandle = self.IOCP:getNativeHandle();
-	stone.ThreadHandle = self.Thread:getNativeHandle();
 
-	return stone;
-end
---]]
 
 local Messenger = {}
 setmetatable(Messenger, {

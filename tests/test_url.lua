@@ -1,7 +1,7 @@
 local URL = require("url");
 
 function printURL(urltable)
-	print("==================================")
+	print("-- printURL --")
 	for name, value in pairs(urltable) do
 		print(name, value)
 	end
@@ -18,12 +18,17 @@ local test_parse = function()
 end
 
 local test_path = function()
-	local parts = URL.parse("http://localhost:8080/files/tools/TINN/tinn.exe");
+	print("== test_path ==")
+	local origin = "http://localhost:8080/files/tools/TINN/tinn.exe"
+	
+	print("origin: ", origin)
+
+	local parts = URL.parse(origin);
 	printURL(parts);
 
 	local segments = URL.parse_path(parts.path)
 
-	print("== SEGMENTS ==")
+	print("-- SEGMENTS --")
 	for _, item in ipairs(segments) do
 		print(item);
 	end
@@ -39,13 +44,14 @@ local test_path = function()
 end
 
 local test_escape = function()
+	print("== test_escape ==")
 	local aurl = "https://localhost:8080/files/tools/TINN Directory/tinn.exe";
 
 	local fixed = URL.escape(aurl);
-
-	print("fixed: ", fixed);
+	print("origin: ", aurl)
+	print(" fixed: ", fixed);
 end
 
 
---test_path();
+test_path();
 test_escape();

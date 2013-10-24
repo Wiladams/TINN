@@ -15,6 +15,15 @@ local SocketLib = ffi.load("ws2_32")
 
 
 
+ffi.cdef[[
+typedef struct {
+	HANDLE HeapHandle;
+	HANDLE IOCPHandle;
+	HANDLE ThreadHandle;
+} Computicle_t;
+
+]]
+
 
 -- Get the parameter that represents the sink for our messages
 local stone1 = ffi.cast("Computicle_t *", _params.sink1);
