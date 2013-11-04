@@ -44,7 +44,7 @@ local GetSystemWindowsDirectory = function()
     local buffSize = core_sysinfo.GetSystemWindowsDirectoryA(lpBuffer, ffi.C.MAX_PATH);
     
     if res == 0 then
-        return false, k32Lib.GetLastError();
+        return false, errorhandling.GetLastError();
     end
 
     return ffi.string(lpBuffer, buffSize);
@@ -59,7 +59,49 @@ local windowsDirectory = function()
     print(GetSystemWindowsDirectory());
 end
 
+
+--[[
+    DWORD dwLength;
+    DWORD dwMemoryLoad;
+    DWORDLONG ullTotalPhys;
+    DWORDLONG ullAvailPhys;
+    DWORDLONG ullTotalPageFile;
+    DWORDLONG ullAvailPageFile;
+    DWORDLONG ullTotalVirtual;
+    DWORDLONG ullAvailVirtual;
+    DWORDLONG ullAvailExtendedVirtual;
+--]]
+local getMemoryStatus = function()
+    local lpBuffer = ffi.new("MEMORYSTATUSEX")
+    lpBuffer.dwLength = ffi.sizeof("MEMORYSTATUSEX")
+
+    local res = core_sysinfo.GlobalMemoryStatusEx(lpBuffer)
+    
+    if res == 0 then
+        return false, errorhandling.GetLastError();
+    end
+
+    local info = {
+        MemoryLoad = lpBuffer.dwMemoryLoad;
+        
+        TotalPhysical = lpBuffer.ullTotalPhys;
+        AvailablePhysical = lpBuffer.ullAvailPhys;
+
+        TotalVirtual = lpBuffer.ullTotalVirtual;
+        AvailableVirtual = lpBuffer.ullAvailVirtual;
+
+        TotalPageFile = lpBuffer.ullAvailPageFile;
+        AvailablePageFile = lpBuffer.ullAvailPageFile;
+
+        AvailableExtendedVirtual = lpBuffer.ullAvailExtendedVirtual;
+    }
+    
+    return info;
+end
+
 return {
+    getMemoryStatus = getMemoryStatus;
+
     OSVersionInfo = OSVERSIONINFO;
 
     getSystemDirectory = GetSystemDirectory;

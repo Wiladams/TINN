@@ -5,6 +5,7 @@ local band = bit.band
 
 local WinSock = require("WinSock_Utils");
 local ws2_32 = require("ws2_32");
+local core_sysinfo = require("core_sysinfo_l1_2_0");
 
 local WSAProtocolInfo_t = {}
 local WSAProtocolInfo_mt = {
@@ -51,22 +52,26 @@ local WSAProtocolInfo = function(info)
 end
 
 
-Network_t = {}
-Network_mt = {
-	__index = Network_t;
-}
+local Network = {}
 
-local Network = function()
-	local obj = {
-	
-	}
-	
-	setmetatable(obj, Network_mt);
 
-	return obj;
+Network.getHostName = function(self)
+	local bufflen = 256;
+	local lpBuffer = ffi.new("char[?]", bufflen);
+	local nSize = ffi.new("DWORD[1]", bufflen);
+
+	local NameType = ffi.C.ComputerNameDnsFullyQualified;
+
+	local res = core_sysinfo.GetComputerNameExA (NameType,lpBuffer,nSize);
+
+	if res == 0 then
+		return false --, GetLastError();
+	end
+
+	return ffi.string(lpBuffer, nSize[0])
 end
 
-Network_t.GetProtocols = function(self)
+Network.GetProtocols = function(self)
 	local results, err = WinSock.WSAEnumProtocols();
 
 	if not results then
@@ -84,7 +89,7 @@ Network_t.GetProtocols = function(self)
 	return protos;
 end
 
-Network_t.GetInterfaces = function(self, stype)
+Network.GetInterfaces = function(self, stype)
     stype = stype or SOCK_STREAM;
 
     local interfaces = {};
@@ -108,7 +113,7 @@ Network_t.GetInterfaces = function(self, stype)
         nil, nil);
 
     if not success then
-        io.stderr:write("Failed calling WSAIoctl: error ", WSAGetLastError(), "\n");
+        --io.stderr:write("Failed calling WSAIoctl: error ", WSAGetLastError(), "\n");
         return false, err;
     end
 
@@ -144,10 +149,9 @@ Network_t.GetInterfaces = function(self, stype)
     return interfaces;
 end
 
-Network_t.GetLocalAddress = function(self)
-	local network = Network();
+Network.GetLocalAddress = function(self)
 
-	local interfaces = network:GetInterfaces();
+	local interfaces = Network:GetInterfaces();
 
 	for _,interface in pairs(interfaces) do
 		if not interface.isloopback then

@@ -1,7 +1,6 @@
 
 local ffi = require("ffi");
 local core_interlocked = require("core_interlocked");
-local Heap = require("Heap");
 
 
 SList = {}
@@ -14,24 +13,34 @@ SList_mt = {
 	__index = SList;
 }
 
-SList.create = function(self, listHead)
-	local obj = {};
-
-	if not listHead then
-		obj.OwnAllocation = true;
-		listHead = ffi.new("SLIST_HEADER");
-		core_interlocked.InitializeSListHead(listHead);
-	end
-
-	obj.ListHead = listHead;
+SList.init = function(self, listHead)
+	local obj = {
+		ListHead = listHead;
+	};
 
 	setmetatable(obj, SList_mt);
 
 	return obj;
 end
 
+SList.create = function(self, listHead)
+	local ownAllocation = false;
+	if not listHead then
+		listHead = ffi.new("SLIST_HEADER");
+		core_interlocked.InitializeSListHead(listHead);
+	end
+
+	return self:init(listHead, ownAllocation)
+end
+
+
+SList.clear = function(self)
+	return core_interlocked.InterlockedFlushSList(self.ListHead);
+end
+
+
 SList.push = function(self, item)
-	core_interlocked.InterlockedPushEntrySList(self.ListHead, ffi.cast("SLIST_ENTRY *",item));
+	return core_interlocked.InterlockedPushEntrySList(self.ListHead, ffi.cast("SLIST_ENTRY *",item));
 end
 
 SList.pop = function(self)

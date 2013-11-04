@@ -61,6 +61,7 @@ WebApp.init = function(self, resourceMap, port)
 
 
 	local obj = {}
+	obj.ServicePort = port;
 	obj.Server = HttpServer(port, OnRequest, obj);
 	obj.ResourceMap = resourceMap;
 	obj.Mapper = ResourceMapper(resourceMap);

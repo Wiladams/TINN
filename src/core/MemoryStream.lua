@@ -306,7 +306,7 @@ function MemoryStream:writeBytes(buff, count, offset)
 	return maxbytes;
 end
 
-function MemoryStream:WriteString(str, count, offset)
+function MemoryStream:writeString(str, count, offset)
 	offset = offset or 0
 	count = count or #str
 
@@ -320,7 +320,7 @@ end
 	Start from the current position in the current stream
 --]]
 
-function MemoryStream:WriteStream(stream, size)
+function MemoryStream:writeStream(stream, size)
 	local count = 0
 	local abyte = stream:ReadByte()
 	while abyte and count < size do
@@ -332,7 +332,7 @@ function MemoryStream:WriteStream(stream, size)
 	return count
 end
 
-function MemoryStream:WriteLine(line)
+function MemoryStream:writeLine(line)
 	local status, err
 
 	if line then
@@ -387,5 +387,8 @@ MemoryStream.ReadLine = MemoryStream.readLine;
 
 MemoryStream.WriteByte = MemoryStream.writeByte;
 MemoryStream.WriteBytes = MemoryStream.writeBytes;
+MemoryStream.WriteLine = MemoryStream.writeLine;
+MemoryStream.WriteString = MemoryStream.writeString;
+MemoryStream.WriteStream = MemoryStream.writeStream;
 
 return MemoryStream;
