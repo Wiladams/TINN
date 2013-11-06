@@ -1,7 +1,6 @@
 
 local ffi = require "ffi"
-local stream = require "stream"
-
+local StreamOps = require("StreamOps")
 
 local MemoryStream = {}
 setmetatable(MemoryStream, {
@@ -77,7 +76,7 @@ end
 
 
 
-function MemoryStream:Reset()
+function MemoryStream:reset()
 	self.Offset = 0
 	self.Position = 0
 	self.BytesWritten = 0
@@ -103,19 +102,19 @@ function MemoryStream:CanRead()
 	return self:BytesReadyToBeRead() > 0
 end
 
-function MemoryStream:Seek(pos, origin)
-	origin = origin or stream.SEEK_SET
+function MemoryStream:seek(pos, origin)
+	origin = origin or StreamOps.SEEK_SET
 
-	if origin == stream.SEEK_CUR then
+	if origin == StreamOps.SEEK_CUR then
 		local newpos = self.Position + pos
 		if newpos >= 0 and newpos < self.Length then
 			self.Position = newpos
 		end
-	elseif origin == stream.SEEK_SET then
+	elseif origin == StreamOps.SEEK_SET then
 		if pos >= 0 and pos < self.Length then
 			self.Position = pos;
 		end
-	elseif origin == stream.SEEK_END then
+	elseif origin == StreamOps.SEEK_END then
 		local newpos = self.Length-1 + pos
 		if newpos >= 0 and newpos < self.Length then
 			self.Position = newpos
@@ -130,7 +129,7 @@ end
 --]]
 -- The Bytes() function acts as an iterator on bytes
 -- from the stream.
-function MemoryStream:Bytes(maxbytes)
+function MemoryStream:bytes(maxbytes)
 	local bytesleft = maxbytes or math.huge
 	local pos = -1
 
@@ -379,6 +378,13 @@ function MemoryStream:ToString()
 
 	return nil
 end
+
+
+
+MemoryStream.Reset = MemoryStream.reset;
+MemoryStream.Seek = MemoryStream.seek;
+
+MemoryStream.Bytes = MemoryStream.bytes;
 
 MemoryStream.ReadByte = MemoryStream.readByte;
 MemoryStream.ReadBytes = MemoryStream.readBytes;

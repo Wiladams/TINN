@@ -8,7 +8,7 @@ local IOCPSocketIo = require("IOCPSocketIo");
 local NetStream = require ("NetStream");
 
 
-local PreamblePending = Collections.Queue.new();
+local PreamblePending = Collections.Queue();
 
 local HandleNewConnection = function(accepted)
 			

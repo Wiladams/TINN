@@ -25,8 +25,8 @@ typedef struct {
 -- A win32 file interfaces
 -- put the standard async stream interface onto a file
 local NativeFile={
-	READ = 3;
-	WRITE = 4;
+--	READ = 3;
+--	WRITE = 4;
 }
 setmetatable(NativeFile, {
 	__call = function(self, ...)
@@ -41,6 +41,7 @@ local NativeFile_mt = {
 NativeFile.init = function(self, rawHandle)
 	local obj = {
 		Handle = FsHandles.FsHandle(rawHandle);
+		Offset = 0;
 	}
 	setmetatable(obj, NativeFile_mt)
 
@@ -94,10 +95,12 @@ NativeFile.close = function(self)
 	self.Handle = nil;
 end
 
-NativeFile.createOverlapped = function(self, buff, bufflen, operation)
+NativeFile.createOverlapped = function(self, buff, bufflen, operation, deviceoffset)
 	if not IOProcessor then 
 		return nil 
 	end
+	
+	fileoffset = fileoffset or 0;
 
 	local obj = ffi.new("FileOverlapped");
 	
@@ -106,13 +109,16 @@ NativeFile.createOverlapped = function(self, buff, bufflen, operation)
 	obj.OVL.opcounter = IOProcessor:getNextOperationId();
 	obj.OVL.Buffer = buff;
 	obj.OVL.BufferLength = bufflen;
+	obj.OVL.OVL.Offset = deviceoffset;
 
 	return obj, obj.OVL.opcounter;
 end
 
 
 -- Write bytes to the file
-NativeFile.writeBytes = function(self, buff, nNumberOfBytesToWrite, offset)
+NativeFile.writeBytes = function(self, buff, nNumberOfBytesToWrite, offset, deviceoffset)
+	fileoffset = fileoffset or 0
+
 	if not self.Handle then
 		return nil;
 	end
@@ -121,7 +127,8 @@ NativeFile.writeBytes = function(self, buff, nNumberOfBytesToWrite, offset)
 	local lpNumberOfBytesWritten = nil;
 	local lpOverlapped = self:createOverlapped(ffi.cast("uint8_t *",buff)+offset, 
 		nNumberOfBytesToWrite, 
-		IOOps.WRITE);
+		IOOps.WRITE,
+		deviceoffset);
 
 
 	if lpOverlapped == nil then
@@ -158,13 +165,15 @@ NativeFile.writeString = function(self, astring)
 end
 
 
-NativeFile.readBytes = function(self, buff, nNumberOfBytesToRead, offset)
+
+NativeFile.readBytes = function(self, buff, nNumberOfBytesToRead, offset, deviceoffset)
 	offset = offset or 0
 	local lpBuffer = ffi.cast("char *",buff) + offset
 	local lpNumberOfBytesRead = nil
 	local lpOverlapped = self:createOverlapped(ffi.cast("uint8_t *",buff)+offset, 
 		nNumberOfBytesToRead, 
-		IOOps.READ);
+		IOOps.READ,
+		deviceoffset);
 
 	if lpOverlapped == nil then
 		lpNumberOfBytesRead = ffi.new("DWORD[1]")
@@ -173,11 +182,14 @@ NativeFile.readBytes = function(self, buff, nNumberOfBytesToRead, offset)
 
 	local res = core_file.ReadFile(self:getNativeHandle(), lpBuffer, nNumberOfBytesToRead,
 		lpNumberOfBytesRead,
-		lpOverlapped);
+		ffi.cast("OVERLAPPED *",lpOverlapped));
 
 
 	if res == 0 then
 		local err = errorhandling.GetLastError();
+
+--print("NativeFile, readBytes: ", res, err)
+
 		if err ~= ERROR_IO_PENDING then
 			return false, err
 		end
@@ -186,12 +198,47 @@ NativeFile.readBytes = function(self, buff, nNumberOfBytesToRead, offset)
 	end
 
 	if IOProcessor then
-    	local key, bytes, ovl = IOProcessor:yieldForIo(self, IOOps.WRITE, lpOverlapped.OVL.opcounter);
+    	local key, bytes, ovl = IOProcessor:yieldForIo(self, IOOps.READ, lpOverlapped.OVL.opcounter);
+
+    	local ovlp = ffi.cast("OVERLAPPED *", ovl)
+    	print("overlap offset: ", ovlp.Offset)
+
 --print("key, bytes, ovl: ", key, bytes, ovl)
 	    return bytes
 	end
 
 end
 
+NativeFile.readByte = function(self)
+	local buff = ffi.new("uint8_t[1]")
+	local abyte, err = self:readBytes(buff, 1)
+
+	if not abyte then
+		return false, err
+	end
+
+	return buff[0];
+end
+
+NativeFile.readString = function(self, bufflen)
+	bufflen = bufflen or 4096
+
+--print("IOCPNetStream:ReadString: 1.0: ", bufflen);
+
+	local buff = ffi.new("uint8_t[?]", bufflen);
+	if not buff then
+		return false, "out of memory"
+	end
+
+	local bytesread, err = self:readBytes(buff, bufflen);
+
+	if not bytesread then
+		return false, err;
+	end
+
+	local str = ffi.string(buff, bytesread)
+
+	return str;
+end
 
 return NativeFile;

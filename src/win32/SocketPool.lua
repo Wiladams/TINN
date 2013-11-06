@@ -12,7 +12,7 @@ local SocketPool = function(params)
 	params = params or {host="localhost", port=80, reserve=2, timeout=60*2, iocore = SocketUtils}
 
 	local obj = {
-		Connections = Collections.Queue.new();
+		Connections = Collections.Queue();
 		Hostname = params.host or "localhost";
 		Port = tonumber(params.port) or 80;
 		Reserve = params.reserve or 2;

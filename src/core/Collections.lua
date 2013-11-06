@@ -132,13 +132,17 @@ Queue.init = function(self, first, last, name)
 end
 
 Queue.create = function(self, first, last, name)
+	first = first or 1
+	last = last or 0
+
 	return self:init(first, last, name);
 end
 
-
+--[[
 function Queue.new(name)
 	return Queue:init(1, 0, name);
 end
+--]]
 
 function Queue:enqueue(value)
 	--self.MyList:PushRight(value)

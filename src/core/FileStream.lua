@@ -1,7 +1,6 @@
 
 local ffi = require "ffi"
-local stream = require "stream"
-
+local StreamOps = require("StreamOps")
 
 local FileStream = {}
 setmetatable(FileStream, {
@@ -38,8 +37,10 @@ FileStream.create = function(self, filename, mode)
 end
 
 
-
-function FileStream:Close()
+--[[
+	Core Stream functions
+--]]
+function FileStream:close()
 	self.FileHandle:close();
 end
 
@@ -57,29 +58,29 @@ function FileStream:GetPosition()
 	return currpos;
 end
 
-function FileStream:Seek(offset, origin)
+function FileStream:seek(offset, origin)
 	offset = offset or 0
-	origin = origin or stream.SEEK_SET
+	origin = origin or StreamOps.SEEK_SET
 
-	if origin == stream.SEEK_CUR then
+	if origin == StreamOps.SEEK_CUR then
 		return self.FileHandle:seek("cur", offset)
-	elseif origin == stream.SEEK_SET then
+	elseif origin == StreamOps.SEEK_SET then
 		return self.FileHandle:seek("set", offset)
-	elseif origin == stream.SEEK_END then
+	elseif origin == StreamOps.SEEK_END then
 		return self.FileHandle:seek("end", offset)
 	end
 
 	return nil
 end
 
-function FileStream:ReadByte()
+function FileStream:readByte()
 	local str = self.FileHandle:read(1)
 	if not str then return str end
 
 	return string.byte(str);
 end
 
-function FileStream:ReadBytes(buffer, len, offset)
+function FileStream:readBytes(buffer, len, offset)
 	offset = offset or 0
 	local str = self.FileHandle:read(len)
 	local maxbytes = math.min(len, #str)
@@ -88,16 +89,9 @@ function FileStream:ReadBytes(buffer, len, offset)
 	return maxbytes
 end
 
-function FileStream:ReadString(count)
+function FileStream:readString(count)
 	local str = self.FileHandle:read(count)
 
---[[
-	if str then
-		print("FileStream:ReadString: ", #str)
-	else
-		print("FileStream:ReadString: ", str)
-	end
---]]
 	return str
 end
 
@@ -152,6 +146,15 @@ function FileStream:writeLine(line)
 
 	return status, err
 end
+
+
+
+FileStream.Close = FileStream.close;
+FileStream.Seek = FileStream.seek;
+
+FileStream.ReadByte = FileStream.readByte;
+FileStream.ReadBytes = FileStream.readBytes;
+FileStream.ReadString = FileStream.readString;
 
 FileStream.WriteString = FileStream.writeString;
 FileStream.WriteLine = FileStream.writeLine;

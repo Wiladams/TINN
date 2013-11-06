@@ -45,7 +45,7 @@ IOCompletionPort.create = function(self, ExistingCompletionPort, FileHandle, Num
 	NumberOfConcurrentThreads = NumberOfConcurrentThreads or 0
 	local CompletionKey = 0;
 
---print("FILE HANDLE: ", FileHandle);
+--print("IOCompletionPort.create(), FILE HANDLE: ", FileHandle);
 
 	local rawhandle = core_io.CreateIoCompletionPort(FileHandle,
 		ExistingCompletionPort,

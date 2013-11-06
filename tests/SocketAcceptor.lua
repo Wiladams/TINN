@@ -46,7 +46,7 @@ listenIOCP, err = IOCompletionPort:create(acceptNotificationQueue:getNativeHandl
 -- however many are created here will be all that are available for
 -- the lifetime of the service
 
-setOfSockets = Collections.Queue.new("setOfSockets");
+setOfSockets = Collections.Queue(1,0,"setOfSockets");
 
 local maxSockets = 5;
 

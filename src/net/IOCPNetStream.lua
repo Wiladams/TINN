@@ -284,15 +284,11 @@ local LF = string.byte("\n")
 
 function IOCPNetStream:readOneLine(buffer, size)
 	local nchars = 0;
-	local ptr = ffi.cast("uint8_t *", buff);
-	local bytesread
 	local byteread
 	local err
 
 	while nchars < size do
 		byteread, err = self:readByte();
-		--bytesread, err = self.Socket:receive(ptr, 1);
-		--io.write(string.format("%02x",ptr[0]));
 
 		if not byteread then
 			-- err is either "eof" or some other socket error
@@ -309,7 +305,6 @@ function IOCPNetStream:readOneLine(buffer, size)
 			else
 				-- Just a regular character, so save it
 				buffer[nchars] = byteread
-				--ptr = ptr + 1
 				nchars = nchars+1
 			end
 		end
@@ -332,7 +327,6 @@ function IOCPNetStream:readLine(size)
 
 	assert(self.LineBuffer, "out of memory");
 
-	--local bytesread, err = self.Socket:receive(self.LineBuffer, size);
 	local bytesread, err = self:readOneLine(self.LineBuffer, size)
 
 --	self.ReadTimer:Reset();

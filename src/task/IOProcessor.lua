@@ -14,7 +14,7 @@ local tabutils = require("tabutils");
 
 IOProcessor = {
 	Clock = StopWatch();
-	fibers = Collections.Queue.new();
+	fibers = Collections.Queue();
 	coroutines = {};
 	EventFibers = {};
 	FibersAwaitingEvent = {};

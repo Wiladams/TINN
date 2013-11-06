@@ -14,11 +14,6 @@ ffi.cdef[[
 int RunLuaScript(void *s);
 ]]
 
---
-
-
-
-
 
 
 local TINNThread = {}
