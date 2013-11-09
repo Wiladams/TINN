@@ -321,19 +321,24 @@ end
 
 
 CryptUtils.SHA1 = function(content, len)
-	return CryptUtils.Hashes.SHA1:CreateDigest(content, len);
+	local SHA1 = CryptUtils.SHA1Algorithm:CreateHash();
+	return SHA1:CreateDigest(content, len);
 end
 
 CryptUtils.SHA256 = function(content, len)
-	return CryptUtils.Hashes.SHA256:CreateDigest(content, len);
+	local SHA256 = CryptUtils.SHA256Algorithm:CreateHash();
+
+	return SHA256:CreateDigest(content, len);
 end
 
 CryptUtils.SHA384 = function(content, len)
-	return CryptUtils.Hashes.SHA384:CreateDigest(content, len);
+	local SHA384 = CryptUtils.SHA384Algorithm:CreateHash();
+	return SHA384:CreateDigest(content, len);
 end
 
 CryptUtils.SHA512 = function(content, len)
-	return CryptUtils.Hashes.SHA512:CreateDigest(content, len);
+	local SHA512 = CryptUtils.SHA512Algorithm:CreateHash();
+	return SHA512:CreateDigest(content, len);
 end
 
 
