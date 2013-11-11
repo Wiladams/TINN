@@ -871,6 +871,43 @@ SOCKET socket(int af, int type, int protocol);
 
 ]]
 
+ffi.cdef[[
+typedef struct addrinfoexA
+{
+    int                 ai_flags;       // AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST
+    int                 ai_family;      // PF_xxx
+    int                 ai_socktype;    // SOCK_xxx
+    int                 ai_protocol;    // 0 or IPPROTO_xxx for IPv4 and IPv6
+    size_t              ai_addrlen;     // Length of ai_addr
+    char               *ai_canonname;   // Canonical name for nodename
+    struct sockaddr    *ai_addr;        // Binary address
+    void               *ai_blob;
+    size_t              ai_bloblen;
+    LPGUID              ai_provider;
+    struct addrinfoexA *ai_next;        // Next structure in linked list
+} ADDRINFOEXA, *PADDRINFOEXA, *LPADDRINFOEXA;
+]]
+
+ffi.cdef[[
+typedef void ( * LPLOOKUPSERVICE_COMPLETION_ROUTINE)(
+    DWORD    dwError,
+    DWORD    dwBytes,
+    LPWSAOVERLAPPED lpOverlapped);
+
+INT
+GetAddrInfoExA(
+    PCSTR           pName,
+    PCSTR           pServiceName,
+    DWORD           dwNameSpace,
+    LPGUID          lpNspId,
+    const ADDRINFOEXA *hints,
+    PADDRINFOEXA *  ppResult,
+    struct timeval *timeout,
+    LPOVERLAPPED    lpOverlapped,
+    LPLOOKUPSERVICE_COMPLETION_ROUTINE  lpCompletionRoutine,
+    LPHANDLE        lpNameHandle);
+
+]]
 
 -- Windows Specific Networking API
 ffi.cdef[[

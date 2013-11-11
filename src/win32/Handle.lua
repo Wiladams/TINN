@@ -50,7 +50,7 @@ local Handle_mt = {
 	-- A Win32 OS Handle should be properly closed when it 
 	-- is no longer being used.
 	__gc = function(self)
-		print("GC: Handle");
+		--print("GC: Handle");
 		Handle_ffi.CloseHandle(self.Handle);
 	end,
 

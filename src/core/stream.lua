@@ -66,6 +66,9 @@ Stream.refillReadingBuffer = function(self)
 		return false, "eof"
 	end
 
+	-- move the device position the relative amount
+	self.Device:seek(bytesread, StreamOps.SEEK_CUR);
+
 	self.DeviceOffset = self.DeviceOffset+bytesread;
 	
 	self.ReadingBuffer:Reset()

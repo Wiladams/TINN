@@ -1850,6 +1850,24 @@ ffi.cdef[[
 static const int MAXIMUM_ALLOWED                 = 0x02000000;
 ]]
 
+ffi.cdef[[
+static const int PROCESSOR_ARCHITECTURE_INTEL           = 0;
+static const int PROCESSOR_ARCHITECTURE_MIPS            = 1;
+static const int PROCESSOR_ARCHITECTURE_ALPHA           = 2;
+static const int PROCESSOR_ARCHITECTURE_PPC             = 3;
+static const int PROCESSOR_ARCHITECTURE_SHX             = 4;
+static const int PROCESSOR_ARCHITECTURE_ARM             = 5;
+static const int PROCESSOR_ARCHITECTURE_IA64            = 6;
+static const int PROCESSOR_ARCHITECTURE_ALPHA64         = 7;
+static const int PROCESSOR_ARCHITECTURE_MSIL            = 8;
+static const int PROCESSOR_ARCHITECTURE_AMD64           = 9;
+static const int PROCESSOR_ARCHITECTURE_IA32_ON_WIN64   = 10;
+
+static const int PROCESSOR_ARCHITECTURE_UNKNOWN = 0xFFFF;
+]]
+
+
+
 return {
     StandardRights = ffi.new("StandardRights");
     GenericRights = ffi.new("GENERIC_MAPPING");

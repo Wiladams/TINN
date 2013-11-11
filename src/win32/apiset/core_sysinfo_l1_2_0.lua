@@ -32,8 +32,8 @@ typedef struct _SYSTEM_INFO {
         struct {
             WORD wProcessorArchitecture;
             WORD wReserved;
-        } DUMMYSTRUCTNAME;
-    } DUMMYUNIONNAME;
+        } ;// DUMMYSTRUCTNAME;
+    } ;// DUMMYUNIONNAME;
     DWORD dwPageSize;
     LPVOID lpMinimumApplicationAddress;
     LPVOID lpMaximumApplicationAddress;
@@ -259,6 +259,8 @@ VerSetConditionMask(
 
 
 return {
+    SYSTEM_INFO = ffi.typeof("SYSTEM_INFO");
+
 EnumSystemFirmwareTables = k32Lib.EnumSystemFirmwareTables,
 GetComputerNameExA = k32Lib.GetComputerNameExA,
 GetComputerNameExW = k32Lib.GetComputerNameExW,
