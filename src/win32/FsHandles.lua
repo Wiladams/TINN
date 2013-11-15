@@ -1,7 +1,9 @@
 
 local ffi = require("ffi");
-local core_file = require("core_file_l1_2_0");
+
 local WinBase = require("WinBase");
+local core_file = require("core_file_l1_2_0");
+local Handle_ffi = require("Handle_ffi");
 
 ffi.cdef[[
 typedef struct {
@@ -12,7 +14,7 @@ local FsHandle = ffi.typeof("FsHandle");
 local FsHandle_mt = {
 	__gc = function(self)
 		if self:isValid() then
-			core_file.CloseHandle(self.Handle);
+			Handle_ffi.CloseHandle(self.Handle);
 		end
 	end,
 
@@ -23,12 +25,13 @@ local FsHandle_mt = {
 
 		free = function(self)
 			if self.Handle ~= nil then
-				core_file.CloseHandle(self.Handle);
+				Handle_ffi.CloseHandle(self.Handle);
 				self.Handle = nil;
 			end
 		end,
 	},
 };
+ffi.metatype(FsHandle, FsHandle_mt);
 
 
 ffi.cdef[[

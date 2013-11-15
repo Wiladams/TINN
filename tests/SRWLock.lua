@@ -12,9 +12,7 @@ typedef struct {
 SRWLockExclusive = ffi.typeof("SRWLockExclusive")
 SRWLockExclusive_t = {
 	__gc = function(self)
-		if self.Handle ~= nil then
-			core_synch.ReleaseSRWLockExclusive(self.Handle);
-		end
+		self:free();
 	end,
 
 	__new = function(ct, handle)
@@ -28,7 +26,7 @@ SRWLockExclusive_t = {
 	end,
 
 	__index = {
-		exit = function(self)
+		free = function(self)
 			if self.Handle ~= nil then
 				core_synch.ReleaseSRWLockExclusive(self.Handle);
 				self.Handle = nil;
@@ -38,11 +36,19 @@ SRWLockExclusive_t = {
 		end,			
 	}
 }
+ffi.metatype(SRWLockExclusive, SRWLockExclusive_t)
 
 
-OSRWLock = {}
-OSRWLock_mt = {
-	__index = SRWLock,
+
+local OSRWLock = {}
+setmetatable(OSRWLock, {
+	__call = function(self, ...)
+		return self:create(...)
+	end,
+})
+
+local OSRWLock_mt = {
+	__index = OSRWLock,
 }
 
 OSRWLock.init = function(self, rawhandle)
@@ -50,7 +56,7 @@ OSRWLock.init = function(self, rawhandle)
 		Handle = rawhandle;
 	};
 
-	setmetatable(obj, SRWLock_mt);
+	setmetatable(obj, OSRWLock_mt);
 	return obj;
 end
 
@@ -61,7 +67,7 @@ OSRWLock.create = function(self)
 	return self:init(rawhandle);
 end
 
-OSRWLock.lockExclusive = function(self)
+OSRWLock.lock = function(self)
 	if not self.Handle then
 		return false;
 	end
@@ -69,7 +75,8 @@ OSRWLock.lockExclusive = function(self)
 	return SRWLockExclusive(self.Handle);
 end
 
-OSRWLock.exit = function(self)
+OSRWLock.release = function(self)
 	core_synch.ReleaseSRWLockExclusive(self.Handle);
 end
 
+return OSRWLock

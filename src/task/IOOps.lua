@@ -18,6 +18,15 @@ typedef struct {
 ]]
 
 
+ffi.cdef[[
+typedef struct {
+	IOOverlapped OVL;
+
+	// Our specifics
+	HANDLE file;
+} FileOverlapped;
+]]
+
 
 return {
 	ERROR = -1;

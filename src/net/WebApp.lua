@@ -9,7 +9,7 @@ local FileService = require("FileService");
 local WebApp = {}
 setmetatable(WebApp, {
 	__call = function(self, ...)
-		print("WebApp.__call() - BEGIN")
+		--print("WebApp.__call() - BEGIN")
 		return self:create(...);
 	end,
 })
@@ -53,6 +53,7 @@ local OnRequest = function(param, request, response)
 		-- is still open
 		param.Server:HandleRequestFinished(request);
 	end
+
 end
 
 WebApp.init = function(self, resourceMap, port)

@@ -3,8 +3,11 @@
 
 local ffi = require("ffi");
 local WTypes = require("WTypes");
+local WinBase = require("WinBase")
+
 local k32Lib = ffi.load("kernel32");
 local advapiLib = ffi.load("AdvApi32");
+
 
 ffi.cdef[[
 BOOL
@@ -84,6 +87,47 @@ WaitNamedPipeW(
     LPCWSTR lpNamedPipeName,
     DWORD nTimeOut
     );
+]]
+
+ffi.cdef[[
+//
+// Define the NamedPipe definitions
+//
+
+
+//
+// Define the dwOpenMode values for CreateNamedPipe
+//
+
+static const int PIPE_ACCESS_INBOUND        = 0x00000001;
+static const int PIPE_ACCESS_OUTBOUND       = 0x00000002;
+static const int PIPE_ACCESS_DUPLEX         = 0x00000003;
+
+//
+// Define the Named Pipe End flags for GetNamedPipeInfo
+//
+
+static const int PIPE_CLIENT_END            = 0x00000000;
+static const int PIPE_SERVER_END            = 0x00000001;
+
+//
+// Define the dwPipeMode values for CreateNamedPipe
+//
+
+static const int PIPE_WAIT                  = 0x00000000;
+static const int PIPE_NOWAIT                = 0x00000001;
+static const int PIPE_READMODE_BYTE         = 0x00000000;
+static const int PIPE_READMODE_MESSAGE      = 0x00000002;
+static const int PIPE_TYPE_BYTE             = 0x00000000;
+static const int PIPE_TYPE_MESSAGE          = 0x00000004;
+static const int PIPE_ACCEPT_REMOTE_CLIENTS = 0x00000000;
+static const int PIPE_REJECT_REMOTE_CLIENTS = 0x00000008;
+
+//
+// Define the well known values for CreateNamedPipe nMaxInstances
+//
+
+static const int PIPE_UNLIMITED_INSTANCES    = 255;
 ]]
 
 return {

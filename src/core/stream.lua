@@ -23,7 +23,7 @@ local Stream_mt = {
 Stream.init = function(self, device)
 	local obj = {
 		Device = device;
-		DeviceOffset = 0;
+		--DeviceOffset = 0;
 		LineBuffer = ffi.new("uint8_t[1024]"),
 		ReadingBuffer = MemoryStream(1500);
 	}
@@ -34,6 +34,12 @@ end
 
 Stream.create = function(self, ...)
 	return self:init(...);
+end
+
+--[[
+--]]
+Stream.flush = function(self)
+	return self.Device:flush();
 end
 
 --[[
@@ -54,7 +60,7 @@ Stream.refillReadingBuffer = function(self)
 	local err
 	local bytesread
 
-	bytesread, err = self.Device:readBytes(self.ReadingBuffer.Buffer, self.ReadingBuffer.Length,0,self.DeviceOffset)
+	bytesread, err = self.Device:readBytes(self.ReadingBuffer.Buffer, self.ReadingBuffer.Length,0)
 
 	--print("-- LOADED BYTES: ", bytesread, err);
 
@@ -67,9 +73,9 @@ Stream.refillReadingBuffer = function(self)
 	end
 
 	-- move the device position the relative amount
-	self.Device:seek(bytesread, StreamOps.SEEK_CUR);
+	--self.Device:seek(bytesread, StreamOps.SEEK_CUR);
 
-	self.DeviceOffset = self.DeviceOffset+bytesread;
+	--self.DeviceOffset = self.DeviceOffset+bytesread;
 	
 	self.ReadingBuffer:Reset()
 	self.ReadingBuffer.BytesWritten = bytesread
@@ -104,7 +110,7 @@ Stream.readByte = function(self)
 end
 
 
-Stream.readBytes = function(self, buffer, len, offset, deviceoffset)
+Stream.readBytes = function(self, buffer, len, offset)
 	offset = offset or 0
 --print("IOCPNetStream:readBytes: ", buffer, len, offset);
 
@@ -242,7 +248,7 @@ function Stream.writeByte(self, value)
 end
 
 function Stream.writeBytes(self, buffer, len, offset)
-	return self.Device:writeBytes(buffer, len, offset, self.DeviceOffset);
+	return self.Device:writeBytes(buffer, len, offset);
 end
 
 function Stream.writeString(self, str, count, offset)

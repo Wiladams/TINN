@@ -68,7 +68,7 @@ BCryptHash_mt = {
 				0);
 
 			if status ~= 0 then
-				print("GetProperty, Error status: ", status);
+				--print("GetProperty, Error status: ", status);
 				return nil, status
 			end
 
@@ -134,7 +134,7 @@ BCryptHash_mt = {
 			local pbInput = chunk
 			local cbInput
 			local flags = 0
-print("HashMore: ", chunk, chunksize)
+--print("HashMore: ", chunk, chunksize)
 			if type(chunk) == "string" then
 				pbInput = ffi.cast("const uint8_t *", chunk);
 				cbInput = chunksie or #chunk
@@ -202,7 +202,7 @@ local BCryptAlgorithm_mt = {
 		local status = BCrypt.Lib.BCryptOpenAlgorithmProvider(lphAlgo, algoidptr, impl, 0);
 
 		if not BCrypt.BCRYPT_SUCCESS(status) then
-			print("BCryptAlgorithm(), status: ", status);
+			--print("BCryptAlgorithm(), status: ", status);
 			return nil
 		end
 
