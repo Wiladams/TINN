@@ -31,6 +31,11 @@ SimpleFiber.init = function(self, aroutine, ...)
 	return obj
 end
 
+SimpleFiber.create = function(self, aroutine, ...)
+	return self:init(aroutine, ...)
+end
+
+
 SimpleFiber.getStatus = function(self)
 	return coroutine.status(self.routine);
 end

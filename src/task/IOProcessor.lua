@@ -1,4 +1,10 @@
 
+if Task_Included then
+	return IOProcessor;
+end
+
+Task_Included = true;
+
 local ffi = require("ffi");
 
 local Collections = require("Collections");

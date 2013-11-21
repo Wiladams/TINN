@@ -44,10 +44,12 @@ Environments :
 
 local ffi = require("ffi");
 
+local basetsd = require("basetsd")
 local core_string = require("core_string_l1_1_0");
 local L = core_string.toUnicode;
 local schannel = require("schannel");
 local WinBer = require("WinBer_ffi");
+
 local ldlib = ffi.load("wldap32");
 
 --[[

@@ -12,6 +12,8 @@ local bswap = bit.bswap
 
 local WTypes = require("WTypes");
 local WinBase = require("WinBase");
+local basetsd = require("basetsd")
+
 local Lib = ffi.load("ws2_32");
 
 

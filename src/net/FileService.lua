@@ -20,7 +20,7 @@ local function SendFile(filename, response)
 	local resourceBody, mimetype = loadResource(filename);
 
 	if not resourceBody then
-print("NO RESPONSE BODY: ", filename, mimetype)
+--print("NO RESPONSE BODY: ", filename, mimetype)
 		-- send back an error response
 		local respHeader = {
 			["Connection"] = "Keep-Alive",
@@ -31,8 +31,8 @@ print("NO RESPONSE BODY: ", filename, mimetype)
 		return false
 	end
 
-print("== FileService.SENDING ==");
-print("FILE: ", filename, mimetype);
+--print("== FileService.SENDING ==");
+--print("FILE: ", filename, mimetype);
 --print(resourceBody);
 
 	local headers = {

@@ -2,7 +2,9 @@
 -- cabinet.dll	
 
 local ffi = require("ffi");
+
 local WTypes = require("WTypes");
+local basetsd = require("basetsd")
 
 DECLARE_HANDLE("COMPRESSOR_HANDLE");
 

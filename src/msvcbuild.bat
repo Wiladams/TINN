@@ -35,13 +35,14 @@
 %LUAC% REPL.lua REPL.obj
 %LUAC% core/Query.lua Query.obj
 %LUAC% Shell.lua Shell.obj
+%LUAC% core/stdlib.lua stdlib.obj
 %LUAC% core/stream.lua stream.obj
 %LUAC% core/StreamOps.lua StreamOps.obj
 %LUAC% core/stringzutils.lua stringzutils.obj
 %LUAC% core/tabutils.lua tabutils.obj
 %LUAC% core/Vector.lua Vector.obj
 %LUAC% core/zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stream.obj StreamOps.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
+@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stdlib.obj stream.obj StreamOps.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
 
 @rem TINN Task library
 %LUAC% task/IOOps.lua IOOps.obj

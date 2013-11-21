@@ -2,9 +2,9 @@ local ffi = require("ffi")
 
 require("WTypes");
 require("WinNT");
+require("basetsd")
 
 local Lib = ffi.load("dbghelp");
-
 
 --[[
  BUILD Version: 0000     Increment this if a change has global effects
@@ -34,7 +34,6 @@ Revision History:
 // works great on 32 bit platforms, and is forward
 // compatible to 64 bit platforms.
 --]]
-local _WIN64 = ffi.os == "Windows" and ffi.abi("64bit");
 local _IMAGEHLP64 = ffi.abi("64bit");
 
 

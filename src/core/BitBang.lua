@@ -8,11 +8,11 @@ local bnot = bit.bnot
 local rshift = bit.rshift
 
 
-function isset(value, bit, endian)
+local function isset(value, bit)
 	return band(value, 2^bit) > 0
 end
 
-function setbit(value, bit, endian)
+local function setbit(value, bit, endian)
 	if endian == "be" then
 		return bor(value, 2^bit)
 	else
@@ -20,7 +20,7 @@ function setbit(value, bit, endian)
 	end
 end
 
-function clearbit(value, bit)
+local function clearbit(value, bit)
 	return band(value, bnot(2^bit))
 end
 

@@ -4,6 +4,7 @@ local ffi = require("ffi");
 local bit = require("bit");
 local band = bit.band;
 
+local WinBase = require("WinBase")
 local Handle_ffi = require("Handle_ffi");
 local error_handling = require("core_errorhandling_l1_1_1");
 
@@ -62,6 +63,18 @@ local Handle_mt = {
 	__index = Handle_t;
 }
 ffi.metatype(Handle, Handle_mt);
+
+Handle_t.free = function(self)
+	if self.Handle ~= nil then
+		Handle_ffi.CloseHandle(self.Handle);
+		self.Handle = nil;
+	end
+end
+
+Handle_t.isValid = function(self)
+	return self.Handle ~= INVALID_HANDLE_VALUE;
+end
+
 
 Handle_t.getHandleInformation = function(self)
 	local lpdwFlags = ffi.new("DWORD[1]");

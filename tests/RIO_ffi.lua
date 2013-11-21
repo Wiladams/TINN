@@ -65,7 +65,7 @@ typedef struct _RIO_CMSG_BUFFER {
 --]]
 
 ffi.cdef[[
-typedef BOOL (PASCAL FAR * LPFN_RIORECEIVE)(
+typedef BOOL (PASCAL * LPFN_RIORECEIVE)(
      RIO_RQ SocketQueue,
     PRIO_BUF pData,
      ULONG DataBufferCount,
@@ -73,7 +73,7 @@ typedef BOOL (PASCAL FAR * LPFN_RIORECEIVE)(
      PVOID RequestContext
     );
 
-typedef int (PASCAL FAR * LPFN_RIORECEIVEEX)(
+typedef int (PASCAL * LPFN_RIORECEIVEEX)(
      RIO_RQ SocketQueue,
     PRIO_BUF pData,
      ULONG DataBufferCount,
@@ -85,7 +85,7 @@ typedef int (PASCAL FAR * LPFN_RIORECEIVEEX)(
      PVOID RequestContext
 ); 
 
-typedef BOOL (PASCAL FAR * LPFN_RIOSEND)(
+typedef BOOL (PASCAL * LPFN_RIOSEND)(
      RIO_RQ SocketQueue,
     PRIO_BUF pData,
      ULONG DataBufferCount,
@@ -93,7 +93,7 @@ typedef BOOL (PASCAL FAR * LPFN_RIOSEND)(
      PVOID RequestContext
 );
 
-typedef BOOL (PASCAL FAR * LPFN_RIOSENDEX)(
+typedef BOOL (PASCAL * LPFN_RIOSENDEX)(
      RIO_RQ SocketQueue,
     PRIO_BUF pData,
      ULONG DataBufferCount,
@@ -105,7 +105,7 @@ typedef BOOL (PASCAL FAR * LPFN_RIOSENDEX)(
      PVOID RequestContext
 );
 
-typedef VOID (PASCAL FAR * LPFN_RIOCLOSECOMPLETIONQUEUE)(RIO_CQ CQ);
+typedef VOID (PASCAL * LPFN_RIOCLOSECOMPLETIONQUEUE)(RIO_CQ CQ);
 
 typedef enum _RIO_NOTIFICATION_COMPLETION_TYPE {
     RIO_EVENT_COMPLETION      = 1,
@@ -132,12 +132,12 @@ typedef struct _RIO_NOTIFICATION_COMPLETION {
 
 #pragma warning(pop)
 
-typedef RIO_CQ (PASCAL FAR * LPFN_RIOCREATECOMPLETIONQUEUE)(
+typedef RIO_CQ (PASCAL * LPFN_RIOCREATECOMPLETIONQUEUE)(
      DWORD QueueSize,
     PRIO_NOTIFICATION_COMPLETION NotificationCompletion
 );
 
-typedef RIO_RQ (PASCAL FAR * LPFN_RIOCREATEREQUESTQUEUE)(
+typedef RIO_RQ (PASCAL * LPFN_RIOCREATEREQUESTQUEUE)(
      SOCKET Socket,
      ULONG MaxOutstandingReceive,
      ULONG MaxReceiveDataBuffers,
@@ -148,31 +148,31 @@ typedef RIO_RQ (PASCAL FAR * LPFN_RIOCREATEREQUESTQUEUE)(
      PVOID SocketContext
 );
 
-typedef ULONG (PASCAL FAR * LPFN_RIODEQUEUECOMPLETION)(
+typedef ULONG (PASCAL * LPFN_RIODEQUEUECOMPLETION)(
      RIO_CQ CQ,
     PRIORESULT Array,
      ULONG ArraySize
 );
 
-typedef VOID (PASCAL FAR * LPFN_RIODEREGISTERBUFFER)(
+typedef VOID (PASCAL * LPFN_RIODEREGISTERBUFFER)(
      RIO_BUFFERID BufferId
 );
 
-typedef INT (PASCAL FAR * LPFN_RIONOTIFY)(
+typedef INT (PASCAL * LPFN_RIONOTIFY)(
      RIO_CQ CQ
 );
 
-typedef RIO_BUFFERID (PASCAL FAR * LPFN_RIOREGISTERBUFFER)(
+typedef RIO_BUFFERID (PASCAL * LPFN_RIOREGISTERBUFFER)(
      PCHAR DataBuffer,
      DWORD DataLength
 );
 
-typedef BOOL (PASCAL FAR * LPFN_RIORESIZECOMPLETIONQUEUE) (
+typedef BOOL (PASCAL * LPFN_RIORESIZECOMPLETIONQUEUE) (
      RIO_CQ CQ,
      DWORD QueueSize
 );
 
-typedef BOOL (PASCAL FAR * LPFN_RIORESIZEREQUESTQUEUE) (
+typedef BOOL (PASCAL * LPFN_RIORESIZEREQUESTQUEUE) (
      RIO_RQ RQ,
      DWORD MaxOutstandingReceive,
      DWORD MaxOutstandingSend

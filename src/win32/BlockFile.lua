@@ -6,10 +6,11 @@ local bor = bit.bor;
 
 local core_file = require("core_file_l1_2_0");
 local errorhandling = require("core_errorhandling_l1_1_1");
-local FsHandles = require("FsHandles")
+--local FsHandles = require("FsHandles")
 local WinBase = require("WinBase")
 local IOOps = require("IOOps")
 local StreamOps = require("StreamOps")
+local Handle = require("Handle")
 
 
 -- A win32 file interfaces
@@ -27,7 +28,7 @@ local BlockFile_mt = {
 
 BlockFile.init = function(self, rawHandle)
 	local obj = {
-		Handle = FsHandles.FsHandle(rawHandle);
+		Handle = Handle(rawHandle);
 		DeviceOffset = 0;
 	}
 	setmetatable(obj, BlockFile_mt)

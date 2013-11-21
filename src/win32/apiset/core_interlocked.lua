@@ -2,8 +2,11 @@
 -- api-ms-win-core-interlocked-l1-2-0.dll	
 
 local ffi = require("ffi");
+
 require("WTypes");
 require("WinNT");
+local basetsd = require("basetsd")
+
 local Lib = ffi.load("kernel32");
 local Ntdll = ffi.load("Ntdll.dll");
 

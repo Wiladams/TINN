@@ -10,6 +10,7 @@ local rshift = bit.rshift;
 
 local WinNT = require("WinNT");
 local WTypes = require("WTypes");
+local basetsd = require("basetsd")
 
 
 -- begin_ntddk begin_wdm begin_nthal begin_ntifs

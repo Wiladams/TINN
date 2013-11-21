@@ -1,6 +1,33 @@
 
-local Html = {}
  
+local HtmlTemplate = {}
+setmetatable(HtmlTemplate, {
+	__call = function(self, ...)
+		return self:create(...)
+	end,
+})
+
+HtmlTemplate_mt = {
+	__index = HtmlTemplate;
+}
+
+
+
+HtmlTemplate.init = function(self, content, subs)
+	local obj = {
+		Content = content,
+		Substitutions = subs,
+	}
+	setmetatable(obj, HtmlTemplate_mt)
+
+	return obj;
+end
+
+HtmlTemplate.create = function(self, content, subs)
+	return self:init(content, subs)
+end
+
+
 --[[
 	fillTemplate()
 
@@ -29,9 +56,18 @@ local Html = {}
       ["serviceport"]   = serviceport,
     }
 --]]
+HtmlTemplate.fillTemplate = function(self, subs)
+	subs = subs or self.Substitutions;
 
-Html.fillTemplate = function(self, template, subs)
-    return string.gsub(template, "%<%?(%a+)%?%>", subs)
+	-- if there are no substitutions, then just
+	-- return the content unchanged.
+	if not subs then 
+		return self.Content 
+	end
+
+	-- do the substitution thing
+    return string.gsub(self.Content, "%<%?(%a+)%?%>", subs)
 end
 
-return Html
+
+return HtmlTemplate

@@ -48,6 +48,7 @@ Logfile.create = function(self, filename)
 end
 
 Logfile.trace = function(self, ...)
+	local message = select(1, ...)
 	self.Stream:writeString(message)
 	self.Stream:flush();
 end

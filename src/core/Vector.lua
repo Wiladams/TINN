@@ -5,11 +5,11 @@ local rshift = bit.rshift
 local lshift = bit.lshift
 local C = ffi.C
 
-ffi.cdef[[
-void * malloc ( size_t size );
-void free ( void * ptr );
-void * realloc ( void * ptr, size_t size );
-]]
+
+local stdlib = require("stdlib")
+local malloc = stdlib.malloc;
+local realloc = stdlib.realloc;
+local free = stdlib.free;
 
 -- round up to the nearest
 -- power of 2
@@ -60,7 +60,7 @@ end
 
 Vector_t.Free = function(self)
 	if self.Data ~= nil then
-		ffi.C.free(self.Data);
+		free(self.Data);
 	end
 end
 
@@ -77,13 +77,13 @@ end
 Vector_t.Realloc = function(self, nelems)
 	if nelems == 0 then
 		if self.Data ~= nil then
-			ffi.C.free(self.Data)
+			free(self.Data)
 			self.Data = nil
 		end
 		return nil
 	end
 	
-	local newdata = ffi.C.malloc(ffi.sizeof(self.ElementType)* nelems);
+	local newdata = malloc(ffi.sizeof(self.ElementType)* nelems);
 
 	-- copy existing over to new one
 	local maxCopy = math.min(nelems, self.n);
@@ -92,7 +92,7 @@ Vector_t.Realloc = function(self, nelems)
 	--print("Type PTR: ", typeptr);
 	
 	-- free old data
-	ffi.C.free(self.Data);
+	free(self.Data);
 	
 	self.Data = ffi.cast(typeptr,newdata);	
 end

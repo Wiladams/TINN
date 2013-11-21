@@ -2,7 +2,8 @@
 --
 local ffi = require("ffi")
 
-local _WIN64 = ffi.os == "Windows" and ffi.abi("64bit");
+--local _WIN64 = ffi.os == "Windows" and ffi.abi("64bit");
+local basetsd = require("basetsd")
 
 require("WTypes");
 
