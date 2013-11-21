@@ -17,8 +17,8 @@ typedef struct {
 } IOCPSocketHandle;
 ]]
 
-IOCPSocketHandle = ffi.typeof("IOCPSocketHandle");
-IOCPSocketHandle_mt = {
+local IOCPSocketHandle = ffi.typeof("IOCPSocketHandle");
+local IOCPSocketHandle_mt = {
 	__gc = function(self)
 		--print("GC: IOCPSocketHandle: ", self.sock, self.autoClose);
 		-- Force close on socket

@@ -8,14 +8,14 @@ local ws2_32 = require("ws2_32");
 
 IOProcessor:setMessageQuanta(5);
 
-SocketServer = {}
+local SocketServer = {}
 setmetatable(SocketServer, {
   __call = function(self, ...)
     return self:create(...);
   end,
 });
 
-SocketServer_mt = {
+local SocketServer_mt = {
   __index = SocketServer;
 }
 

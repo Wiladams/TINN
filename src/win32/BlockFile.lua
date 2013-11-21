@@ -6,7 +6,6 @@ local bor = bit.bor;
 
 local core_file = require("core_file_l1_2_0");
 local errorhandling = require("core_errorhandling_l1_1_1");
---local FsHandles = require("FsHandles")
 local WinBase = require("WinBase")
 local IOOps = require("IOOps")
 local StreamOps = require("StreamOps")

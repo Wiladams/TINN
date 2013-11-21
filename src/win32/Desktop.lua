@@ -12,8 +12,8 @@ typedef struct {
 } DesktopHandle;
 ]]
 
-DesktopHandle = ffi.typeof("DesktopHandle");
-DesktopHandle_mt = {
+local DesktopHandle = ffi.typeof("DesktopHandle");
+local DesktopHandle_mt = {
 	__gc = function(self)
 		if self.OwnAllocation then
 			desktop_ffi.CloseDesktop(self.Handle);

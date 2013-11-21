@@ -4,6 +4,13 @@ local lua = require "luajit_ffi"
 
 
 
+local function report_errors(L, status)
+	if status ~= 0 then
+		print("-- ", ffi.string(lua.lua_tostring(L, -1)))
+		lua.lua_pop(L, 1); -- remove error message
+	end
+end
+
 
 local LuaState = {
 	Defaults = {}
@@ -34,12 +41,7 @@ local LuaState_mt = {
 }
 
 
-local function report_errors(L, status)
-	if status ~= 0 then
-		print("-- ", ffi.string(lua.lua_tostring(L, -1)))
-		lua.lua_pop(L, 1); -- remove error message
-	end
-end
+
 
 LuaState.new = function(self, codechunk, autorun)
 	local L = lua.luaL_newstate();  -- create state

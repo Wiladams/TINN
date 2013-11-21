@@ -7,7 +7,7 @@ setmetatable(HtmlTemplate, {
 	end,
 })
 
-HtmlTemplate_mt = {
+local HtmlTemplate_mt = {
 	__index = HtmlTemplate;
 }
 

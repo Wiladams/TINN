@@ -18,7 +18,7 @@ setmetatable(WindowKind, {
     end,
 });
 
-WindowKind_mt = {
+local WindowKind_mt = {
     __index = WindowKind,    
 }
 

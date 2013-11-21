@@ -12,6 +12,7 @@ setmetatable(IOCPNetStream, {
 		return self:create(...);
 	end,
 });
+
 local IOCPNetStream_mt = {
 	__index = IOCPNetStream,
 }

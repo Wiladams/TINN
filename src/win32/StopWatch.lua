@@ -36,9 +36,7 @@ StopWatch.create = function(self, frequency, startcount)
 	frequency = frequency or 1/core_profile.getPerformanceFrequency(freqbuff);
 	startcount = startcount or core_profile.getPerformanceCounter(countbuff);
 
-	local obj = self:init(frequency, startcount);
-
-	return obj;
+	return self:init(frequency, startcount);
 end
 
 

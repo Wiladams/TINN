@@ -11,8 +11,8 @@ local function bintohex(bytes, len)
 end
 
 
-BCryptKey = ffi.typeof("BCryptKey");
-BCryptKey_mt = {
+local BCryptKey = ffi.typeof("BCryptKey");
+local BCryptKey_mt = {
 	__gc = function(self)
 		status = BCrypt.Lib.BCryptDestroyKey(self.Handle)
 	end,
@@ -28,8 +28,8 @@ BCryptKey_mt = {
 BCryptKey = ffi.metatype(BCryptKey, BCryptKey_mt);
 
 
-BCryptHash = ffi.typeof("BCryptHash");
-BCryptHash_mt = {
+local BCryptHash = ffi.typeof("BCryptHash");
+local BCryptHash_mt = {
 	__gc = function(self)
 		local status = BCrypt.Lib.BCryptDestroyHash(self.Handle);
 	end,

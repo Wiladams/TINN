@@ -7,14 +7,14 @@ local WebRequest = require("WebRequest");
 local WebResponse = require("WebResponse");
 local URL = require("url");
 
-HttpServer = {}
+local HttpServer = {}
 setmetatable(HttpServer, {
 	__call = function(self, ...)
 		return self:create(...);
 	end,
 });
 
-HttpServer_mt = {
+local HttpServer_mt = {
 	__index = HttpServer;
 }
 

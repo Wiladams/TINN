@@ -9,14 +9,11 @@ typedef struct {
 	HANDLE	Handle;
 } IOCompletionHandle;
 ]]
-IOCompletionHandle = ffi.typeof("IOCompletionHandle")
-
-IOCompletionHandle_mt = {
-	__index = {
-
-	},
-
+local IOCompletionHandle = ffi.typeof("IOCompletionHandle")
+local IOCompletionHandle_mt = {
+	__index = {},
 }
+ffi.metatype(IOCompletionHandle, IOCompletionHandle_mt)
 
 
 local IOCompletionPort = {}

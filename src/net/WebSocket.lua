@@ -25,8 +25,8 @@ local tinsert = table.insert;
 local webSocketGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 
-WebSocket_t = {}
-WebSocket_mt = {
+local WebSocket_t = {}
+local WebSocket_mt = {
 	__index = WebSocket_t,
 }
 
@@ -40,6 +40,7 @@ local WebSocket = function(dataStream)
 
 	return obj
 end
+
 
 local UpgradeRequest = function(req)
 	local lines = {
