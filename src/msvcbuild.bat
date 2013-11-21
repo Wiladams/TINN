@@ -56,7 +56,7 @@
 
 
 @rem The Net library
-%LUAC% net/Html.lua Html.obj
+%LUAC% net/HtmlTemplate.lua HtmlTemplate.obj
 %LUAC% net/httpstatus.lua httpstatus.obj
 %LUAC% net/HttpChunkIterator.lua HttpChunkIterator.obj
 %LUAC% net/HttpHeaders.lua HttpHeaders.obj
@@ -77,7 +77,7 @@
 %LUAC% net/WebResponse.lua WebResponse.obj
 %LUAC% net/WebSocket.lua WebSocket.obj
 
-@set TINNNET=Html.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj IOCPNetStream.obj IOCPSocket.obj mime.obj SocketServer.obj FileService.obj SocketOps.obj TcpSplice.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
+@set TINNNET=HtmlTemplate.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj IOCPNetStream.obj IOCPSocket.obj mime.obj SocketServer.obj FileService.obj SocketOps.obj TcpSplice.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
 
 @rem Core windows API set
 %LUAC% Win32/apiset/core_console_l1_1_0.lua core_console_l1_1_0.obj
