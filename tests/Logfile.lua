@@ -53,5 +53,9 @@ Logfile.trace = function(self, ...)
 	self.Stream:flush();
 end
 
+Logfile.writeString = function(self, message)
+	self.Stream:writeString(message)
+	self.Stream:flush();
+end
 
 return Logfile;
