@@ -11,15 +11,13 @@ local core_library = require("core_libraryloader_l1_1_1");
 
 
 ffi.cdef[[
-typedef struct _User32Window {
+typedef struct {
 	HWND	Handle;
 } WindowHandle, *PWindowHandle;
 ]]
 
-WindowHandle = ffi.typeof("WindowHandle");
-WindowHandle_mt = {
-	
-}
+local WindowHandle = ffi.typeof("WindowHandle");
+local WindowHandle_mt = {}
 ffi.metatype(WindowHandle, WindowHandle_mt);
 
 
@@ -82,7 +80,11 @@ NativeWindow.getNativeHandle = function(self)
 end
 
 NativeWindow.getDeviceContext = function(self)
-	return DeviceContext(User32.GetDC(self:getNativeHandle()));
+	if not self.ClientContext then
+		self.ClientContext = DeviceContext(User32.GetDC(self:getNativeHandle()))
+	end
+
+	return self.ClientContext;
 end
 
 -- Functions
