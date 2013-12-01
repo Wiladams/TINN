@@ -342,7 +342,7 @@ stop = function()
 	return IOProcessor:stop();
 end
 
-wait = function(millis)
+sleep = function(millis)
 	return IOProcessor:yieldForTime(millis)
 end
 

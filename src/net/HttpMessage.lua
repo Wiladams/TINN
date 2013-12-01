@@ -1,6 +1,6 @@
 
-HttpMessage_t = {}
-HttpMessage_mt = {
+local HttpMessage_t = {}
+local HttpMessage_mt = {
 	__index = HttpMessage_t,
 }
 

@@ -14,7 +14,7 @@ local comp1 = Computicle:create([[
 	print(lock:lock());
 
 	print("Lock First - begin waiting")
-	wait(3000)
+	sleep(3000)
 
 	print("Lock First - done waiting")
 

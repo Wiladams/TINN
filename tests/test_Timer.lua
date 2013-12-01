@@ -9,7 +9,7 @@ end
 local count = 0;
 local function counter(timer)
 	count = count + 1;
-	if count >= 5 then
+	if count >= 15 then
 		timer:cancel();
 	end
 	print("counter: ",count)
@@ -20,13 +20,13 @@ local function testDelays()
 
 	-- wait a few seconds, then stop the time
 	print("wait 4 seconds...")
-	wait(4*1000)
+	sleep(4*1000)
 	print("stop timer")
-	timer:cancel(1000*4);
+	timer:cancel();
 
 	-- Wait a few more seconds then exit
 	print("wait 2 seconds...")
-	wait(1000*2);
+	sleep(1000*2);
 end
 
 local testCounter = function()

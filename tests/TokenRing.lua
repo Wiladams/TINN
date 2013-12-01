@@ -13,7 +13,7 @@ setmetatable(TokenRing, {
 	end,
 });
 
-TokenRing_mt = {
+local TokenRing_mt = {
 	__index = TokenRing,
 }
 

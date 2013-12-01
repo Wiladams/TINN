@@ -2,7 +2,6 @@ local ffi = require "ffi"
 
 local MemoryStream = require "MemoryStream"
 
-local HttpMessage = require ("HttpMessage").HttpMessage;
 local HttpMessage_t = require("HttpMessage").HttpMessage_t;
 
 

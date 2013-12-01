@@ -1,4 +1,6 @@
-function url_encode(str)
+--
+
+local function url_encode(str)
   if (str) then
     str = string.gsub (str, "\n", "\r\n")
     str = string.gsub (str, "([^%w ])",

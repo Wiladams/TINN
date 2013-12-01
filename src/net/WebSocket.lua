@@ -9,15 +9,15 @@ local bxor = bit.bxor
 local base64 = require("base64")
 
 local CryptUtils = require("BCryptUtils")
-local UrlParser = require("url");
+local URL = require("url");
 
 local WebResponse = require ("WebResponse");
 
 local b64 = require("base64");
 
 
-BinaryStream = require("BinaryStream");
-BitBang = require("BitBang");
+local BinaryStream = require("BinaryStream");
+local BitBang = require("BitBang");
 
 local format = string.format;
 local tinsert = table.insert;
@@ -65,7 +65,7 @@ end
 
 
 WebSocket_t.InitiateClientHandshake = function(self, url, origin)
-	local urlparts = UrlParser.parse(url, {port="80", path="/", scheme="ws"});
+	local urlparts = URL.parse(url, {port="80", path="/", scheme="ws"});
 
 --print("WebSocket_t.InitiateClientHandshake()", urlparts.host, urlparts.port, urlparts.path, urlparts.query)
 

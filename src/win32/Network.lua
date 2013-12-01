@@ -55,12 +55,13 @@ end
 local Network = {}
 
 
-Network.getHostName = function(self)
+Network.getHostName = function(self, nametype)
+	nametype = nametype or ffi.C.ComputerNameDnsFullyQualified
 	local bufflen = 256;
 	local lpBuffer = ffi.new("char[?]", bufflen);
 	local nSize = ffi.new("DWORD[1]", bufflen);
 
-	local NameType = ffi.C.ComputerNameDnsFullyQualified;
+	local NameType = nametype;
 
 	local res = core_sysinfo.GetComputerNameExA (NameType,lpBuffer,nSize);
 

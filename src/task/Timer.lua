@@ -38,7 +38,7 @@ Timer.start = function(self)
 
 	local function closure()
 		if self.Delay then
-			wait(self.Delay);
+			sleep(self.Delay);
 			self.OnTime(self);
 		end
 
@@ -47,7 +47,7 @@ Timer.start = function(self)
 		end
 
 		while self.Running do
-			wait(self.Period)
+			sleep(self.Period)
 			self.OnTime(self);
 		end
 	end
