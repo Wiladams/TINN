@@ -98,6 +98,20 @@ NativeWindow.Maximize = function(self)
 	return self:Show(User32.SW_MAXIMIZE);
 end
 
+NativeWindow.redraw = function(self, flags)
+	local lprcUpdate = nil;	-- const RECT *
+	local hrgnUpdate = nil; -- HRGN
+	flags = flags or ffi.C.RDW_UPDATENOW;
+
+	local res = User32.RedrawWindow(
+  		self:getNativeHandle(),
+  		lprcUpdate,
+   		hrgnUpdate,
+  		flags);
+
+	return true;
+end
+
 NativeWindow.Show = function(self, kind)
 	kind = kind or User32.SW_SHOWNORMAL;
 

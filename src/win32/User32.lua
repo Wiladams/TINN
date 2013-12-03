@@ -9,7 +9,7 @@ local core_library = require("core_libraryloader_l1_1_1");
 
 
 local RegisterWindowClass = function(wndclassname, msgproc, style)
-	msgproc = msgproc or User32Lib.DefWindowProcA;
+	msgproc = msgproc or user32_ffi.DefWindowProcA;
 	style = style or bor(user32_ffi.CS_HREDRAW,user32_ffi.CS_VREDRAW, user32_ffi.CS_OWNDC);
 
 	local hInst = core_library.GetModuleHandleA(nil);
@@ -28,7 +28,7 @@ local RegisterWindowClass = function(wndclassname, msgproc, style)
     wcex.lpszClassName  = wndclassname;
     wcex.hIconSm        = nil;		-- LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
 
-	local classAtom = User32Lib.RegisterClassExA(wcex);
+	local classAtom = user32_ffi.RegisterClassExA(wcex);
 
 	if classAtom == nil then
     	return false, "Call to RegistrationClassEx failed."
@@ -44,7 +44,7 @@ local CreateWindowHandle = function(winclass, wintitle, width, height, winstyle,
 	y = y or user32_ffi.CW_USEDEFAULT;
 
 	local hInst = core_library.GetModuleHandleA(nil);
-	local hWnd = User32Lib.CreateWindowExA(
+	local hWnd = user32_ffi.CreateWindowExA(
 		0,
 		winclass,
 		wintitle,
@@ -82,7 +82,7 @@ function User32_MsgProc(hwnd, msg, wparam, lparam)
 		return 0
 	end
 
-	local retValue = User32Lib.DefWindowProcA(hwnd, msg, wparam, lparam)
+	local retValue = user32_ffi.DefWindowProcA(hwnd, msg, wparam, lparam)
 
 	return retValue;
 end
@@ -122,7 +122,7 @@ User32MSGHandler.new = function(classname, msgproc, classStyle)
 		hIconSm = nil;
 		})
 
-	self.Registration = User32Lib.RegisterClassExA(winClass)
+	self.Registration = user32_ffi.RegisterClassExA(winClass)
 
 	if (self.Registration == 0) then
 		print("Registration error")
@@ -146,7 +146,7 @@ User32MSGHandler.CreateHandler = function(self, title, x, y, width, height, wind
 
 	local win = ffi.new("NativeWindow")
 
-	local hWnd = User32Lib.CreateWindowExA(
+	local hWnd = user32_ffi.CreateWindowExA(
 				0,
 				self.ClassName,
 				self.Title,
@@ -169,28 +169,6 @@ User32MSGHandler.CreateHandler = function(self, title, x, y, width, height, wind
 	return win
 end
 
-ffi.cdef[[
-typedef struct {
-	HWINSTA	Handle;
-} WindowStation;
-]]
-
-local WindowStation = ffi.typeof("WindowStation");
-local WindowStation_mt = {
-	__gc = function(self)
-	end,
-	
-	__new = function(ct, params)
-	end,
-	
-	__index = {
-		Close = function(self)
-			return (User32Lib.CloseWindowStation(self.Handle) ~= 0) or false, User32Lib.GetLastError();
-		end,
-		
-	},
-}
-ffi.metatype(WindowStation, WindowStation_mt);
 
 
 --[[
@@ -200,7 +178,7 @@ ffi.metatype(WindowStation, WindowStation_mt);
 --]]
 
 local GetSystemMetrics = function(what)
-	local res = User32Lib.GetSystemMetrics(what)
+	local res = user32_ffi.GetSystemMetrics(what)
 	if res == 0 then
 		return nil, "failed"
 	end
@@ -209,7 +187,7 @@ local GetSystemMetrics = function(what)
 end
 
 local SendInput = function(nInputs, pInputs, cbSize)
-	local res = User32Lib.SendInput(nInputs,pInputs,cbSize);
+	local res = user32_ffi.SendInput(nInputs,pInputs,cbSize);
 	
 	-- If the number of events inserted was zero,
 	-- then there was an error
@@ -225,7 +203,7 @@ return {
 	FFI = user32_ffi,
 	Lib = User32Lib,
 	
-	GetDC = User32Lib.GetDC;
+	GetDC = user32_ffi.GetDC;
 	
 	RegisterWindowClass = RegisterWindowClass,
 	CreateWindowHandle = CreateWindowHandle,

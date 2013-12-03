@@ -289,6 +289,13 @@ HWND CreateWindowExA(
 
 BOOL DestroyWindow(HWND hWnd);
 
+BOOL RedrawWindow(
+  HWND hWnd,
+  const RECT *lprcUpdate,
+  HRGN hrgnUpdate,
+  UINT flags
+);
+
 BOOL ShowWindow(HWND hWnd, int nCmdShow);
 
 BOOL UpdateWindow(HWND hWnd);
@@ -395,6 +402,28 @@ BOOL  SetUserObjectSecurity(HANDLE hObj,
 */
 ]]
 
+ffi.cdef[[
+/*
+ * RedrawWindow() flags
+ */
+static const int RDW_INVALIDATE        =  0x0001;
+static const int RDW_INTERNALPAINT     =  0x0002;
+static const int RDW_ERASE             =  0x0004;
+
+static const int RDW_VALIDATE          =  0x0008;
+static const int RDW_NOINTERNALPAINT   =  0x0010;
+static const int RDW_NOERASE           =  0x0020;
+
+static const int RDW_NOCHILDREN        =  0x0040;
+static const int RDW_ALLCHILDREN       =  0x0080;
+
+static const int RDW_UPDATENOW         =  0x0100;
+static const int RDW_ERASENOW          =  0x0200;
+
+static const int RDW_FRAME             =  0x0400;
+static const int RDW_NOFRAME           =  0x0800;
+
+]]
 
 local Lib = ffi.load("user32");
 
@@ -666,13 +695,18 @@ local user32_ffi = {
 	SAMEDISPLAYFORMAT = 81,
 	CMETRICS = 83,
 
+
+	CloseWindowStation = Lib.CloseWindowStation,
 	CreateWindowExA = Lib.CreateWindowExA,
 	DefWindowProcA = Lib.DefWindowProcA,
 	DispatchMessageA = Lib.DispatchMessageA,
 	GetClientRect = Lib.GetClientRect,
 	GetDC = Lib.GetDC,
+	GetSystemMetrics = Lib.GetSystemMetrics,
+	LoadCursor = Lib.LoadCursorA,
 	PeekMessageA = Lib.PeekMessageA,
 	RegisterClassExA = Lib.RegisterClassExA,
+	SendInput = Lib.SendInput,
 	SendMessageA = Lib.SendMessageA,
 	ShowWindow = Lib.ShowWindow,
 	TranslateMessage = Lib.TranslateMessage,

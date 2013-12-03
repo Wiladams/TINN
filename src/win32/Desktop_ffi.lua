@@ -75,6 +75,22 @@ OpenWindowStationA(
     ACCESS_MASK dwDesiredAccess);
 
 BOOL SetProcessWindowStation(HWINSTA hWinSta);
+]]
+
+ffi.cdef[[
+static const int WINSTA_ENUMDESKTOPS        = 0x0001;
+static const int WINSTA_READATTRIBUTES      = 0x0002;
+static const int WINSTA_ACCESSCLIPBOARD     = 0x0004;
+static const int WINSTA_CREATEDESKTOP       = 0x0008;
+static const int WINSTA_WRITEATTRIBUTES     = 0x0010;
+static const int WINSTA_ACCESSGLOBALATOMS   = 0x0020;
+static const int WINSTA_EXITWINDOWS         = 0x0040;
+static const int WINSTA_ENUMERATE           = 0x0100;
+static const int WINSTA_READSCREEN          = 0x0200;
+
+static const int WINSTA_ALL_ACCESS          = (WINSTA_ENUMDESKTOPS  | WINSTA_READATTRIBUTES  | WINSTA_ACCESSCLIPBOARD | \
+                                     WINSTA_CREATEDESKTOP | WINSTA_WRITEATTRIBUTES | WINSTA_ACCESSGLOBALATOMS | \
+                                     WINSTA_EXITWINDOWS   | WINSTA_ENUMERATE       | WINSTA_READSCREEN);
 
 ]]
 
@@ -99,6 +115,6 @@ return
 	EnumWindowStationsA = Lib.EnumWindowStationsA,
 	GetProcessWindowStation = Lib.GetProcessWindowStation,
 	LockWorkStation = Lib.LockWorkStation,
-	OpenWindowStationA = Lib.OpenWindowStationA,
+	OpenWindowStation = Lib.OpenWindowStationA,
 	SetProcessWindowStation = Lib.SetProcessWindowStation,
 }

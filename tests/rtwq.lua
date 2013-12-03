@@ -5,11 +5,10 @@ local ffi = require("ffi");
 
 local WTypes = require("WTypes");
 local Lib = ffi.load("RTWorkQ.dll");
+local IUnknown = require("IUnknown");
 
 ffi.cdef[[
-typedef struct {
-	void * ptr;	
-} IUnknown ;
+
 
 typedef void (__stdcall *MFPERIODICCALLBACK)(IUnknown *pContext);
 

@@ -1,12 +1,12 @@
 
 local ffi = require("ffi");
 
---local IOProcessor = require("IOProcessor");
+local IOProcessor = require("IOProcessor");
 local IOCPSocket = require("IOCPSocket");
 local ws2_32 = require("ws2_32");
 
 
---IOProcessor:setMessageQuanta(5);
+IOProcessor:setMessageQuanta(5);
 
 local SocketServer = {}
 setmetatable(SocketServer, {
