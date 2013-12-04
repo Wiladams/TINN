@@ -226,14 +226,14 @@
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinn.exe tinn.obj %CLIBS% %COMPUTICLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
+%LJLINK% /out:tinn.exe %LJLIBNAME% tinn.obj %CLIBS% %COMPUTICLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinn.exe.manifest^
   %LJMT% -manifest tinn.exe.manifest -outputresource:tinn.exe
 
 %LJCOMPILE% tinnsh.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinnsh.exe tinnsh.obj %CLIBS% %COMPUTICLELIB% %NETLIB% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB% %LJLIBNAME%
+%LJLINK% /out:tinnsh.exe %LJLIBNAME% tinnsh.obj %CLIBS% %COMPUTICLELIB% %NETLIB% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB% %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinnsh.exe.manifest^
   %LJMT% -manifest tinnsh.exe.manifest -outputresource:tinnsh.exe
