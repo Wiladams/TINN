@@ -1,5 +1,5 @@
 --local ffi   = require( "ffi" )
---local gl    = require( "gl" )
+--local gl    = require( "gl_ffi" )
 
 
 local function checkGL( str )

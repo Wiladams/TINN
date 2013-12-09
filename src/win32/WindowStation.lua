@@ -3,10 +3,12 @@ local ffi = require("ffi")
 
 local User32Lib = ffi.load("user32")
 local Desktop_ffi = require("Desktop_ffi")
+local errorhandling = require("core_errorhandling_l1_1_1");
 
 ffi.cdef[[
 typedef struct {
 	HWINSTA	Handle;
+	bool AutoClose;
 } WindowStationHandle_t;
 ]]
 
@@ -16,13 +18,13 @@ local WindowStationHandle_mt = {
 		self:free()
 	end,
 	
-	__new = function(ct, params)
-		return ffi.new(ct,params)
+	__new = function(ct, ...)
+		return ffi.new(ct,...)
 	end,
 	
 	__index = {
 		free = function(self)
-			if self.Handle ~= nil then
+			if self.Handle ~= nil and self.AutoClose then
 				Desktop_ffi.CloseWindowStation(self.Handle);
 				self.Handle = nil;
 			end
@@ -51,9 +53,11 @@ local WindowStation_mt = {
 	__index = WindowStation,
 }
 
-WindowStation.init = function(self, rawhandle)
+WindowStation.init = function(self, rawhandle, autoclose)
+	autoclose = autoclose or false
+
 	local obj = {
-		Handle = WindowStation_t(rawhandle)
+		Handle = WindowStation_t(rawhandle, autoclose)
 	}
 	setmetatable(obj, WindowStation_mt)
 
@@ -61,17 +65,40 @@ WindowStation.init = function(self, rawhandle)
 end
 
 -- By default, open the specified window station
-WindowStation.create = function(self, lpszWinSta)
+WindowStation.create = function(self, name)
 	local fInherit = true;
 	local dwDesiredAccess = ffi.C.WINSTA_ALL_ACCESS; -- ACCESS_MASK
 
-	local rawhandle = Desktop_ffi.OpenWindowStation(lpszWinSta, fInherit,dwDesiredAccess);
+	local rawhandle = nil;
+	local autoclose = false;
 
-	if rawhandle == nil then
-		return nil, err 
+	if not name then
+		rawhandle = Desktop_ffi.GetProcessWindowStation();
+	else
+		rawhandle = Desktop_ffi.OpenWindowStation(name, fInherit, dwDesiredAccess);
+		autoclose = true;
 	end
 
-	return self:init(rawhandle)
+	if rawhandle == nil then
+		return nil, errorhandling.GetLastError();
+	end
+
+	return self:init(rawhandle, autoclose)
+end
+
+WindowStation.createNew = function(self, name)
+	local dwFlags = 0;
+	local dwDesiredAccess = ffi.C.WINSTA_ALL_ACCESS; -- ACCESS_MASK
+	local lpsa = nil;	-- Security_Attributes
+
+	local rawhandle = Desktop_ffi.CreateWindowStation(name, dwFlags, 
+		dwDesiredAccess, lpsa);
+
+	if rawhandle == nil then
+		return nil, errorhandling.GetLastError();
+	end
+
+	return self:init(rawhandle, true)
 end
 
 WindowStation.getWindowStations = function(self)
@@ -92,6 +119,10 @@ WindowStation.getWindowStations = function(self)
 	return stations
 end
 
+
+--[[
+	Instance Methods
+--]]
 WindowStation.getNativeHandle = function(self)
 	return self.Handle.Handle;
 end
@@ -103,5 +134,12 @@ WindowStation.close = function(self)
 	return res;
 end
 
+WindowStation.setAsProcessWindowStation = function(self)
+	local res = Desktop_ffi.SetProcessWindowStation(self:getNativeHandle())
+
+	if res == 0 then
+		return false, errorhandling.GetLastError();
+	end
+end
 
 return WindowStation;

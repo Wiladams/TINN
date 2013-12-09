@@ -2,13 +2,13 @@
 local IOProcessor = require("IOProcessor")
 local serpent = require("serpent")
 
-local BGPPeer = require("BGPPeer")
+local NetMesh = require("NetMesh")
 
-local bgpeer = BGPPeer("bgpconfig.lua")
+local mesh  = NetMesh("bgpconfig.lua")
 
 local function main()
-	print("==== bgpeer ====")
-	print(serpent.encode(bgpeer.Config))
+	print("==== mesh ====")
+	print(serpent.encode(mesh.Config))
 end
 
 run(main)

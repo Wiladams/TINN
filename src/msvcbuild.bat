@@ -20,7 +20,7 @@
 @set LUAC=luajit -b
 @set LJDLLNAME=lua51.dll
 @set LJLIBNAME=lua51.lib
-
+@set ZLIBNAME=zlib.lib
 
 @rem The TINN core library
 %LUAC% core/base64.lua base64.obj
@@ -152,6 +152,7 @@
 %LUAC% Win32/Heap.lua Heap.obj
 %LUAC% Win32/IOCompletionPort.lua IOCompletionPort.obj
 %LUAC% Win32/KeyMouse.lua KeyMouse.obj
+%LUAC% Win32/Logfile.lua Logfile.obj
 %LUAC% Win32/logoncli_ffi.lua logoncli_ffi.obj
 %LUAC% Win32/NativeWindow.lua NativeWindow.obj
 %LUAC% Win32/netutils.lua netutils.obj
@@ -187,7 +188,7 @@
 %LUAC% Win32/Workstation.lua Workstation.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj BlockFile.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj Desktop.obj Desktop_ffi.obj FileSystemItem.obj FsHandles.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj logoncli_ffi.obj NativeWindow.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  vkeys.obj win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WindowKind.obj WindowStation.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
+@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj BlockFile.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj Desktop.obj Desktop_ffi.obj FileSystemItem.obj FsHandles.obj GDI32.obj gdi32_ffi.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj Logfile.obj logoncli_ffi.obj NativeWindow.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  vkeys.obj win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WindowKind.obj WindowStation.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
  
 @rem Create the computicle specific stuff
 %LUAC% computicle/comp_msgpump.lua comp_msgpump.obj
@@ -207,7 +208,9 @@
 
 
 @rem Khronos library
-%LUAC% khronos/gl.lua gl.obj
+%LUAC% khronos/gl_constants.lua gl_constants.obj
+%LUAC% khronos/gl_ffi.lua gl_ffi.obj
+%LUAC% khronos/gl_types.lua gl_types.obj
 %LUAC% khronos/GLContext.lua GLContext.obj
 %LUAC% khronos/glext.lua glext.obj
 %LUAC% khronos/GLSLProgram.lua GLSLProgram.obj
@@ -218,7 +221,7 @@
 %LUAC% khronos/View3D.lua View3D.obj
 %LUAC% khronos/wglext.lua wglext.obj
 
-@set KHRONOSLIB=gl.obj GLContext.obj glext.obj GLSLProgram.obj GLTexture.obj glu.obj GLWindow.obj OglMan.obj View3D.obj wglext.obj
+@set KHRONOSLIB=gl_constants.obj gl_ffi.obj gl_types.obj GLContext.obj glext.obj GLSLProgram.obj GLTexture.obj glu.obj GLWindow.obj OglMan.obj View3D.obj wglext.obj
 
 %LJCOMPILE% lpeg.c
 @if errorlevel 1 goto :BAD
@@ -226,7 +229,7 @@
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinn.exe %LJLIBNAME% tinn.obj %CLIBS% %COMPUTICLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
+%LJLINK% /out:tinn.exe %LJLIBNAME% %ZLIBNAME% tinn.obj %CLIBS% %COMPUTICLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinn.exe.manifest^
   %LJMT% -manifest tinn.exe.manifest -outputresource:tinn.exe

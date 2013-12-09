@@ -188,7 +188,7 @@ end
 
 GLContext.create = function(self, hWnd, majorversion, minorversion, multisamplemode)
 	if not hWnd then
-		return false, "must specify a window handle"
+		return nil, "must specify a window handle"
 	end
 
 	majorversion = majorversion or 3;

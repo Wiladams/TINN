@@ -22,9 +22,12 @@ IOProcessor = {
 	Clock = StopWatch();
 	fibers = Collections.Queue();
 	coroutines = {};
+
 	EventFibers = {};
+
 	FibersAwaitingEvent = {};
 	FibersAwaitingTime = {};
+	FibersAwaitingPredicate = Collections.Queue();
 
 	IOEventQueue = IOCompletionPort:create();
 	MessageQuanta = 10;		-- milliseconds
@@ -167,14 +170,46 @@ IOProcessor.stepTimeEvents = function(self)
 	end
 end
 
+IOProcessor.yieldUntilPredicate = function(self, predicate)
+	if self.CurrentFiber~= nil then
+		self.CurrentFiber.Predicate = predicate;
+		self.FibersAwaitingPredicate:enqueue(self.CurrentFiber)
+
+		return self:yield();
+	end
+
+	return false;
+end
+
+IOProcessor.stepPredicates = function(self)
+	local nPredicates = self.FibersAwaitingPredicate:length()
+
+	for i=1,nPredicates do
+		local fiber = self.FibersAwaitingPredicate:dequeue();
+		if fiber.Predicate() then
+			fiber.Predicate = nil;
+			self:scheduleFiber(fiber);
+		else
+			-- stick the fiber back in the queue if it does not
+			-- indicate true as yet.
+			self.FibersAwaitingPredicate:enqueue(fiber)
+		end
+	end
+
+end
+
+
 
 IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
 	local ovl = ffi.cast("IOOverlapped *", overlapped);
 
-	-- Find the waiting task that is waiting for this IO event
 	ovl.bytestransferred = numbytes;
 
+	-- Find the waiting task that is waiting for this IO event
+	-- this lookup needs to be sped up as it governs
+	-- overall scheduling quanta
 	local fiber = self.EventFibers[ovl.opcounter];
+
 	if fiber then
 		self:scheduleFiber(fiber, key, numbytes, overlapped);
 		self.EventFibers[ovl.opcounter] = nil;
@@ -279,6 +314,8 @@ IOProcessor.step = function(self)
 	self:stepTimeEvents();
 	self:stepFibers();
 	self:stepIOEvents();
+	self:stepPredicates();
+
 
 	local fibersawaitio = false;
 
@@ -304,12 +341,14 @@ end
 IOProcessor.start = function(self)
 	-- Run the IOProcessor loop
 	self.ContinueRunning = true;
+	local steps = 0;
 
 	while self.ContinueRunning do
+		steps = steps + 1;
 	    if not IOProcessor:step() then
 	    	break;
 	    end
-	    --core_synch.Sleep(5);
+	    --print("sps: ", steps/self.Clock:Seconds())
 	end
 end
 
@@ -318,7 +357,6 @@ IOProcessor.stop = function(self)
 end
 
 IOProcessor.run = function(self, func, ...)
---print("IOProcessor.run: ", self, func)
 	if func ~= nil then
 		self:spawn(func, ...);
 	end
@@ -350,6 +388,9 @@ yield = function()
 	return IOProcessor:yield();
 end
 
+waitFor = function(predicate)
+	return IOProcessor:yieldUntilPredicate(predicate)
+end
 
 return IOProcessor
 
