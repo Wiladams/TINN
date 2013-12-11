@@ -40,13 +40,13 @@ GetConsoleMode(HANDLE hConsoleHandle, LPDWORD lpMode);
 
 
 -- printing out data structures
---printType(ffi.typeof("Foo"));
-printType(ffi.typeof("GDIDIBSection"));
+printType(ffi.typeof("Foo"));
+--printType(ffi.typeof("GDIDIBSection"));
 
 
 -- printing out function pointers
 --printType(ffi.C["GetConsoleMode"]);
-printType(ffi.C["Ellipse"]);
+--printType(ffi.C["Ellipse"]);
 
 --printType(ffi.typeof("PFNFooFuncPROC"));
 

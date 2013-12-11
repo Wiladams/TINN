@@ -28,19 +28,18 @@ if not windowkind then
 end
 
 
-for k,v in pairs(windowkind) do
-	print(k,v);
-end
+--for k,v in pairs(windowkind) do
+--	print(k,v);
+--end
 
 local function main()
 	local win = windowkind:createWindow(640, 480, "Window Title");
 	win:Show();
-	win:Maximize();
+	--win:Maximize();
 
 	synch.Sleep(5000);
 end
 
-main();
+run(main)
 
---spawn(main);
 

@@ -1,7 +1,24 @@
--- LuaJIT FII reflection library
--- License: Same as LuaJIT
--- Version: beta 1 (2012-06-02)
--- Author: Peter Cawley (lua@corsix.org)
+--[[ LuaJIT FFI reflection Library ]]--
+--[[ Copyright (C) 2013 Peter Cawley <lua@corsix.org>. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+--]]
 local ffi = require "ffi"
 local bit = require "bit"
 local reflect = {}
@@ -18,6 +35,12 @@ ffi.cdef [[
   
   typedef struct CTState {
     CType *tab;
+    uint32_t top;
+    uint32_t sizetab;
+    void *L;
+    void *g;
+    void *finalizer;
+    void *miscmap;
   } CTState;
 ]]
 
@@ -28,28 +51,35 @@ local function gc_str(gcref) -- Convert a GCref (to a GCstr) into a string
   end
 end
 
+local function memptr(gcobj)
+  return tonumber(tostring(gcobj):match"%x*$", 16)
+end
+
 -- Acquire a pointer to this Lua universe's CTState
 local CTState do
-  -- Stripped down version of global_State from lj_obj.h.
-  -- All that is needed is for the offset of the ctype_state field to be correct.
-  local global_state_ptr = ffi.typeof [[
-    struct {
-      void* _; // strhash
-      uint32_t _[2]; // strmask, strnum
-      void(*_)(void); // allocf
-      void* _; // allocd
-      uint32_t _[14]; // gc
-      char* _; // tmpbuf
-      uint32_t _[28]; // tmpbuf, nilnode, strempty*, *mask, dispatchmode, mainthref, *tv*, uvhead, hookc*
-      void(*_[3])(void); // hookf, wrapf, panic
-      uint32_t _[5]; // vmstate, bc_*, jit_*
-      uint32_t ctype_state;
-    }*
-  ]]
   local co = coroutine.create(function()end) -- Any live coroutine will do.
-  local L = tonumber(tostring(co):match"%x*$", 16) -- Get the memory address of co's lua_State (ffi.cast won't accept a coroutine).
-  local G = ffi.cast(global_state_ptr, ffi.cast("uint32_t*", L)[2])
-  CTState = ffi.cast("CTState*", G.ctype_state)
+  local uint32_ptr = ffi.typeof("uint32_t*")
+  local G = ffi.cast(uint32_ptr, ffi.cast(uint32_ptr, memptr(co))[2])
+  -- In global_State, `MRef ctype_state` is immediately before `GCRef gcroot[GCROOT_MAX]`.
+  -- We first find (an entry in) gcroot by looking for a metamethod name string.
+  local anchor = ffi.cast("uint32_t", ffi.cast("const char*", "__index"))
+  local i = 0
+  while math.abs(tonumber(G[i] - anchor)) > 64 do
+    i = i + 1
+  end
+  -- We then work backwards looking for something resembling ctype_state.
+  repeat
+    i = i - 1
+    CTState = ffi.cast("CTState*", G[i])
+  until ffi.cast(uint32_ptr, CTState.g) == G
+end
+
+-- Acquire the CTState's miscmap table as a Lua variable
+local miscmap do
+  local t = {}; t[0] = t
+  local tvalue = ffi.cast("uint32_t*", memptr(t))[2]
+  ffi.cast("uint32_t*", tvalue)[ffi.abi"le" and 0 or 1] = ffi.cast("uint32_t", ffi.cast("uintptr_t", CTState.miscmap))
+  miscmap = t[0]
 end
 
 -- Information for unpacking a `struct CType`.
@@ -156,7 +186,10 @@ local CTAs = {[0] =
     refct.alignment = a
     refct.attributes.align = a
   end,
-  function(a, refct) refct.transparent = true end,
+  function(a, refct)
+    refct.transparent = true
+    refct.attributes.subtype = refct.typeid
+  end,
   function(a, refct) refct.sym_name = a.name end,
   function(a, refct) error("TODO: CTA_BAD") end,
 }
@@ -270,7 +303,7 @@ end
 local function siblings(refct)
   -- Follow to the end of the attrib chain, if any.
   while refct.attributes do
-    refct = refct_from_id(CTState.tab[refct.typeid].sib)
+    refct = refct_from_id(refct.attributes.subtype or CTState.tab[refct.typeid].sib)
   end
 
   return sib_iter, nil, refct
@@ -304,6 +337,10 @@ metatables.enum.__index.value = find_sibling
 
 function reflect.typeof(x) -- refct = reflect.typeof(ct)
   return refct_from_id(tonumber(ffi.typeof(x)))
+end
+
+function reflect.getmetatable(x) -- mt = reflect.getmetatable(ct)
+  return miscmap[-tonumber(ffi.typeof(x))]
 end
 
 return reflect
