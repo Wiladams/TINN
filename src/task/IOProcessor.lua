@@ -20,19 +20,20 @@ local tabutils = require("tabutils");
 
 IOProcessor = {
 	Clock = StopWatch();
-	fibers = Collections.Queue();
-	coroutines = {};
+	
+	TaskID = 0;
+	TasksReadyToRun = Collections.Queue();
+	TasksWaitingForTime = {};
 
-	EventFibers = {};
 
-	FibersAwaitingEvent = {};
-	FibersAwaitingTime = {};
 	FibersAwaitingPredicate = Collections.Queue();
 
-	IOEventQueue = IOCompletionPort:create();
 	MessageQuanta = 10;		-- milliseconds
-
 	OperationId = 0;
+	IOEventQueue = IOCompletionPort:create();
+	EventFibers = {};
+	FibersAwaitingEvent = {};
+	TasksWaitingForIO = {};
 };
 
 
@@ -71,27 +72,34 @@ end
 --[[
 	Fiber Handling
 --]]
+IOProcessor.getTaskID = function(self)
+	self.TaskID = self.TaskID + 1;
+	return self.TaskID;
+end
 
 IOProcessor.scheduleFiber = function(self, afiber, ...)
 	if not afiber then
-		return nil
+		return false, "no fiber specified"
 	end
 
 	afiber:setParams(...);
-	self.coroutines[afiber.routine] = afiber;
-	self.fibers:Enqueue(afiber);	
+	self.TasksReadyToRun:Enqueue(afiber);	
+	afiber.state = "readytorun"
 
 	return afiber;
 end
 
 IOProcessor.spawn = function(self, aroutine, ...)
 	--print("IOProcessor.spawn()", aroutine, ...);
-	return self:scheduleFiber(SimpleFiber(aroutine), ...);
+	local task = SimpleFiber(aroutine)
+	task.TaskID = self:getTaskID();
+	self:scheduleFiber(task, ...);
+
+	return task;
 end
 
 IOProcessor.removeFiber = function(self, fiber)
 	--print("DROPPING DEAD FIBER: ", fiber);
-	self.coroutines[fiber.routine] = nil;
 	return true;
 end
 
@@ -99,9 +107,10 @@ IOProcessor.inMainFiber = function(self)
 	return coroutine.running() == nil; 
 end
 
-IOProcessor.yield = function(self)
-	return coroutine.yield();
+IOProcessor.yield = function(self, ...)
+	return coroutine.yield(...);
 end
+
 
 IOProcessor.yieldForIo = function(self, socket, iotype, opid)
 --print("== IOProcessor.yieldForIo: BEGIN: ", socket:getNativeSocket(), iotype, opid, self.CurrentFiber);
@@ -110,6 +119,7 @@ IOProcessor.yieldForIo = function(self, socket, iotype, opid)
 	self.EventFibers[opid] = self.CurrentFiber;
 	if self.CurrentFiber ~= nil then
 		self.FibersAwaitingEvent[self.CurrentFiber] = true;
+		self.CurrentFiber.state = "suspended";
 --print("== IOProcessor.yieldForIo: END: ")
 		return self:yield();
 	end
@@ -129,10 +139,12 @@ end
 
 IOProcessor.yieldUntilTime = function(self, atime)
 	--print("IOProcessor.yieldUntilTime: ", atime, self.Clock:Milliseconds())
+	--print("Current Fiber: ", self.CurrentFiber)
 
 	if self.CurrentFiber ~= nil then
 		self.CurrentFiber.DueTime = atime;
-		tabutils.binsert(self.FibersAwaitingTime, self.CurrentFiber, compareTaskDueTime);
+		self.CurrentFiber.state = "suspended"
+		tabutils.binsert(self.TasksWaitingForTime, self.CurrentFiber, compareTaskDueTime);
 
 		return self:yield();
 	end
@@ -151,11 +163,11 @@ IOProcessor.stepTimeEvents = function(self)
 
 	-- traverse through the fibers that are waiting
 	-- on time
-	local nAwaiting = #self.FibersAwaitingTime;
+	local nAwaiting = #self.TasksWaitingForTime;
 --print("Timer Events Waiting: ", nAwaiting)
 	for i=1,nAwaiting do
 
-		local fiber = self.FibersAwaitingTime[1];
+		local fiber = self.TasksWaitingForTime[1];
 		if fiber.DueTime <= currentTime then
 			--print("ACTIVATE: ", fiber.DueTime, currentTime);
 			-- put it back into circulation
@@ -165,20 +177,23 @@ IOProcessor.stepTimeEvents = function(self)
 
 			-- Remove the fiber from the list of fibers that are
 			-- waiting on time
-			table.remove(self.FibersAwaitingTime, 1);
+			table.remove(self.TasksWaitingForTime, 1);
 		end
 	end
 end
 
 IOProcessor.yieldUntilPredicate = function(self, predicate)
-	if self.CurrentFiber~= nil then
-		self.CurrentFiber.Predicate = predicate;
-		self.FibersAwaitingPredicate:enqueue(self.CurrentFiber)
+	--print("yieldUntilPredicate: ", predicate, self.CurrentFiber)
 
-		return self:yield();
+	if self.CurrentFiber == nil then
+		return false, "not current in a running task"
 	end
 
-	return false;
+	self.CurrentFiber.Predicate = predicate;
+	self.CurrentFiber.state = "suspended";
+	self.FibersAwaitingPredicate:enqueue(self.CurrentFiber)
+
+	return self:yield();
 end
 
 IOProcessor.stepPredicates = function(self)
@@ -199,7 +214,6 @@ IOProcessor.stepPredicates = function(self)
 end
 
 
-
 IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
 	local ovl = ffi.cast("IOOverlapped *", overlapped);
 
@@ -211,9 +225,16 @@ IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
 	local fiber = self.EventFibers[ovl.opcounter];
 
 	if fiber then
-		self:scheduleFiber(fiber, key, numbytes, overlapped);
-		self.EventFibers[ovl.opcounter] = nil;
+		-- remove the task from the list of tasks that are
+		-- waiting for an IO event
 		self.FibersAwaitingEvent[fiber] = nil;
+
+		-- remove the fiber from the index based on the
+		-- IO eventid
+		self.EventFibers[ovl.opcounter] = nil;
+
+		-- schedule the fiber
+		self:scheduleFiber(fiber, key, numbytes, overlapped);
 	else
 		print("IOProcessor.processIOEvent,NO FIBER WAITING FOR IO EVENT: ", ovl.opcounter)
 	end
@@ -263,60 +284,80 @@ end
 
 IOProcessor.stepFibers = function(self)
 	-- Now check the regular fibers
-	local fiber = self.fibers:Dequeue()
+	local task = self.TasksReadyToRun:Dequeue()
 
-	-- Take care of spawning a fiber first
-	if fiber then
-		if fiber:getStatus() ~= "dead" then
+	-- If no fiber in ready queue, then just return
+	if task == nil then
+		return true
+	end
 
-			-- If the fiber we pulled off the active list is 
-			-- not dead, then set it as the currently running fiber
-			-- and resume it.
-			self.CurrentFiber = fiber;
-			local results = {fiber:resume()};
+	if task:getStatus() == "dead" then
+		print("IOProcessor, REMOVE stillborn task")
+		self:removeFiber(task)
 
-			-- parse out the results of the resume into a success
-			-- and the rest of the values returned from the resume
-			local success = results[1];
-			table.remove(results,1);
+		return true;
+	end
 
-			self.CurrentFiber = nil;
+	-- If the task we pulled off the active list is 
+	-- not dead, then perhaps it is suspended.  If that's true
+	-- then it needs to drop out of the active list.
+	-- We assume that some other part of the system is responsible for
+	-- keeping track of the task, and rescheduling it when appropriate.
+	if task.state == "suspended" then
+		return true;
+	end
 
-			--print("SUCCESS: ", success);
-			if not success then
-				print("RESUME ERROR")
-				print(unpack(results));
-			end
+	-- If we have gotten this far, then the task truly is ready to 
+	-- run, and it should be set as the currentFiber, and its coroutine
+	-- is resumed.
+	self.CurrentFiber = task;
+	local results = {task:resume()};
 
-			-- The scheduling strategy here is:
-			--   if the fiber is dead, 
-			--     then remove it from the list of live fibers 
-			--     to be run
-			--   if it's not dead, but waiting for IO
-			--   or waiting for timer
-			--     then don't put it in the running list
-			if fiber:getStatus() == "dead" then
-				--print("INNER FIBER DEAD")
-				self:removeFiber(fiber)
-			elseif  not self.FibersAwaitingEvent[fiber] then
-				if fiber.DueTime and fiber.DueTime < self.Clock:Milliseconds() then
-					self:scheduleFiber(fiber, results);
-				end
-			end
-		else
-			print("OUTER FIBER DEAD")
-			self:removeFiber(fiber)
-		end
+	-- no task is currently executing
+	self.CurrentFiber = nil;
+
+	-- once we get results back from the resume, one
+	-- of two things could have happened.
+	-- 1) The routine exited normally
+	-- 2) The routine yielded
+	--
+	-- In both cases, we parse out the results of the resume 
+	-- into a success indicator and the rest of the values returned 
+	-- from the routine
+	local success = results[1];
+	table.remove(results,1);
+
+
+	--print("SUCCESS: ", success);
+	if not success then
+		print("RESUME ERROR")
+		print(unpack(results));
+	end
+
+	-- Again, check to see if the task is dead after
+	-- the most recent resume.  If it's dead, then don't
+	-- bother putting it back into the readytorun queue
+	-- just remove the task from the list of tasks
+	if task:getStatus() == "dead" then
+		--print("IOProcessor, DEAD coroutine, removing")
+		self:removeFiber(task)
+
+		return true;
+	end
+
+	-- The only way the task will get back onto the readylist
+	-- is if it's state is 'readytorun', otherwise, it will
+	-- stay out of the readytorun list.
+	if task.state == "readytorun" then
+		self:scheduleFiber(task, results);
 	end
 end
 
-IOProcessor.step = function(self)
-	self:stepTimeEvents();
-	self:stepFibers();
-	self:stepIOEvents();
-	self:stepPredicates();
+IOProcessor.getFibersWaitingOnTime = function(self)
+	return #self.TasksWaitingForTime
+end
 
-
+IOProcessor.fibersAwaitIO = function(self)
 	local fibersawaitio = false;
 
 
@@ -325,13 +366,27 @@ IOProcessor.step = function(self)
 		break;
 	end
 
-	local fibersawaittime = #self.FibersAwaitingTime > 0
+	return fibersawaitio
+end
 
-	--print("IOProcessor.step, fibersawaitio: ", fibersawaitio);
-	
-	if self.fibers:Len() < 1 and
-		not fibersawaitio and
-		not fibersawaittime then
+IOProcessor.step = function(self)
+	self:stepIOEvents();
+	self:stepTimeEvents();
+	self:stepFibers();
+	self:stepPredicates();
+
+
+	--print("== EPILOG ==")
+	--print("  READY: ", self.TasksReadyToRun:Len())
+	--print("     IO: ", self:fibersAwaitIO())
+	--print("   TIME: ", self:getFibersWaitingOnTime())
+	-- check various exit conditions
+	if self.TasksReadyToRun:Len() < 1 and
+		self:getFibersWaitingOnTime() < 1 and
+		not self:fibersAwaitIO() then 
+
+		print("EXITING IOProcessor.step, lack of tasks")
+
 		return false
 	end
 
@@ -384,8 +439,8 @@ sleep = function(millis)
 	return IOProcessor:yieldForTime(millis)
 end
 
-yield = function()
-	return IOProcessor:yield();
+yield = function(...)
+	return IOProcessor:yield(...);
 end
 
 waitFor = function(predicate)

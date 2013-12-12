@@ -189,6 +189,9 @@ DeviceContext_mt = {
 
 		-- Bitmap drawing
 		BitBlt = function(self, nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop)
+			nXSrc = nXSrc or 0
+			nYSrc = nYSrc or 0
+			dwRop = dwRop or gdi_ffi.SRCCOPY
 			return GDILib.BitBlt(self.Handle,nXDest,nYDest,nWidth,nHeight,hdcSrc,nXSrc,nYSrc,dwRop);
 		end,
 
