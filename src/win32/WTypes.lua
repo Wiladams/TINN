@@ -549,10 +549,10 @@ typedef struct tagRGBTRIPLE {
   BYTE rgbtGreen;
   BYTE rgbtRed;
 } RGBTRIPLE;
+]]
 
 
-
-
+ffi.cdef[[
 typedef struct tagBITMAP {
   LONG   bmType;
   LONG   bmWidth;
@@ -562,7 +562,12 @@ typedef struct tagBITMAP {
   WORD   bmBitsPixel;
   LPVOID bmBits;
 } BITMAP, *PBITMAP;
+]]
 
+BITMAP = ffi.typeof("BITMAP")
+
+
+ffi.cdef[[
 typedef struct tagBITMAPCOREHEADER {
   DWORD   bcSize;
   WORD    bcWidth;
@@ -684,6 +689,7 @@ BITMAPINFO_mt = {
   __new = function(ct)
   print("BITMAPINFO_ct")
     local obj = ffi.new(ct);
+    obj:Init();
     obj.bmiHeader:Init();
     return obj;
   end,
