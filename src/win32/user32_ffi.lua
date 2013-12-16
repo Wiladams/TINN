@@ -140,62 +140,6 @@ typedef struct {
     POINT ptMaxTrackSize;
 } MINMAXINFO, *PMINMAXINFO;
 
-
-
-static const int	CCHDEVICENAME = 32;
-static const int 	CCHFORMNAME = 32;
-
-
-typedef struct _devicemode {
-  BCHAR  dmDeviceName[CCHDEVICENAME];
-  WORD   dmSpecVersion;
-  WORD   dmDriverVersion;
-  WORD   dmSize;
-  WORD   dmDriverExtra;
-  DWORD  dmFields;
-  union {
-    struct {
-      short dmOrientation;
-      short dmPaperSize;
-      short dmPaperLength;
-      short dmPaperWidth;
-      short dmScale;
-      short dmCopies;
-      short dmDefaultSource;
-      short dmPrintQuality;
-    };
-    POINTL dmPosition;
-    DWORD  dmDisplayOrientation;
-    DWORD  dmDisplayFixedOutput;
-  };
-
-  short  dmColor;
-  short  dmDuplex;
-  short  dmYResolution;
-  short  dmTTOption;
-  short  dmCollate;
-  BYTE  dmFormName[CCHFORMNAME];
-  WORD  dmLogPixels;
-  DWORD  dmBitsPerPel;
-  DWORD  dmPelsWidth;
-  DWORD  dmPelsHeight;
-  union {
-    DWORD  dmDisplayFlags;
-    DWORD  dmNup;
-  };
-  DWORD  dmDisplayFrequency;
-  DWORD  dmICMMethod;
-  DWORD  dmICMIntent;
-  DWORD  dmMediaType;
-  DWORD  dmDitherType;
-  DWORD  dmReserved1;
-  DWORD  dmReserved2;
-  DWORD  dmPanningWidth;
-  DWORD  dmPanningHeight;
-} DEVMODE, *PDEVMODE;
-
-
-
 ]]
 
 

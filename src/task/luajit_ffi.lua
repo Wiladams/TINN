@@ -6,7 +6,7 @@ local bit = require "bit"
 local lshift = bit.lshift
 
 
-local Lib = ffi.load("lua51")
+local Lib = ffi.load("tinn.exe")
 local luajit = {}
 setmetatable(luajit, {
 	__index = function(tbl, key)

@@ -22,7 +22,7 @@ Computicle = require("Computicle");
 ComputicleOps = require("ComputicleOps");
 IOCompletionPort = require("IOCompletionPort");
 Heap = require("Heap");
-IOProcessor = require("IOProcessor");
+Task = require("IOProcessor");
 
 exit = function()
     SELFICLE:quit();
@@ -108,8 +108,7 @@ local handlemessages = function()
   print("BROKEN OUT")
 end
 
-IOProcessor:spawn(handlemessages);
-IOProcessor:run();
+Task:run(handlemessages);
 ]];
 }
 setmetatable(Computicle, {
@@ -224,6 +223,14 @@ Computicle.createFromFile = function(self, filename, codeparams)
 	fs:close();
 
 	return self:create(codechunk, codeparams);
+end
+
+Computicle.__toEssence = function(self)
+	local essence = string.format("Computicle:init(TINNThread:StringToPointer(%s),TINNThread:StringToPointer(%s));", 
+				TINNThread:PointerToString(self.Heap:getNativeHandle()), 
+				TINNThread:PointerToString(self.IOCP:getNativeHandle()));
+
+	return essence;
 end
 
 Computicle.load = function(self, name, codeparams)

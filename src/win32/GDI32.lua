@@ -8,84 +8,12 @@ local rshift = bit.rshift
 local GDILib = ffi.load("gdi32")
 local gdi_ffi = require ("gdi32_ffi")
 
---[=[
-ffi.cdef[[
-typedef struct {
-	HDC		Handle;
-} DeviceContext;
-]]
-DeviceContext = ffi.typeof("DeviceContext");
---]=]
 
-
-
-
-
-local GDI32 = {
-	FFI = gdi_ffi,
-	Lib = GDILib,
 --[[
-	CreateDC = function(lpszDriver, lpszDevice, lpszOutput, lpInitData)
-		return DeviceContext(GDILib.CreateDCA(lpszDriver, lpszDevice, lpszOutput, lpInitData));
-	end,
+	DeviceContext
 
-	CreateCompatibleDC = function(hdc)
-		return DeviceContext(GDILib.CreateCompatibleDC(hdc));
-	end,
-
-	CreateDCForDefaultDisplay = function()
-		local handle = GDILib.CreateDCA("DISPLAY", nil, nil, nil);
-		--print("CreateDCA: ", handle)
-		return DeviceContext(handle);
-	end,
-
-	CreateDCForMemory = function()
-		local displayDC = GDILib.CreateDCA("DISPLAY", nil, nil, nil)
-		return DeviceContext(GDILib.CreateCompatibleDC(displayDC))
-	end,
-
-	-- This is for getting a DC for a spooler
-	-- not for a window
-	-- GetDC() is located in the User32 library
-	GdiGetDC = function(SpoolFileHandle)
-		local hdc = GDILib.GdiGetDC(SpoolFileHandle);
-		return DeviceContext(hdc);
-	end,
+	The Drawing Context for good ol' GDI drawing
 --]]
-
-	SaveDC = function(hdc)
-		return GDILib.SaveDC(hdc);
-	end,
-
-	RestoreDC = function(hdc, nSaveDC)
-		return GDILib.RestoreDC(hdc, nSavedDC);
-	end,
-
-
-	-- Object Management
-	GetObject = function(hgdiobj, cbBuffer, lpvObject)
-		return GDILib.GetObjectA(hgdiobj, cbBuffer, lpvObject);
-	end,
-
-	GetStockObject = function(fnObject)
-		return GDILib.GetStockObject(fnObject);
-	end,
-
-
-	-- Bitmaps
-	CreateCompatibleBitmap = function(hdc, nWidth, nHeight)
-		return GDILib.CreateCompatibleBitmap(hdc, nWidth, nHeight);
-	end,
-
-	CreateDIBSection = function(hdc, pbmi, iUsage, ppvBits, hSection, dwOffset)
-		return GDILib.CreateDIBSection(hdc, pbmi, iUsage, ppvBits, hSection, dwOffset);
-	end,
-
-}
-
-
-
-
 DeviceContext = {}
 setmetatable(DeviceContext, {
 	__call = function(self, ...)
@@ -145,8 +73,23 @@ end
 
 
 -- Device Context State
-DeviceContext.Flush = function(self)
+DeviceContext.flush = function(self)
 	return GDILib.GdiFlush()
+end
+
+DeviceContext.restore = function(self, nSavedDC)
+	nSavedDC = nSavedDC or -1;
+	
+	return GDILib.RestoreDC(self.Handle, nSavedDC);
+end
+
+DeviceContext.save = function(self)
+	local stateIndex = GDILib.SaveDC(self.Handle);
+	if stateIndex == 0 then
+		return false, "failed to save GDI state"
+	end
+
+	return stateIndex; 
 end
 
 -- Object Management
@@ -181,55 +124,57 @@ DeviceContext.SetDCPenColor = function(self, color)
 end
 
 
-		-- Drawing routines
-		DeviceContext.MoveTo = function(self, x, y)
-			local result = GDILib.MoveToEx(self.Handle, x, y, nil);
-			return result
-		end
+-- Drawing routines
+DeviceContext.MoveTo = function(self, x, y)
+	local result = GDILib.MoveToEx(self.Handle, x, y, nil);
+	return result
+end
 
-		DeviceContext.MoveToEx = function(self, x, y, lpPoint)
-			return GDILib.MoveToEx(self.Handle, X, Y, lpPoint);
-		end
+DeviceContext.MoveToEx = function(self, x, y, lpPoint)
+	return GDILib.MoveToEx(self.Handle, X, Y, lpPoint);
+end
 
-		DeviceContext.SetPixel = function(self, x, y, color)
-			return GDILib.SetPixel(self.Handle, x, y, color);
-		end
+DeviceContext.SetPixel = function(self, x, y, color)
+	return GDILib.SetPixel(self.Handle, x, y, color);
+end
 
-		DeviceContext.SetPixelV = function(self, x, y, crColor)
-			return GDILib.SetPixelV(self.Handle, X, Y, crColor);
-		end
+DeviceContext.SetPixelV = function(self, x, y, crColor)
+	return GDILib.SetPixelV(self.Handle, X, Y, crColor);
+end
 
-		DeviceContext.LineTo = function(self, xend, yend)
-			local result = GDILib.LineTo(self.Handle, xend, yend);
-			return result
-		end
+DeviceContext.LineTo = function(self, xend, yend)
+	local result = GDILib.LineTo(self.Handle, xend, yend);
+	return result
+end
 
-		DeviceContext.Ellipse = function(self, nLeftRect, nTopRect, nRightRect, nBottomRect)
-			return GDILib.Ellipse(self.Handle,nLeftRect,nTopRect,nRightRect,nBottomRect);
-		end
+DeviceContext.Ellipse = function(self, nLeftRect, nTopRect, nRightRect, nBottomRect)
+	return GDILib.Ellipse(self.Handle,nLeftRect,nTopRect,nRightRect,nBottomRect);
+end
 
-		DeviceContext.Rectangle = function(self, left, top, right, bottom)
-			return GDILib.Rectangle(self.Handle, left, top, right, bottom);
-		end
+DeviceContext.Rectangle = function(self, left, top, right, bottom)
+	return GDILib.Rectangle(self.Handle, left, top, right, bottom);
+end
 
-		DeviceContext.RoundRect = function(self, left, top, right, bottom, width, height)
-			return GDILib.RoundRect(self.Handle, left, top, right, bottom, width, height);
-		end
+DeviceContext.RoundRect = function(self, left, top, right, bottom, width, height)
+	return GDILib.RoundRect(self.Handle, left, top, right, bottom, width, height);
+end
 
-		-- Text Drawing
-		DeviceContext.Text = function(self, txt, x, y)
-			x = x or 0
-			y = y or 0
-			return GDILib.TextOutA(self.Handle, x, y, txt, string.len(txt));
-		end
+-- Text Drawing
+DeviceContext.Text = function(self, txt, x, y)
+	x = x or 0
+	y = y or 0
+	
+	return GDILib.TextOutA(self.Handle, x, y, txt, string.len(txt));
+end
 
-		-- Bitmap drawing
-		DeviceContext.BitBlt = function(self, nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop)
-			nXSrc = nXSrc or 0
-			nYSrc = nYSrc or 0
-			dwRop = dwRop or gdi_ffi.SRCCOPY
-			return GDILib.BitBlt(self.Handle,nXDest,nYDest,nWidth,nHeight,hdcSrc,nXSrc,nYSrc,dwRop);
-		end
+-- Bitmap drawing
+DeviceContext.BitBlt = function(self, nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop)
+	nXSrc = nXSrc or 0
+	nYSrc = nYSrc or 0
+	dwRop = dwRop or gdi_ffi.SRCCOPY
+	
+	return GDILib.BitBlt(self.Handle,nXDest,nYDest,nWidth,nHeight,hdcSrc,nXSrc,nYSrc,dwRop);
+end
 
 		DeviceContext.StretchDIBits = function(self, XDest, YDest, nDestWidth, nDestHeight, XSrc, YSrc, nSrcWidth, nSrcHeight, lpBits, lpBitsInfo, iUsage, dwRop)
 			XDest = XDest or 0
@@ -272,20 +217,20 @@ end
 
 -- For Color
 -- 0x00bbggrr
-function RGB(byRed, byGreen, byBlue)
+local function RGB(byRed, byGreen, byBlue)
 	local acolor = lshift(byBlue,16) + lshift(byGreen,8) + byRed;
 	return acolor;
 end
 
-function GetRValue(c)
+local function GetRValue(c)
 	return band(c, 0xff)
 end
 
-function GetGValue(c)
+local function GetGValue(c)
 	return band(rshift(c,8), 0xff)
 end
 
-function GetBValue(c)
+local function GetBValue(c)
 	return band(rshift(c,16), 0xff)
 end
 
@@ -303,7 +248,7 @@ end
 --		that each row can align to a 32-bit boundary.  So, we need to
 --		essentially scale up the number of bits to match the alignment.
 --
-GDI32.GetAlignedByteCount = function(width, bitsperpixel, alignment)
+local GetAlignedByteCount = function(width, bitsperpixel, alignment)
 	local bytesperpixel = bitsperpixel / 8;
 	return band((width * bytesperpixel + (alignment - 1)), bnot(alignment - 1));
 end
@@ -378,7 +323,7 @@ GDIBitmap.getNativeInfo = function(self)
 	if not self.Info then
 		self.Info = ffi.new("BITMAP")
 		local infosize = ffi.sizeof("BITMAP");
-		GDI32.GetObject(self.Handle, infosize, self.Info)
+		GDILib.GetObjectA(self.Handle, infosize, self.Info)
 	end
 
 	return self.Info
@@ -407,24 +352,6 @@ end
 
 
 
---
--- GDIDIBSection_mt
---
---[=[
-ffi.cdef[[
-typedef struct {
-	void	*Handle;
-	DeviceContext	hDC;
-	int		Width;
-	int		Height;
-	int		BitsPerPixel;
-	char * Pixels;
-	BITMAPINFO	Info;
-} GDIDIBSection;
-]]
-
-GDIDIBSection = ffi.typeof("GDIDIBSection")
---]=]
 
 GDIDIBSection = {}
 setmetatable(GDIDIBSection, {
@@ -443,6 +370,8 @@ GDIDIBSection.init = function(rawhandle, pixels, info, deviceContext)
 		Width = info.bmiHeader.biWidth;
 		Height = info.bmiHeader.biHeight;
 		BitsPerPixel = info.bmiHeader.biBitCount;
+		Pixels = pixels;
+		Info = info;
 		DeviceContext = deviceContext;
 	}
 	setmetatable(obj, GDIDIBSection_mt)
@@ -460,7 +389,7 @@ GDIDIBSection.create = function(self, width, height, bitsperpixel, alignment)
 
 	-- Need to construct a BITMAPINFO structure
 	-- to describe the image we'll be creating
-	local bytesPerRow = GDI32.GetAlignedByteCount(width, bitsperpixel, alignment)
+	local bytesPerRow = GetAlignedByteCount(width, bitsperpixel, alignment)
 	local info = BITMAPINFO();
 
 	info.bmiHeader.biWidth = width;
@@ -504,4 +433,19 @@ end
 		
 
 
-return GDI32
+return {
+	FFI = gdi_ffi,
+	Lib = GDILib,
+
+	DeviceContext = DeviceContext,
+	GDIBitmap = GDIBitmap,
+	GDIDIBSection = GDIDIBSection,
+
+	-- Some helper functions
+	GetAlignedByteCount = GetAlignedByteCount,
+	GetBValue = GetBValue,
+	GetGValue = GetGValue,
+	GetRValue = GetRValue,
+
+	RGB = RGB,
+}

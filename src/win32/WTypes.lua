@@ -480,12 +480,18 @@ ffi.cdef[[
 typedef struct tagSIZE {
   LONG cx;
   LONG cy;
-} SIZE, *PSIZE;
+} SIZE, *PSIZE, *LPSIZE;
 
 typedef struct tagPOINT {
   int32_t x;
   int32_t y;
-} POINT, *PPOINT;
+} POINT, *PPOINT, *LPPOINT;
+
+typedef struct tagPOINTS
+{
+    SHORT   x;
+    SHORT   y;
+} POINTS, *PPOINTS, *LPPOINTS;
 
 typedef struct _POINTL {
   LONG x;
@@ -497,10 +503,12 @@ typedef struct tagRECT {
 	int32_t top;
 	int32_t right;
 	int32_t bottom;
-} RECT, *PRECT;
+} RECT, *PRECT, *LPRECT;
+
+typedef const RECT * LPCRECT;
 ]]
 
-RECT = nil
+RECT = ffi.typeof("RECT")
 RECT_mt = {
 	__tostring = function(self)
 		local str = string.format("%d %d %d %d", self.left, self.top, self.right, self.bottom)
@@ -510,195 +518,14 @@ RECT_mt = {
 	__index = {
 	}
 }
-RECT = ffi.metatype("RECT", RECT_mt)
+ffi.metatype(RECT, RECT_mt)
 
-ffi.cdef[[
-typedef struct _TRIVERTEX {
-  LONG        x;
-  LONG        y;
-  COLOR16     Red;
-  COLOR16     Green;
-  COLOR16     Blue;
-  COLOR16     Alpha;
-}TRIVERTEX, *PTRIVERTEX;
+local exports = {
+    -- Types
+    RECT = RECT,
 
-typedef struct _GRADIENT_TRIANGLE {
-  ULONG    Vertex1;
-  ULONG    Vertex2;
-  ULONG    Vertex3;
-}GRADIENT_TRIANGLE, *PGRADIENT_TRIANGLE;
-
-typedef struct _GRADIENT_RECT {
-  ULONG    UpperLeft;
-  ULONG    LowerRight;
-}GRADIENT_RECT, *PGRADIENT_RECT;
-
-
-
-
-
-typedef struct tagRGBQUAD {
-  BYTE    rgbBlue;
-  BYTE    rgbGreen;
-  BYTE    rgbRed;
-  BYTE    rgbReserved;
-} RGBQUAD;
-
-typedef struct tagRGBTRIPLE {
-  BYTE rgbtBlue;
-  BYTE rgbtGreen;
-  BYTE rgbtRed;
-} RGBTRIPLE;
-]]
-
-
-ffi.cdef[[
-typedef struct tagBITMAP {
-  LONG   bmType;
-  LONG   bmWidth;
-  LONG   bmHeight;
-  LONG   bmWidthBytes;
-  WORD   bmPlanes;
-  WORD   bmBitsPixel;
-  LPVOID bmBits;
-} BITMAP, *PBITMAP;
-]]
-
-BITMAP = ffi.typeof("BITMAP")
-
-
-ffi.cdef[[
-typedef struct tagBITMAPCOREHEADER {
-  DWORD   bcSize;
-  WORD    bcWidth;
-  WORD    bcHeight;
-  WORD    bcPlanes;
-  WORD    bcBitCount;
-} BITMAPCOREHEADER, *PBITMAPCOREHEADER;
-
-typedef struct tagBITMAPINFOHEADER{
-  DWORD  biSize;
-  LONG   biWidth;
-  LONG   biHeight;
-  WORD   biPlanes;
-  WORD   biBitCount;
-  DWORD  biCompression;
-  DWORD  biSizeImage;
-  LONG   biXPelsPerMeter;
-  LONG   biYPelsPerMeter;
-  DWORD  biClrUsed;
-  DWORD  biClrImportant;
-} BITMAPINFOHEADER, *PBITMAPINFOHEADER;
-
-
-typedef struct tagBITMAPINFO {
-  BITMAPINFOHEADER bmiHeader;
-  RGBQUAD          bmiColors[1];
-} BITMAPINFO, *PBITMAPINFO;
-
-
-typedef struct tagCIEXYZ {
-  FXPT2DOT30 ciexyzX;
-  FXPT2DOT30 ciexyzY;
-  FXPT2DOT30 ciexyzZ;
-} CIEXYZ, * PCIEXYZ;
-
-
-typedef struct tagCIEXYZTRIPLE {
-  CIEXYZ  ciexyzRed;
-  CIEXYZ  ciexyzGreen;
-  CIEXYZ  ciexyzBlue;
-} CIEXYZTRIPLE, *PCIEXYZTRIPLE;
-
-
-
-typedef struct {
-  DWORD        bV4Size;
-  LONG         bV4Width;
-  LONG         bV4Height;
-  WORD         bV4Planes;
-  WORD         bV4BitCount;
-  DWORD        bV4V4Compression;
-  DWORD        bV4SizeImage;
-  LONG         bV4XPelsPerMeter;
-  LONG         bV4YPelsPerMeter;
-  DWORD        bV4ClrUsed;
-  DWORD        bV4ClrImportant;
-  DWORD        bV4RedMask;
-  DWORD        bV4GreenMask;
-  DWORD        bV4BlueMask;
-  DWORD        bV4AlphaMask;
-  DWORD        bV4CSType;
-  CIEXYZTRIPLE bV4Endpoints;
-  DWORD        bV4GammaRed;
-  DWORD        bV4GammaGreen;
-  DWORD        bV4GammaBlue;
-} BITMAPV4HEADER, *PBITMAPV4HEADER;
-
-typedef struct {
-  DWORD        bV5Size;
-  LONG         bV5Width;
-  LONG         bV5Height;
-  WORD         bV5Planes;
-  WORD         bV5BitCount;
-  DWORD        bV5Compression;
-  DWORD        bV5SizeImage;
-  LONG         bV5XPelsPerMeter;
-  LONG         bV5YPelsPerMeter;
-  DWORD        bV5ClrUsed;
-  DWORD        bV5ClrImportant;
-  DWORD        bV5RedMask;
-  DWORD        bV5GreenMask;
-  DWORD        bV5BlueMask;
-  DWORD        bV5AlphaMask;
-  DWORD        bV5CSType;
-  CIEXYZTRIPLE bV5Endpoints;
-  DWORD        bV5GammaRed;
-  DWORD        bV5GammaGreen;
-  DWORD        bV5GammaBlue;
-  DWORD        bV5Intent;
-  DWORD        bV5ProfileData;
-  DWORD        bV5ProfileSize;
-  DWORD        bV5Reserved;
-} BITMAPV5HEADER, *PBITMAPV5HEADER;
-
-]]
-
-
-BITMAPINFOHEADER = nil
-BITMAPINFOHEADER_mt = {
-
-	__index = {
-    __new = function(ct)
-    print("BITMAPINFOHEADER_ct")
-      local obj = ffi.new(ct);
-      obj.biSize = ffi.sizeof("BITMAPINFOHEADER")
-      return obj;
-    end,
-
-		Init = function(self)
-			self.biSize = ffi.sizeof("BITMAPINFOHEADER")
-		end,
-	}
+    -- Functions
+    DECLARE_HANDLE = DECLARE_HANDLE,
 }
-BITMAPINFOHEADER = ffi.metatype("BITMAPINFOHEADER", BITMAPINFOHEADER_mt)
 
-
-BITMAPINFO = ffi.typeof("BITMAPINFO")
-BITMAPINFO_mt = {
-  __new = function(ct)
-  print("BITMAPINFO_ct")
-    local obj = ffi.new(ct);
-    obj:Init();
-    obj.bmiHeader:Init();
-    return obj;
-  end,
-
-  __index = {
-    Init = function(self)
-      self.bmiHeader:Init();
-    end,
-  },
-}
-BITMAPINFO = ffi.metatype("BITMAPINFO", BITMAPINFO_mt)
-
+return exports

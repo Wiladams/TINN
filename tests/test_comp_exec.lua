@@ -5,8 +5,6 @@ local Messenger = require("Messenger");
 local comp = Computicle();
 local msngr = Messenger(comp);
 
--- The following runs a primary application loop
---comp = Computicle:load("comp_msgpump");
 
 
 -- Functions to be injected into computicle

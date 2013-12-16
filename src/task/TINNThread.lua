@@ -1,7 +1,7 @@
 
 local ffi = require("ffi");
 
-local lua = require("luajit_ffi");
+--local lua = require("luajit_ffi");
 local errorhandling = require("core_errorhandling_l1_1_1");
 local core_process = require("core_processthreads_l1_1_1");
 local WinBase = require("WinBase");

@@ -36,6 +36,7 @@
 
 
 local ffi = require "ffi"
+local WTypes = require("WTypes")
 
 WGL_WGLEXT_VERSION = 24
 
@@ -414,7 +415,7 @@ WGL_ACCESS_WRITE_DISCARD_NV    = 0x00000002
 
 -- WGL_EXT_swap_control_tear
 
-
+--[=[
 local function DECLARE_HANDLE(name)
 	local decl = string.format([[
 		struct %s__ {
@@ -425,6 +426,7 @@ local function DECLARE_HANDLE(name)
 		name, name, name);
 	ffi.cdef(decl);
 end
+--]=]
 
 DECLARE_HANDLE("HPBUFFERARB");
 DECLARE_HANDLE("HPBUFFEREXT");
