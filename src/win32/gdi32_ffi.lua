@@ -773,6 +773,7 @@ typedef struct _XFORM {
   FLOAT eDy;
 } XFORM, *PXFORM, *LPXFORM;
 ]]
+local XFORM = ffi.typeof("XFORM")
 
 ffi.cdef[[
 
@@ -1325,7 +1326,8 @@ local gdi32_ffi = {
   -- Types
   BITMAP = BITMAP,
   BITMAPINFOHEADER = BITMAPINFOHEADER,
-
+  XFORM = XFORM,
+  
   -- Functions
   -- Bitmaps
   AlphaBlend = ImgLib.AlphaBlend,
@@ -1333,7 +1335,27 @@ local gdi32_ffi = {
   TransparentBlt = ImgLib.TransparentBlt,
 
   -- Coordinates and Viewport
+  CombineTransform = Lib.CombineTransform,
+  DPtoLP = Lib.DPtoLP,
   GetMapMode = Lib.GetMapMode,
+  GetViewportExtEx = Lib.GetViewportExtEx,
+  GetViewportOrgEx = Lib.GetViewportOrgEx,
+  GetWindowExtEx = Lib.GetWindowExtEx,
+  GetWindowOrgEx = Lib.GetWindowOrgEx,
+  GetWorldTransform = Lib.GetWorldTransform,
+  LPtoDP = Lib.LPtoDP,
+  ModifyWorldTransform = Lib.ModifyWorldTransform,
+  OffsetViewportOrgEx = Lib.OffsetViewportOrgEx,
+  OffsetWindowOrgEx = Lib.OffsetWindowOrgEx,
+  ScaleViewportExtEx = Lib.ScaleViewportExtEx,
+  ScaleWindowExtEx = Lib.ScaleWindowExtEx,
+  SetGraphicsMode = Lib.SetGraphicsMode,
+  SetMapMode = Lib.SetMapMode,
+  SetViewportExtEx = Lib.SetViewportExtEx,
+  SetViewportOrgEx = Lib.SetViewportOrgEx,
+  SetWindowExtEx = Lib.SetWindowExtEx,
+  SetWindowOrgEx = Lib.SetWindowOrgEx,
+  SetWorldTransform = Lib.SetWorldTransform,
 
   -- Arcs and Lines
   AngleArc = Lib.AngleArc,
@@ -1361,6 +1383,8 @@ local gdi32_ffi = {
   StretchDIBits = Lib.StretchDIBits,
   TextOutA = Lib.TextOutA,
 
+  -- Filled shapes
+  Polygon = Lib.Polygon,
 }
 
 return gdi32_ffi

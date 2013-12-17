@@ -47,6 +47,9 @@ DeviceContext.create = function(self, lpszDriver, lpszDevice, lpszOutput, lpInit
 		return nil, "could not create Device Context as specified"
 	end
 
+	-- default to advanced graphics mode instead of GM_COMPATIBLE
+	gdi_ffi.SetGraphicsMode(rawhandle, "GM_ADVANCED")
+
 	return self:init(rawhandle)
 end
 
@@ -71,6 +74,18 @@ DeviceContext.createCompatibleBitmap = function(self, width, height)
 	return bm, err
 end
 
+-- Coordinates and Transforms
+DeviceContext.setGraphicsMode = function(self, mode)
+	gdi_ffi.SetGraphicsMode(self.Handle, mode)
+
+	return true;
+end
+
+DeviceContext.setMapMode = function(self, mode)
+	gdi_ffi.SetMapMode(self.Handle, mode)
+
+	return true;
+end
 
 -- Device Context State
 DeviceContext.flush = function(self)
@@ -149,6 +164,12 @@ end
 
 DeviceContext.Ellipse = function(self, nLeftRect, nTopRect, nRightRect, nBottomRect)
 	return GDILib.Ellipse(self.Handle,nLeftRect,nTopRect,nRightRect,nBottomRect);
+end
+
+DeviceContext.Polygon = function(self, lpPoints, nCount)
+	local res = gdi_ffi.Polygon(self.Handle,lpPoints, nCount);
+
+	return true;
 end
 
 DeviceContext.Rectangle = function(self, left, top, right, bottom)
