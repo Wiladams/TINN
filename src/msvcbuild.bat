@@ -49,10 +49,11 @@
 %LUAC% task/IOProcessor.lua IOProcessor.obj
 %LUAC% task/luajit_ffi.lua luajit_ffi.obj
 %LUAC% task/LuaState.lua LuaState.obj
+%LUAC% task/parallel.lua parallel.obj
 %LUAC% task/SimpleFiber.lua SimpleFiber.obj
 %LUAC% task/Timer.lua Timer.obj
 %LUAC% task/TINNThread.lua TINNThread.obj
-@set TASKLIB=IOOps.obj IOProcessor.obj luajit_ffi.obj LuaState.obj SimpleFiber.obj Timer.obj TINNThread.obj
+@set TASKLIB=IOOps.obj IOProcessor.obj luajit_ffi.obj LuaState.obj parallel.obj SimpleFiber.obj Timer.obj TINNThread.obj
 
 
 @rem The Net library

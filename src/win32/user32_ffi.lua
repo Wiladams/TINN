@@ -517,8 +517,9 @@ local user32_ffi = {
 	SW_SHOWDEFAULT = 10,
 	SW_FORCEMINIMIZE = 11,
 
-	PM_REMOVE = 0x0001,
-	PM_NOYIELD = 0x0002,
+	PM_NOREMOVE			= 0x0000,
+	PM_REMOVE 			= 0x0001,
+	PM_NOYIELD 			= 0x0002,
 
 	-- dwWakeMask of MsgWaitForMultipleObjectsEx()
 	QS_KEY				= 0x0001,
@@ -646,6 +647,7 @@ local user32_ffi = {
 	DispatchMessageA = Lib.DispatchMessageA,
 	GetClientRect = Lib.GetClientRect,
 	GetDC = Lib.GetDC,
+	GetMessageA = Lib.GetMessageA,
 	GetSystemMetrics = Lib.GetSystemMetrics,
 	LoadCursor = Lib.LoadCursorA,
 	PeekMessageA = Lib.PeekMessageA,

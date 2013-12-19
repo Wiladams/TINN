@@ -7,6 +7,7 @@ local bit = require "bit"
 local bor = bit.bor
 
 local Task = require("IOProcessor")
+local parallel = require("parallel")()
 local Timer = require("Timer")
 
 local Gdi32 = require "GDI32"
@@ -211,6 +212,7 @@ print("GDIApp:OnCreated: ", nativewindow)
 --print("GDIContext: ", self.GDIContext);
 
 	self.IsValid = true
+	self.IsRunning = true;
 
 	if self.OnCreatedDelegate then
 		self.OnCreatedDelegate(self)
@@ -274,6 +276,45 @@ function GDIApp:OnMouseMessage(msg)
 	return 1;
 end
 
+--[[
+	A simple predicate that tells us whether or not a message
+	is waiting in the thread's message queue or not.
+--]]
+local user32MessageHasArrived = function()
+	local msg = ffi.new("MSG")
+
+	local closure = function()
+		local peeked = User32.PeekMessageA(msg, nil, 0, 0, User32.PM_NOREMOVE);
+--print("PEEKED: ", peeked)
+		if peeked == 0 then
+			return false
+		end
+
+		return true;
+	end
+
+	return closure;
+end
+
+local handleUser32Message = function(win)
+	local msg = ffi.new("MSG")
+
+	local closure = function()
+--print("HANDLE MESSAGE: ")
+		ffi.fill(msg, ffi.sizeof("MSG"))
+		local res = User32.GetMessageA(msg, nil, 0,0)
+		local res = User32.TranslateMessage(msg)
+			
+		User32.DispatchMessageA(msg)
+
+		if msg.message == User32.WM_QUIT then
+			print("APP QUIT == TRUE")
+			win:OnQuit()
+		end
+	end
+
+	return closure;
+end
 
 --[[
 	This is a predicate with side effects
@@ -289,59 +330,38 @@ end
 	to this predicate becoming true will be enacted.
 
 --]]
-local appClose = function(win)
-
-	win.IsRunning = true
-	local msg = ffi.new("MSG")
+local appToClose = function(win)
 
 	local closure = function()
-
-		ffi.fill(msg, ffi.sizeof("MSG"))
-		local peeked = User32.PeekMessageA(msg, nil, 0, 0, User32.PM_REMOVE);
-
---print("PEEKED: ", peeked)
-
-		if peeked ~= 0 then
-
-			local res = User32.TranslateMessage(msg)
-			
-			User32.DispatchMessageA(msg)
-
-			if msg.message == User32.WM_QUIT then
-				print("APP QUIT == TRUE")
-				win:OnQuit()
-			end
-		end
-
 		if win.IsRunning == false then
-			print("APP CLOSE, IsRunning == false")		
-			if win.FrameTimer then
-				win.FrameTimer:cancel();
-			end
-
+			--print("APP CLOSE, IsRunning == false")		
 			return true;
 		end
-
 		return false;
 	end
 
 	return closure;
 end
 
-GDIApp.runWindow = function(self)
+GDIApp.main = function(self)
 	
 	self:show()
 	self:update()
 
 	-- Start the FrameTimer
-	local period = 1000/self.FrameRate;
-	self.FrameTimer = Timer({Delay=period, Period=period, OnTime =self:handleFrameTick()})
+	--local period = 1000/self.FrameRate;
+	--self.FrameTimer = Timer({Delay=period, Period=period, OnTime =self:handleFrameTick()})
+	self.FrameTimer = periodic(self:handleFrameTick(), 1000/self.FrameRate)
+
+	-- handle the user32 message queue
+	whenever(user32MessageHasArrived(), handleUser32Message(self))
 
 	-- wait here until the application window is closed
-	local res = waitFor(appClose(self))
-	print("RESULT, waitFor(appClose): ", res)
-	
-	print("GDIApp.runWindow == APP CLOSED PREDICATE ")
+	local res = waitFor(appToClose(self))
+
+	if self.FrameTimer then
+		self.FrameTimer:cancel();
+	end
 end
 
 GDIApp.run = function(self)
@@ -357,11 +377,11 @@ GDIApp.run = function(self)
 
 	-- spawn the thread that will wait
 	-- for messages to finish
-	Task:spawn(GDIApp.runWindow, self);
+	Task:spawn(GDIApp.main, self);
 
 	Task:start()
 
-	print("EXIT GDIApp.run")
+	--print("EXIT GDIApp.run")
 end
 
 
