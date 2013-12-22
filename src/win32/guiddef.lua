@@ -121,9 +121,8 @@ int UuidToStringA(UUID * Uuid , char ** StringUuid);
 -- Helpful function for constructing a UUID/GUID
 -- from a string
 function UUIDFromString(stringid)
-	local id = ffi.new("UUID[1]")
+	local id = ffi.new("UUID")
 	Rpcrt4.UuidFromStringA(stringid, id)
-	id = id[0]
 
 	return id
 end

@@ -14,13 +14,14 @@ local IOCompletionPort = require("IOCompletionPort");
 local WinError = require("win_error");
 local core_synch = require("core_synch_l1_2_0");
 local IOOps = require("IOOps")
-
+local Functor = require("Functor")
 local tabutils = require("tabutils");
 
 
 IOProcessor = {
 	Clock = StopWatch();
-	
+	QuantaSteps = {};
+
 	TaskID = 0;
 	TasksReadyToRun = Collections.Queue();
 	TasksWaitingForTime = {};
@@ -36,6 +37,10 @@ IOProcessor = {
 	TasksWaitingForIO = {};
 };
 
+
+IOProcessor.getClock = function(self)
+	return self.Clock;
+end
 
 --[[
 	The message quanta is the amount of time we will wait on the 
@@ -107,6 +112,10 @@ IOProcessor.inMainFiber = function(self)
 	return coroutine.running() == nil; 
 end
 
+IOProcessor.getCurrentFiber = function(self)
+	return self.CurrentFiber;
+end
+
 IOProcessor.yield = function(self, ...)
 	return coroutine.yield(...);
 end
@@ -129,6 +138,8 @@ print("IOProcessor.yieldForIo:  NO CURRENT FIBER");
 	return nil;
 end
 
+
+--[[
 local function compareTaskDueTime(task1, task2)
 	if task1.DueTime < task2.DueTime then
 		return true
@@ -181,38 +192,7 @@ IOProcessor.stepTimeEvents = function(self)
 		end
 	end
 end
-
-IOProcessor.yieldUntilPredicate = function(self, predicate)
-	--print("yieldUntilPredicate: ", predicate, self.CurrentFiber)
-
-	if self.CurrentFiber == nil then
-		return false, "not current in a running task"
-	end
-
-	self.CurrentFiber.Predicate = predicate;
-	self.CurrentFiber.state = "suspended";
-	self.FibersAwaitingPredicate:enqueue(self.CurrentFiber)
-
-	return self:yield();
-end
-
-IOProcessor.stepPredicates = function(self)
-	local nPredicates = self.FibersAwaitingPredicate:length()
-
-	for i=1,nPredicates do
-		local fiber = self.FibersAwaitingPredicate:dequeue();
-		if fiber.Predicate() then
-			fiber.Predicate = nil;
-			self:scheduleFiber(fiber);
-		else
-			-- stick the fiber back in the queue if it does not
-			-- indicate true as yet.
-			self.FibersAwaitingPredicate:enqueue(fiber)
-		end
-	end
-
-end
-
+--]]
 
 IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
 	local ovl = ffi.cast("IOOverlapped *", overlapped);
@@ -353,9 +333,11 @@ IOProcessor.stepFibers = function(self)
 	end
 end
 
+--[[
 IOProcessor.getFibersWaitingOnTime = function(self)
 	return #self.TasksWaitingForTime
 end
+--]]
 
 IOProcessor.fibersAwaitIO = function(self)
 	local fibersawaitio = false;
@@ -369,52 +351,80 @@ IOProcessor.fibersAwaitIO = function(self)
 	return fibersawaitio
 end
 
-IOProcessor.step = function(self)
-	self:stepIOEvents();
-	self:stepTimeEvents();
-	self:stepFibers();
-	self:stepPredicates();
+-- returns an iterator of all the steps
+-- to be executed per quanta
+IOProcessor.addQuantaStep = function(self, astep)
+	table.insert(self.QuantaSteps,astep)
+end
+
+IOProcessor.quantumSteps = function(self)
+
+	local index = 0;
+	local listSize = #self.QuantaSteps;
+
+	local closure = function()
+		if not self.ContinueRunning then
+			return nil;
+		end
+
+		index = index + 1;
+		
+		local astep = self.QuantaSteps[index]
+
+		if (index % listSize) == 0 then
+			index = 0
+
+			-- We've made it through the list at least
+			-- once, so check to see if there are still
+			-- any tasks running
+			if self:noMoreTasks() then
+				self.ContinueRunning = false;
+			end
+		end
+
+		return astep
+	end
+
+	return closure	
+end
 
 
-	--print("== EPILOG ==")
-	--print("  READY: ", self.TasksReadyToRun:Len())
-	--print("     IO: ", self:fibersAwaitIO())
-	--print("   TIME: ", self:getFibersWaitingOnTime())
-	-- check various exit conditions
+IOProcessor.noMoreTasks = function(self)
 	if self.TasksReadyToRun:Len() < 1 and
-		self:getFibersWaitingOnTime() < 1 and
-		not self:fibersAwaitIO() then 
-
-		print("EXITING IOProcessor.step, lack of tasks")
-
-		return false
+--	self:getFibersWaitingOnTime() < 1 and
+	not self:fibersAwaitIO() then 
+		return true
 	end
 
-	return true;
+	return false;
 end
 
-IOProcessor.start = function(self)
-	-- Run the IOProcessor loop
-	self.ContinueRunning = true;
-	local steps = 0;
-
-	while self.ContinueRunning do
-		steps = steps + 1;
-	    if not IOProcessor:step() then
-	    	break;
-	    end
-	    --print("sps: ", steps/self.Clock:Seconds())
-	end
-end
 
 IOProcessor.stop = function(self)
 	self.ContinueRunning = false;
+end
+
+IOProcessor.start = function(self)
+	self.ContinueRunning = true;
+
+	--when(Functor(self.noMoreTasks,self), function() self.ContinueRunning = false; end);
+
+	for astep in self:quantumSteps() do
+		astep()
+
+	end
+
+	print("FINISHED STEP ITERATION")
 end
 
 IOProcessor.run = function(self, func, ...)
 	if func ~= nil then
 		self:spawn(func, ...);
 	end
+
+	self:addQuantaStep(Functor(self.stepIOEvents,self));
+--	self:addQuantaStep(Functor(self.stepTimeEvents,self));
+	self:addQuantaStep(Functor(self.stepFibers,self));
 
 	self:start();
 end
@@ -435,17 +445,17 @@ stop = function()
 	return IOProcessor:stop();
 end
 
+--[[
 sleep = function(millis)
 	return IOProcessor:yieldForTime(millis)
 end
+--]]
 
 yield = function(...)
 	return IOProcessor:yield(...);
 end
 
-waitFor = function(predicate)
-	return IOProcessor:yieldUntilPredicate(predicate)
-end
+
 
 return IOProcessor
 

@@ -29,6 +29,7 @@
 %LUAC% core/Collections.lua Collections.obj
 %LUAC% core/dkjson.lua dkjson.obj
 %LUAC% core/FileStream.lua FileStream.obj
+%LUAC% core/Functor.lua Functor.obj
 %LUAC% core/langutils.lua langutils.obj
 %LUAC% core/MemoryStream.lua MemoryStream.obj
 %LUAC% core/re.lua re.obj
@@ -42,7 +43,7 @@
 %LUAC% core/tabutils.lua tabutils.obj
 %LUAC% core/Vector.lua Vector.obj
 %LUAC% core/zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stdlib.obj stream.obj StreamOps.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
+@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  Functor.obj langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stdlib.obj stream.obj StreamOps.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
 
 @rem TINN Task library
 %LUAC% task/IOOps.lua IOOps.obj
@@ -53,7 +54,9 @@
 %LUAC% task/SimpleFiber.lua SimpleFiber.obj
 %LUAC% task/Timer.lua Timer.obj
 %LUAC% task/TINNThread.lua TINNThread.obj
-@set TASKLIB=IOOps.obj IOProcessor.obj luajit_ffi.obj LuaState.obj parallel.obj SimpleFiber.obj Timer.obj TINNThread.obj
+%LUAC% task/waitForCondition.lua waitForCondition.obj
+%LUAC% task/waitForTime.lua waitForTime.obj
+@set TASKLIB=IOOps.obj IOProcessor.obj luajit_ffi.obj LuaState.obj parallel.obj SimpleFiber.obj Timer.obj TINNThread.obj waitForCondition.obj waitForTime.obj
 
 
 @rem The Net library

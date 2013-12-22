@@ -1,6 +1,7 @@
 -- test_waitFor.lua
 
 local IOProcessor = require("IOProcessor")
+local parallel = require("parallel")()
 local Timer = require("Timer")
 
 local count = 0;

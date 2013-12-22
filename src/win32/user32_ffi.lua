@@ -233,6 +233,9 @@ HWND CreateWindowExA(
 
 BOOL DestroyWindow(HWND hWnd);
 
+HWND GetDesktopWindow(void);
+
+
 BOOL RedrawWindow(
   HWND hWnd,
   const RECT *lprcUpdate,
@@ -647,6 +650,7 @@ local user32_ffi = {
 	DispatchMessageA = Lib.DispatchMessageA,
 	GetClientRect = Lib.GetClientRect,
 	GetDC = Lib.GetDC,
+	GetDesktopWindow = Lib.GetDesktopWindow,
 	GetMessageA = Lib.GetMessageA,
 	GetSystemMetrics = Lib.GetSystemMetrics,
 	LoadCursor = Lib.LoadCursorA,

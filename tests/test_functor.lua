@@ -1,28 +1,43 @@
 -- test_functor.lua
+local Functor = require("Functor")
 
-local functorFactor = function(params)
-	local functor = {
-		Params = params;
-	}
-
-	setmetatable(functor, {
-		__call = function(...)
-			print(functor.Params);
-		end,
-		})
-
-	return functor
+-- some function that will be called with parameters
+local function printSomething(words)
+	print(words)
 end
 
 
-local f1 = functorFactor("words to say", func);
+local f1 = Functor(printSomething)
 
-f1();
+f1("words to say")
 
-f1.Params = "new words to say"
+local methods = {}
+local methods_mt = {
+	__index = methods,
+}
 
-f1();
+methods.init = function(self)
+	local obj = {
+		name = "foo",
+		name2 = "bar",
+	}
+	setmetatable(obj, methods_mt)
+	
+	return obj;
+end
 
-f1.Params = nil;
-print("-----")
-f1();
+methods.method1 = function(self)
+	print(self.name)
+end
+
+methods.method2 = function(self)
+	print(self.name2)
+end
+
+local m1 = methods:init();
+
+local f2 = Functor(methods.method1, m1)
+local f3 = Functor(m1.method2, m1)
+
+f2();
+f3();

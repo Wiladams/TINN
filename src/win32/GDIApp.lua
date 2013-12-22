@@ -217,6 +217,7 @@ print("GDIApp:OnCreated: ", nativewindow)
 	if self.OnCreatedDelegate then
 		self.OnCreatedDelegate(self)
 	end
+print("GDIApp:OnCreated - END")
 end
 
 function GDIApp:OnDestroy()
@@ -280,7 +281,7 @@ end
 	A simple predicate that tells us whether or not a message
 	is waiting in the thread's message queue or not.
 --]]
-local user32MessageHasArrived = function()
+local user32MessageIsAvailable = function()
 	local msg = ffi.new("MSG")
 
 	local closure = function()
@@ -316,20 +317,7 @@ local handleUser32Message = function(win)
 	return closure;
 end
 
---[[
-	This is a predicate with side effects
-	appQuit() returns a closure which will check the 
-	event queue for messages, and dispatch them.
 
-	If the WM_QUIT message is encountered, the OnQuit() method
-	is called.  If that in turn sets 'IsRunning' == false
-	then the predicate will return 'true', indicating that the 
-	condition has been met.
-
-	The window will go away, and whatever consequence there is 
-	to this predicate becoming true will be enacted.
-
---]]
 local appToClose = function(win)
 
 	local closure = function()
@@ -344,7 +332,8 @@ local appToClose = function(win)
 end
 
 GDIApp.main = function(self)
-	
+	print("GDIApp.main - BEGIN")
+
 	self:show()
 	self:update()
 
@@ -354,7 +343,7 @@ GDIApp.main = function(self)
 	self.FrameTimer = periodic(self:handleFrameTick(), 1000/self.FrameRate)
 
 	-- handle the user32 message queue
-	whenever(user32MessageHasArrived(), handleUser32Message(self))
+	whenever(user32MessageIsAvailable(), handleUser32Message(self))
 
 	-- wait here until the application window is closed
 	local res = waitFor(appToClose(self))
@@ -369,7 +358,6 @@ GDIApp.run = function(self)
 		print('Window Handle is NULL')
 		return
 	end
-
 	-- set quanta to 0 so we don't waste time
 	-- in i/o processing if there's nothing there
 	Task:setMessageQuanta(0);
@@ -379,9 +367,9 @@ GDIApp.run = function(self)
 	-- for messages to finish
 	Task:spawn(GDIApp.main, self);
 
-	Task:start()
+	Task:run()
 
-	--print("EXIT GDIApp.run")
+	print("EXIT GDIApp.run")
 end
 
 

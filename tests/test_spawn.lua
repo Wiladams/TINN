@@ -1,5 +1,6 @@
 local Task = require("IOProcessor")
 local Timer = require("Timer")
+local parallel = require("parallel")()
 
 
 -- Set quanto to zero to get a flat out loop
