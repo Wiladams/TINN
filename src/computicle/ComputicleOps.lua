@@ -27,21 +27,9 @@ local datumToString = function(data, name)
 	elseif dtype == "table" then
 		if data.__toEssence then
 			datastr = data:__toEssence();
-		--elseif getmetatable(data) == Computicle_mt then
-			-- package up a computicle
-		--	datastr = string.format("Computicle:init(TINNThread:StringToPointer(%s),TINNThread:StringToPointer(%s));", 
-		--		TINNThread:PointerToString(data.Heap:getNativeHandle()), 
-		--		TINNThread:PointerToString(data.IOCP:getNativeHandle()));
-		elseif getmetatable(data) == getmetatable(self.IOCP) then
-			-- The data is an iocompletion port, so handle it specially
-			datastr = string.format("IOCompletionPort:init(TINNThread:StringToPointer(%s))",
-				TINNThread:PointerToString(data:getNativeHandle()));
 		else
 			-- get a json string representation of the table
 			datastr = string.format("[[ %s ]]",JSON.encode(data, {indent=true}));
-
-			--print("=== JSON ===");
-			--print(datastr)
 		end
 	elseif dtype == "function" then
 		datastr = "loadstring([==["..string.dump(data).."]==])";

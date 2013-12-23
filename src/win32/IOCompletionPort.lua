@@ -3,6 +3,7 @@ local ffi = require("ffi");
 local core_io = require("core_io_l1_1_1");
 local errorhandling = require("core_errorhandling_l1_1_1");
 local WinBase = require("WinBase");
+local TINNThread = require("TINNThread")
 
 ffi.cdef[[
 typedef struct {
@@ -42,8 +43,6 @@ IOCompletionPort.create = function(self, ExistingCompletionPort, FileHandle, Num
 	NumberOfConcurrentThreads = NumberOfConcurrentThreads or 0
 	local CompletionKey = 0;
 
---print("IOCompletionPort.create(), FILE HANDLE: ", FileHandle);
-
 	local rawhandle = core_io.CreateIoCompletionPort(FileHandle,
 		ExistingCompletionPort,
 		CompletionKey,
@@ -57,6 +56,10 @@ IOCompletionPort.create = function(self, ExistingCompletionPort, FileHandle, Num
 end
 
 
+IOCompletionPort.__toEssence = function(self)
+	return string.format("IOCompletionPort:init(TINNThread:StringToPointer(%s))",
+				TINNThread:PointerToString(self:getNativeHandle()));
+end
 
 IOCompletionPort.getNativeHandle = function(self)
 	return self.Handle.Handle;
