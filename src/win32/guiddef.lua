@@ -27,6 +27,11 @@ typedef CLSID *			LPCLSID;
 typedef const GUID *	REFCLSID;
 ]]
 
+ffi.cdef[[
+typedef GUID FMTID;
+typedef FMTID *LPFMTID;
+]]
+
 
 local function bytecompare(a, b, n)
 	local res = true

@@ -23,22 +23,3 @@ SEC_I_RENEGOTIATE                =(0x00090321);
 
 
 
-function HRESULT_CODE(hr)
-	return band(hr, 0xFFFF)
-end
-
-function HRESULT_FACILITY(hr)
-	return band(rshift(hr, 16), 0x1fff)
-end
-
-function HRESULT_SEVERITY(hr)
-	return band(rshift(hr, 31), 0x1)
-end
-
-function HRESULT_PARTS(hr)
-	return HRESULT_SEVERITY(hr), HRESULT_FACILITY(hr), HRESULT_CODE(hr)
-end
-
-function FAILED(hr)
-	return HRESULT_SEVERITY(hr) ~= 0;
-end

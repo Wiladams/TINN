@@ -92,7 +92,9 @@ typedef struct DXGI_RATIONAL
     UINT Numerator;
     UINT Denominator;
 } DXGI_RATIONAL;
+]]
 
+ffi.cdef[[
 typedef enum DXGI_MODE_SCANLINE_ORDER
 {
     DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED        = 0,
@@ -116,7 +118,9 @@ typedef enum DXGI_MODE_ROTATION
     DXGI_MODE_ROTATION_ROTATE180    = 3,
     DXGI_MODE_ROTATION_ROTATE270    = 4
 } DXGI_MODE_ROTATION;
+]]
 
+ffi.cdef[[
 typedef struct DXGI_MODE_DESC
 {
     UINT Width;
@@ -126,7 +130,18 @@ typedef struct DXGI_MODE_DESC
     DXGI_MODE_SCANLINE_ORDER ScanlineOrdering;
     DXGI_MODE_SCALING Scaling;
 } DXGI_MODE_DESC;
+]]
+DXGI_MODE_DESC = ffi.typeof("DXGI_MODE_DESC")
+DXGI_MODE_DESC_mt = {
+    __tostring = function(self)
+        local refresh = self.RefreshRate.Numerator / self.RefreshRate.Denominator
+        return string.format("%dx%d %f", self.Width, self.Height, refresh)
+    end,    
+}
+ffi.metatype(DXGI_MODE_DESC, DXGI_MODE_DESC_mt)
 
+
+ffi.cdef[[
 typedef struct DXGI_SAMPLE_DESC
 {
     UINT Count;

@@ -21,13 +21,11 @@ local tabutils = require("tabutils");
 IOProcessor = {
 	Clock = StopWatch();
 	QuantaSteps = {};
+	ContinuationChecks = {};
+
 
 	TaskID = 0;
 	TasksReadyToRun = Collections.Queue();
-	TasksWaitingForTime = {};
-
-
-	FibersAwaitingPredicate = Collections.Queue();
 
 	MessageQuanta = 10;		-- milliseconds
 	OperationId = 0;
@@ -55,20 +53,14 @@ IOProcessor.setMessageQuanta = function(self, millis)
 	return self;
 end
 
-
 IOProcessor.getNextOperationId = function(self)
 	self.OperationId = self.OperationId + 1;
 	return self.OperationId;
 end
 
 
---
--- Given a handle, add it to the list of handles
--- we will observe for io events.
---
-IOProcessor.observeIOEvent = function(self, handle, param)
-	return self.IOEventQueue:addIoHandle(handle, param);
-end
+
+
 
 
 
@@ -77,12 +69,12 @@ end
 --[[
 	Fiber Handling
 --]]
-IOProcessor.getTaskID = function(self)
+function IOProcessor.getTaskID(self)
 	self.TaskID = self.TaskID + 1;
 	return self.TaskID;
 end
 
-IOProcessor.scheduleFiber = function(self, afiber, ...)
+function IOProcessor.scheduleFiber(self, afiber, ...)
 	if not afiber then
 		return false, "no fiber specified"
 	end
@@ -94,7 +86,7 @@ IOProcessor.scheduleFiber = function(self, afiber, ...)
 	return afiber;
 end
 
-IOProcessor.spawn = function(self, aroutine, ...)
+function IOProcessor.spawn(self, aroutine, ...)
 	--print("IOProcessor.spawn()", aroutine, ...);
 	local task = SimpleFiber(aroutine)
 	task.TaskID = self:getTaskID();
@@ -103,26 +95,43 @@ IOProcessor.spawn = function(self, aroutine, ...)
 	return task;
 end
 
-IOProcessor.removeFiber = function(self, fiber)
+function IOProcessor.suspend(self, aTask)
+	aTask = aTask or self.CurrentFiber;
+
+	aTask.state = "suspended";
+
+	return self:yield();
+end
+
+
+function IOProcessor.removeFiber(self, fiber)
 	--print("DROPPING DEAD FIBER: ", fiber);
 	return true;
 end
 
-IOProcessor.inMainFiber = function(self)
+function IOProcessor.inMainFiber(self)
 	return coroutine.running() == nil; 
 end
 
-IOProcessor.getCurrentFiber = function(self)
+function IOProcessor.getCurrentFiber(self)
 	return self.CurrentFiber;
 end
 
-IOProcessor.yield = function(self, ...)
+function IOProcessor.yield(self, ...)
 	return coroutine.yield(...);
 end
 
+--
+-- Given a handle, add it to the list of handles
+-- we will observe for io events.
+--
+function IOProcessor.observeIOEvent(self, handle, param)
+	return self.IOEventQueue:addIoHandle(handle, param);
+end
 
-IOProcessor.yieldForIo = function(self, socket, iotype, opid)
+function IOProcessor.yieldForIo(self, socket, iotype, opid)
 --print("== IOProcessor.yieldForIo: BEGIN: ", socket:getNativeSocket(), iotype, opid, self.CurrentFiber);
+	opid = opid or self:getNextOperationId();
 
 	-- Keep a list of fibers that are awaiting io
 	self.EventFibers[opid] = self.CurrentFiber;
@@ -139,62 +148,7 @@ print("IOProcessor.yieldForIo:  NO CURRENT FIBER");
 end
 
 
---[[
-local function compareTaskDueTime(task1, task2)
-	if task1.DueTime < task2.DueTime then
-		return true
-	end
-	
-	return false;
-end
-
-IOProcessor.yieldUntilTime = function(self, atime)
-	--print("IOProcessor.yieldUntilTime: ", atime, self.Clock:Milliseconds())
-	--print("Current Fiber: ", self.CurrentFiber)
-
-	if self.CurrentFiber ~= nil then
-		self.CurrentFiber.DueTime = atime;
-		self.CurrentFiber.state = "suspended"
-		tabutils.binsert(self.TasksWaitingForTime, self.CurrentFiber, compareTaskDueTime);
-
-		return self:yield();
-	end
-
-	return false;
-end
-
-IOProcessor.yieldForTime = function(self, millis)
-	local nextTime = self.Clock:Milliseconds() + millis;
-
-	return self:yieldUntilTime(nextTime);
-end
-
-IOProcessor.stepTimeEvents = function(self)
-	local currentTime = self.Clock:Milliseconds();
-
-	-- traverse through the fibers that are waiting
-	-- on time
-	local nAwaiting = #self.TasksWaitingForTime;
---print("Timer Events Waiting: ", nAwaiting)
-	for i=1,nAwaiting do
-
-		local fiber = self.TasksWaitingForTime[1];
-		if fiber.DueTime <= currentTime then
-			--print("ACTIVATE: ", fiber.DueTime, currentTime);
-			-- put it back into circulation
-			-- preferably at the front of the list
-			fiber.DueTime = 0;
-			self:scheduleFiber(fiber);
-
-			-- Remove the fiber from the list of fibers that are
-			-- waiting on time
-			table.remove(self.TasksWaitingForTime, 1);
-		end
-	end
-end
---]]
-
-IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
+function IOProcessor.processIOEvent(self, key, numbytes, overlapped)
 	local ovl = ffi.cast("IOOverlapped *", overlapped);
 
 	ovl.bytestransferred = numbytes;
@@ -222,7 +176,7 @@ IOProcessor.processIOEvent = function(self, key, numbytes, overlapped)
 	return true;
 end
 
-IOProcessor.stepIOEvents = function(self)
+function IOProcessor.stepIOEvents(self)
 	-- Check to see if there are any IO Events to deal with
 	--local key, numbytes, overlapped = self.IOEventQueue:dequeue(self.MessageQuanta);
 	local param1, param2, param3, param4, param5 = self.IOEventQueue:dequeue(self.MessageQuanta);
@@ -262,7 +216,19 @@ IOProcessor.stepIOEvents = function(self)
 	return status, err;
 end
 
-IOProcessor.stepFibers = function(self)
+function IOProcessor.fibersAwaitIO(self)
+	local fibersawaitio = false;
+
+
+	for fiber in pairs(self.FibersAwaitingEvent) do
+		fibersawaitio = true;
+		break;
+	end
+
+	return fibersawaitio
+end
+
+function IOProcessor.stepFibers(self)
 	-- Now check the regular fibers
 	local task = self.TasksReadyToRun:Dequeue()
 
@@ -333,31 +299,20 @@ IOProcessor.stepFibers = function(self)
 	end
 end
 
---[[
-IOProcessor.getFibersWaitingOnTime = function(self)
-	return #self.TasksWaitingForTime
+
+
+
+function IOProcessor.addContinuationCheck(self, checker)
+	table.insert(self.ContinuationChecks, checker)
 end
---]]
 
-IOProcessor.fibersAwaitIO = function(self)
-	local fibersawaitio = false;
-
-
-	for fiber in pairs(self.FibersAwaitingEvent) do
-		fibersawaitio = true;
-		break;
-	end
-
-	return fibersawaitio
+function IOProcessor.addQuantaStep(self, astep)
+	table.insert(self.QuantaSteps,astep)
 end
 
 -- returns an iterator of all the steps
 -- to be executed per quanta
-IOProcessor.addQuantaStep = function(self, astep)
-	table.insert(self.QuantaSteps,astep)
-end
-
-IOProcessor.quantumSteps = function(self)
+function IOProcessor.quantumSteps(self)
 
 	local index = 0;
 	local listSize = #self.QuantaSteps;
@@ -377,7 +332,7 @@ IOProcessor.quantumSteps = function(self)
 			-- We've made it through the list at least
 			-- once, so check to see if there are still
 			-- any tasks running
-			if self:noMoreTasks() then
+			if not self:shouldContinue() then
 				self.ContinueRunning = false;
 			end
 		end
@@ -389,41 +344,47 @@ IOProcessor.quantumSteps = function(self)
 end
 
 
-IOProcessor.noMoreTasks = function(self)
-	if self.TasksReadyToRun:Len() < 1 and
---	self:getFibersWaitingOnTime() < 1 and
-	not self:fibersAwaitIO() then 
-		return true
+function IOProcessor.shouldContinue(self)
+	-- check the continuation conditions
+	local condition = false;
+
+	if self.TasksReadyToRun:Len() > 0 then
+		return true;
+	elseif self:fibersAwaitIO() then
+		return true;
+	else
+		for _, tasksPending in ipairs(self.ContinuationChecks) do
+			if tasksPending() then
+				return true
+			end
+		end
 	end
 
 	return false;
 end
 
 
-IOProcessor.stop = function(self)
+function IOProcessor.stop(self)
 	self.ContinueRunning = false;
 end
 
-IOProcessor.start = function(self)
+function IOProcessor.start(self)
 	self.ContinueRunning = true;
 
-	--when(Functor(self.noMoreTasks,self), function() self.ContinueRunning = false; end);
 
 	for astep in self:quantumSteps() do
 		astep()
-
 	end
 
 	print("FINISHED STEP ITERATION")
 end
 
-IOProcessor.run = function(self, func, ...)
+function IOProcessor.run(self, func, ...)
 	if func ~= nil then
 		self:spawn(func, ...);
 	end
 
 	self:addQuantaStep(Functor(self.stepIOEvents,self));
---	self:addQuantaStep(Functor(self.stepTimeEvents,self));
 	self:addQuantaStep(Functor(self.stepFibers,self));
 
 	self:start();
@@ -433,29 +394,20 @@ end
 	Define some global functions
 --]]
 
-run = function(func, ...)
+function run(func, ...)
 	return IOProcessor:run(func, ...);
 end
 
-spawn = function(func, ...)
+function spawn(func, ...)
 	return IOProcessor:spawn(func, ...);
 end
 
-stop = function()
+function stop()
 	return IOProcessor:stop();
 end
 
---[[
-sleep = function(millis)
-	return IOProcessor:yieldForTime(millis)
-end
---]]
-
-yield = function(...)
+function yield(...)
 	return IOProcessor:yield(...);
 end
 
-
-
 return IOProcessor
-

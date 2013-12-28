@@ -3,7 +3,8 @@
 
 local Functor = require("Functor")
 local Task = require("IOProcessor")
---local Timer = require("Timer")
+
+-- Scheduler plug-ins
 local waitForCondition = require("waitForCondition")
 local waitForTime = require("waitForTime")
 
@@ -12,20 +13,11 @@ local wfc = waitForCondition(Task)
 local wft = waitForTime(Task)
 
 
+--[[
+	Convenience Functions
+--]]
 -- Some standard functions
 local sleep = Functor(wft.yield, wft)
-
---[[
-local delay = function(func, millis)
-	millis = millis or 1000
-	return Timer({Delay=millis, OnTime=func})
-end
-
-local periodic = function(func, millis)
-	millis = millis or 1000
-	return Timer({Period=millis, OnTime=func})
-end
---]]
 
 local spawn = function(func, ...)
 	return Task:spawn(func, ...);
@@ -68,11 +60,10 @@ local whenever = function(pred, func)
 	Task:spawn(watchit)
 end
 
+-- when(Functor(self.noMoreTasks,self), function() self.ContinueRunning = false; end);
 
 
 local exports = {
-	--delay = delay,
-	--periodic = periodic,
 	sleep = sleep,
 	spawn = spawn,
 	taskIsFinished = taskIsFinished,
@@ -90,3 +81,25 @@ setmetatable(exports, {
 })
 
 return exports
+
+
+--[[
+function Scheduler.shouldContinue(self)
+	-- check the continuation conditions
+	local condition = false;
+
+	if self.TasksReadyToRun:Len() > 0 then
+		return true;
+	elseif self:fibersAwaitIO() then
+		return true;
+	else
+		for _, tasksPending in ipairs(self.ContinuationChecks) do
+			if tasksPending() then
+				return true
+			end
+		end
+	end
+
+	return false;
+end
+--]]

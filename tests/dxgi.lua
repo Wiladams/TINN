@@ -243,6 +243,36 @@ local IDXGIOutput_mt = {
             return pDesc;
         end,
 
+        GetDisplayModes = function(self, EnumFormat, Flags)
+            EnumFormat = EnumFormat or ffi.C.DXGI_FORMAT_R8G8B8A8_UNORM;
+            Flags = Flags or 0;
+
+            local Flags = 0;
+            local pNumModes = ffi.new("UINT[1]");
+            local pDesc = nil;
+
+            -- First find out how many modes there are
+            local hr = self.lpVtbl.GetDisplayModeList(self,EnumFormat,Flags,pNumModes,pDesc) 
+
+            if hr~= 0 then
+                return nil, hr
+            end
+
+            -- now that we know how many there are, call allocate an array
+            -- to hold the values, and call again.
+            pDesc = ffi.new("DXGI_MODE_DESC[?]",pNumModes[0])
+            local hr = self.lpVtbl.GetDisplayModeList(self,EnumFormat,Flags,pNumModes,pDesc) 
+
+            if hr~= 0 then
+                return nil, hr
+            end
+
+            return pDesc, pNumModes[0];
+        end,
+
+        WaitForVBlank = function(self)
+            return self.lpVtbl.WaitForVBlank(self)
+        end,
     },
 }
 ffi.metatype(IDXGIOutput, IDXGIOutput_mt)
@@ -273,14 +303,10 @@ ffi.metatype(IDXGIOutput, IDXGIOutput_mt)
 
 
 
-#define IDXGIOutput_GetDisplayModeList(This,EnumFormat,Flags,pNumModes,pDesc)   \
-    ( (This)->lpVtbl -> GetDisplayModeList(This,EnumFormat,Flags,pNumModes,pDesc) ) 
 
 #define IDXGIOutput_FindClosestMatchingMode(This,pModeToMatch,pClosestMatch,pConcernedDevice)   \
     ( (This)->lpVtbl -> FindClosestMatchingMode(This,pModeToMatch,pClosestMatch,pConcernedDevice) ) 
 
-#define IDXGIOutput_WaitForVBlank(This) \
-    ( (This)->lpVtbl -> WaitForVBlank(This) ) 
 
 #define IDXGIOutput_TakeOwnership(This,pDevice,Exclusive)   \
     ( (This)->lpVtbl -> TakeOwnership(This,pDevice,Exclusive) ) 

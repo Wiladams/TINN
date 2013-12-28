@@ -118,6 +118,16 @@ DXGI_OUTPUT_DESC_mt = {
     __tostring = function(self)
         return ffi.string(core_string.toAnsi(self.DeviceName))
     end,
+
+    __index = {
+        Print = function(self)
+            print("      Device Name: ", ffi.string(core_string.toAnsi(self.DeviceName)))
+            print("   Desktop Coords: ", self.DesktopCoordinates)
+            print("AttachedToDesktop: ", self.AttachedToDesktop)
+            print("         Rotation: ", self.Rotation)
+            print("          Monitor: ", self.Monitor)
+        end,
+    },
 }
 ffi.metatype(DXGI_OUTPUT_DESC, DXGI_OUTPUT_DESC_mt)
 

@@ -4,6 +4,7 @@ local bit = require("bit");
 local bor = bit.bor;
 local band = require("bit").band;
 
+local win_error = require("win_error")
 local sspi_ffi = require("sspi_ffi");
 --local sspicli = require("sspicli");
 local SecError = require ("SecError");

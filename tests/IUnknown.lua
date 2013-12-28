@@ -22,5 +22,5 @@ typedef struct IUnknownVtbl
 typedef struct IUnknown
 {
 	const struct IUnknownVtbl *lpVtbl;
-} IUnknoqn;
+} IUnknown;
 ]]

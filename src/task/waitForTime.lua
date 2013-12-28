@@ -13,7 +13,7 @@ local waitForTime_mt = {
 	__index = waitForTime;
 }
 
-waitForTime.init = function(self, scheduler)
+function waitForTime.init(self, scheduler)
 	local obj = {
 		Scheduler = scheduler;
 		TasksWaitingForTime = {};
@@ -21,11 +21,12 @@ waitForTime.init = function(self, scheduler)
 	setmetatable(obj, waitForTime_mt)
 
 	scheduler:addQuantaStep(Functor(obj.step,obj));
+	scheduler:addContinuationCheck(Functor(obj.tasksPending, obj));
 
 	return obj;
 end
 
-waitForTime.create = function(self, scheduler)
+function waitForTime.create(self, scheduler)
 	if not scheduler then
 		return nil, "no scheduler specified"
 	end
@@ -33,14 +34,17 @@ waitForTime.create = function(self, scheduler)
 	return self:init(scheduler)
 end
 
+function waitForTime.tasksPending(self)
+	return #self.TasksWaitingForTime > 0
+end
 
-waitForTime.step = function(self)
+function waitForTime.step(self)
 	local currentTime = self.Scheduler.Clock:Milliseconds();
 
 	-- traverse through the fibers that are waiting
 	-- on time
 	local nAwaiting = #self.TasksWaitingForTime;
-print("Timer Events Waiting: ", nAwaiting)
+--print("Timer Events Waiting: ", nAwaiting)
 	for i=1,nAwaiting do
 
 		local fiber = self.TasksWaitingForTime[1];
@@ -49,7 +53,8 @@ print("Timer Events Waiting: ", nAwaiting)
 			-- put it back into circulation
 			-- preferably at the front of the list
 			fiber.DueTime = 0;
-			self:scheduleFiber(fiber);
+			--print("waitForTime.step: ", self)
+			self.Scheduler:scheduleFiber(fiber);
 
 			-- Remove the fiber from the list of fibers that are
 			-- waiting on time

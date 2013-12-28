@@ -337,16 +337,15 @@ GDIApp.main = function(self)
 	self:show()
 	self:update()
 
-	-- Start the FrameTimer
-	--local period = 1000/self.FrameRate;
-	--self.FrameTimer = Timer({Delay=period, Period=period, OnTime =self:handleFrameTick()})
-	self.FrameTimer = periodic(self:handleFrameTick(), 1000/self.FrameRate)
-
 	-- handle the user32 message queue
 	whenever(user32MessageIsAvailable(), handleUser32Message(self))
 
+	-- Start the FrameTimer
+	self.FrameTimer = Timer {OnTime = self:handleFrameTick(), Period = 1000/self.FrameRate}
+
+
 	-- wait here until the application window is closed
-	local res = waitFor(appToClose(self))
+	waitFor(appToClose(self))
 
 	if self.FrameTimer then
 		self.FrameTimer:cancel();

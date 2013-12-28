@@ -61,4 +61,21 @@ Timer.cancel = function(self)
 	self.Running = false;
 end
 
+
+--[[
+	A Couple of convenience methods
+--]]
+
+--[[
+function Timer.delay = function(func, millis)
+	millis = millis or 1000
+	return Timer({Delay=millis, OnTime=func})
+end
+
+function Timer.periodic = function(func, millis)
+	millis = millis or 1000
+	return Timer({Period=millis, OnTime=func})
+end
+--]]
+
 return Timer

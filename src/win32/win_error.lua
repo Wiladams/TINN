@@ -1,3 +1,8 @@
+
+local bit = require("bit")
+local band = bit.band;
+local rshift = bit.rshift;
+
 NO_ERROR		= 0;
 
 ERROR_SUCCESS	= 0;
@@ -45,3 +50,25 @@ ERROR_PRIVILEGE_NOT_HELD        = 1314;
 ERROR_LOGON_FAILURE             = 1326;
 
 ERROR_LOGON_TYPE_NOT_GRANTED    = 1385;
+
+
+
+function HRESULT_CODE(hr)
+	return band(hr, 0xFFFF)
+end
+
+function HRESULT_FACILITY(hr)
+	return band(rshift(hr, 16), 0x1fff)
+end
+
+function HRESULT_SEVERITY(hr)
+	return band(rshift(hr, 31), 0x1)
+end
+
+function HRESULT_PARTS(hr)
+	return HRESULT_SEVERITY(hr), HRESULT_FACILITY(hr), HRESULT_CODE(hr)
+end
+
+function FAILED(hr)
+	return HRESULT_SEVERITY(hr) ~= 0;
+end
