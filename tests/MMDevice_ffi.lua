@@ -31,11 +31,7 @@ static const int DEVICE_STATE_UNPLUGGED  = 0x00000008;
 static const int DEVICE_STATEMASK_ALL    = 0x0000000f;
 ]]
 
---[[
-#ifdef DEFINE_PROPERTYKEY
-#undef DEFINE_PROPERTYKEY
-#endif
---]]
+
 
 --[[
 #ifdef INITGUID
@@ -45,12 +41,14 @@ static const int DEVICE_STATEMASK_ALL    = 0x0000000f;
 #endif // INITGUID
 --]]
 
-function DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid)
+local function DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid)
     local pkey = ffi.new("PROPERTYKEY", { { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }, pid })
     _G[name] = pkey
     return pkey
 end
 
+DEFINE_PROPERTYKEY("PKEY_Device_FriendlyName",           0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 14);
+DEFINE_PROPERTYKEY("PKEY_DeviceInterface_FriendlyName",  0x026e516e, 0xb814, 0x414b, 0x83, 0xcd, 0x85, 0x6d, 0x6f, 0xef, 0x48, 0x22, 2); -- DEVPROP_TYPE_STRING
 
 DEFINE_PROPERTYKEY("PKEY_AudioEndpoint_FormFactor", 0x1da5d803, 0xd492, 0x4edd, 0x8c, 0x23, 0xe0, 0xc0, 0xff, 0xee, 0x7f, 0x0e, 0); 
 DEFINE_PROPERTYKEY("PKEY_AudioEndpoint_ControlPanelPageProvider", 0x1da5d803, 0xd492, 0x4edd, 0x8c, 0x23, 0xe0, 0xc0, 0xff, 0xee, 0x7f, 0x0e, 1); 
@@ -119,6 +117,19 @@ typedef  enum
 --#define HDMI     DigitalAudioDisplayDevice
 
 
+--[[
+-- Used by all COM Interfaces that descend from IUnknown
+#define IMMEndpoint_QueryInterface(This,riid,ppvObject) \
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
+
+#define IMMEndpoint_AddRef(This)    \
+    ( (This)->lpVtbl -> AddRef(This) ) 
+
+#define IMMEndpoint_Release(This)   \
+    ( (This)->lpVtbl -> Release(This) ) 
+--]]
+
+
 
 ffi.cdef[[
     typedef struct IMMNotificationClientVtbl
@@ -178,14 +189,6 @@ ffi.cdef[[
 ]]
     
 --[[
-#define IMMNotificationClient_QueryInterface(This,riid,ppvObject)	\
-    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
-
-#define IMMNotificationClient_AddRef(This)	\
-    ( (This)->lpVtbl -> AddRef(This) ) 
-
-#define IMMNotificationClient_Release(This)	\
-    ( (This)->lpVtbl -> Release(This) ) 
 
 
 #define IMMNotificationClient_OnDeviceStateChanged(This,pwstrDeviceId,dwNewState)	\
@@ -203,7 +206,6 @@ ffi.cdef[[
 #define IMMNotificationClient_OnPropertyValueChanged(This,pwstrDeviceId,key)	\
     ( (This)->lpVtbl -> OnPropertyValueChanged(This,pwstrDeviceId,key) ) 
 
-#endif /* COBJMACROS */
 --]]
 
 
@@ -253,6 +255,11 @@ ffi.cdef[[
 local IMMDevice = ffi.typeof("IMMDevice")
 local IMMDevice_mt = {
     __index = {
+
+        Activate = function(self, iid, dwClsCtx, pActivationParams, ppInterface)
+            self.lpVtbl.Activate(self,iid,dwClsCtx,pActivationParams,ppInterface);         
+        end,
+
         GetId = function(self, ppstrId)
             self.lpVtbl.GetId(self,ppstrId) 
         end,
@@ -271,21 +278,6 @@ local IMMDevice_mt = {
 ffi.metatype(IMMDevice, IMMDevice_mt)
 
 
---[[
-#define IMMDevice_QueryInterface(This,riid,ppvObject)	\
-    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
-
-#define IMMDevice_AddRef(This)	\
-    ( (This)->lpVtbl -> AddRef(This) ) 
-
-#define IMMDevice_Release(This)	\
-    ( (This)->lpVtbl -> Release(This) ) 
-
-
-#define IMMDevice_Activate(This,iid,dwClsCtx,pActivationParams,ppInterface)	\
-    ( (This)->lpVtbl -> Activate(This,iid,dwClsCtx,pActivationParams,ppInterface) ) 
-
---]]
 
 
 
@@ -334,17 +326,6 @@ IMMDeviceCollection_mt = {
 ffi.metatype(IMMDeviceCollection, IMMDeviceCollection_mt)
 
 
---[[
-#define IMMDeviceCollection_QueryInterface(This,riid,ppvObject)	\
-    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
-
-#define IMMDeviceCollection_AddRef(This)	\
-    ( (This)->lpVtbl -> AddRef(This) ) 
-
-#define IMMDeviceCollection_Release(This)	\
-    ( (This)->lpVtbl -> Release(This) ) 
---]]
-
 
 
 
@@ -383,16 +364,7 @@ local IMMEndpoint_mt = {
     },
 }
     
---[[
-#define IMMEndpoint_QueryInterface(This,riid,ppvObject)	\
-    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
 
-#define IMMEndpoint_AddRef(This)	\
-    ( (This)->lpVtbl -> AddRef(This) ) 
-
-#define IMMEndpoint_Release(This)	\
-    ( (This)->lpVtbl -> Release(This) ) 
---]]
 
 
 
@@ -404,7 +376,6 @@ ffi.cdef[[
         HRESULT ( __stdcall *QueryInterface )( 
             IMMDeviceEnumerator * This,
             REFIID riid,
-            /* [annotation][iid_is][out] */ 
             void **ppvObject);
         
         ULONG ( __stdcall *AddRef )( 
@@ -448,6 +419,10 @@ ffi.cdef[[
 
 local IMMDeviceEnumerator = ffi.typeof("struct IMMDeviceEnumerator")
 local IMMDeviceEnumerator_mt = {
+    __gc = function(self)
+        self.lpVtbl.Release(self);
+    end,
+
     __index = {
         EnumAudioEndpoints = function(self, dataFlow, dwStateMask, ppDevices)
         --print("EnumAudioEndpoints: ", self, dataFlow, dwStateMask, ppDevices)
@@ -458,16 +433,6 @@ local IMMDeviceEnumerator_mt = {
 ffi.metatype(IMMDeviceEnumerator, IMMDeviceEnumerator_mt)
 
 --[[
-#define IMMDeviceEnumerator_QueryInterface(This,riid,ppvObject)	\
-    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
-
-#define IMMDeviceEnumerator_AddRef(This)	\
-    ( (This)->lpVtbl -> AddRef(This) ) 
-
-#define IMMDeviceEnumerator_Release(This)	\
-    ( (This)->lpVtbl -> Release(This) ) 
-
-
 
 #define IMMDeviceEnumerator_GetDefaultAudioEndpoint(This,dataFlow,role,ppEndpoint)	\
     ( (This)->lpVtbl -> GetDefaultAudioEndpoint(This,dataFlow,role,ppEndpoint) ) 
@@ -517,16 +482,6 @@ ffi.cdef[[
 
 
 --[[
-#define IMMDeviceActivator_QueryInterface(This,riid,ppvObject)	\
-    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
-
-#define IMMDeviceActivator_AddRef(This)	\
-    ( (This)->lpVtbl -> AddRef(This) ) 
-
-#define IMMDeviceActivator_Release(This)	\
-    ( (This)->lpVtbl -> Release(This) ) 
-
-
 #define IMMDeviceActivator_Activate(This,iid,pDevice,pActivationParams,ppInterface)	\
     ( (This)->lpVtbl -> Activate(This,iid,pDevice,pActivationParams,ppInterface) ) 
 --]]
@@ -535,6 +490,7 @@ ffi.cdef[[
 
 return {
     CLSID_MMDeviceEnumerator = UUIDFromString("BCDE0395-E52F-467C-8E3D-C4579291692E");
+
     IID_IMMDevice  = UUIDFromString("D666063F-1587-4E43-81F1-B948E807363F");
     IID_IMMDeviceActivator = UUIDFromString("3B0D0EA4-D0A9-4B0E-935B-09516746FAC0");
     IID_IMMDeviceCollection = UUIDFromString("0BD7A1BE-7A1A-44DB-8397-CC5392387B5E");
@@ -542,8 +498,13 @@ return {
     IID_IMMEndpoint = UUIDFromString("1BE09788-6894-4089-8586-9A2A6C265AC5");
     IID_IMMNotificationClient  = UUIDFromString("7991EEC9-7E89-4D85-8390-6C703CEC60C0");
     
+    IMMDeviceActivator = IMMDeviceActivator,
+    IMMDeviceCollection = IMMDeviceCollection,
     IMMDeviceEnumerator = IMMDeviceEnumerator,
     IMMDevice = IMMDevice,
     IMMEndpoint = IMMEndpoint,
+
+    -- Helpers
+    DEFINE_PROPERTYKEY = DEFINE_PROPERTYKEY,
 }
 

@@ -65,6 +65,10 @@ typedef enum tagCOINIT
 
 local Lib = ffi.load("Ole32")
 
+-- COM MUST be initialized before anything 
+-- else can be done.
+local hr = Lib.CoInitialize(nil);
+
 return {
 	CLSCTX_ALL = CLSCTX_ALL,
 

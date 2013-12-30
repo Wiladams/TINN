@@ -23,6 +23,7 @@
 @set ZLIBNAME=zlib.lib
 
 @rem The TINN core library
+%LUAC% core/arch.lua arch.obj
 %LUAC% core/base64.lua base64.obj
 %LUAC% core/BinaryStream.lua BinaryStream.obj
 %LUAC% core/BitBang.lua BitBang.obj
@@ -43,7 +44,7 @@
 %LUAC% core/tabutils.lua tabutils.obj
 %LUAC% core/Vector.lua Vector.obj
 %LUAC% core/zlib.lua zlib.obj
-@set TINNLIB=base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  Functor.obj langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stdlib.obj stream.obj StreamOps.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
+@set TINNLIB=arch.obj base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  Functor.obj langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stdlib.obj stream.obj StreamOps.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
 
 @rem TINN Task library
 %LUAC% task/IOOps.lua IOOps.obj

@@ -50,6 +50,19 @@ typedef struct IPropertyStore IPropertyStore;
         const struct IPropertyStoreVtbl *lpVtbl;
     };
 ]]
+IPropertyStore = ffi.typeof("IPropertyStore");
+IPropertyStore_mt = {
+    __index = {
+        GetAt = function(self, idx, pkey)
+            return self.lpVtbl.GetAt(self, idx, pkey);
+        end,
+
+        GetValue = function(self, pkey, pv)
+            return self.lpVtbl.GetValue(self, pkey, pv);
+        end,
+    },    
+}
+ffi.metatype(IPropertyStore, IPropertyStore_mt);
 
 
 --[[

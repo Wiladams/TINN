@@ -1,6 +1,8 @@
 -- MSCOM.lua
 local ffi = require("ffi")
+
 local WTypes = require("WTypes")
+local core_string = require("core_string_l1_1_0");
 
 local IUnknown = require("IUnknown")
 local OaIdl = require("OaIdl")
@@ -198,7 +200,7 @@ struct tag_inner_PROPVARIANT
     PROPVAR_PAD1 wReserved1;
     PROPVAR_PAD2 wReserved2;
     PROPVAR_PAD3 wReserved3;
-    /* [switch_type] */ union 
+    union 
         {
          /* Empty union arm */ 
         CHAR cVal;
@@ -284,6 +286,29 @@ typedef struct tagPROPVARIANT * LPPROPVARIANT;
 typedef const PROPVARIANT *     REFPROPVARIANT;
 
 ]]
+
+
+
+local PROPVARIANT = ffi.typeof("PROPVARIANT")
+local PROPVARIANT_mt = {
+    __tostring = function(self)
+        if self.vt == ffi.C.VT_BLOB then
+            return tostring(self.blob)
+        elseif self.vt == ffi.C.VT_BOOL then
+            return not (self.boolVal == 0);
+        elseif self.vt == ffi.C.VT_CLSID then
+            return tostring(ffi.cast("CLSID *", self.puuid))
+        elseif self.vt == ffi.C.VT_LPWSTR then
+            return core_string.toAnsi(self.pwszVal)
+        elseif self.vt == ffi.C.VT_UI4 then
+            return tonumber(self.uintVal)
+        end
+
+        return tostring(self.pcVal)
+    end,
+}
+ffi.metatype(PROPVARIANT, PROPVARIANT_mt)
+
 
 ffi.cdef[[
 // Reserved global Property IDs
@@ -568,4 +593,6 @@ ffi.cdef[[
 return {
     IID_IPropertyStorage = UUIDFromString("00000138-0000-0000-C000-000000000046");
     IID_IEnumSTATPROPSTG = UUIDFromString("00000139-0000-0000-C000-000000000046");
+
+    PROPVARIANT = PROPVARIANT,
 }

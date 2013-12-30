@@ -2,6 +2,7 @@
 
 local ffi = require("ffi");
 
+local arch = require("arch")
 local Heap = require("Heap");
 local core_synch = require("core_synch_l1_2_0");
 local errorhandling = require("core_errorhandling_l1_1_1");
@@ -227,8 +228,8 @@ end
 
 Computicle.__toEssence = function(self)
 	local essence = string.format("Computicle:init(TINNThread:StringToPointer(%s),TINNThread:StringToPointer(%s));", 
-				TINNThread:PointerToString(self.Heap:getNativeHandle()), 
-				TINNThread:PointerToString(self.IOCP:getNativeHandle()));
+				arch:pointerToString(self.Heap:getNativeHandle()), 
+				arch:pointerToString(self.IOCP:getNativeHandle()));
 
 	return essence;
 end

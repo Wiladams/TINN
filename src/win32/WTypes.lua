@@ -8,7 +8,7 @@ local lshift = bit.lshift
 local rshift = bit.rshift
 
 local basetsd = require("basetsd");
-
+local arch = require("arch");
 
 ffi.cdef[[
 
@@ -186,11 +186,20 @@ ffi.cdef[[
 typedef struct tagBLOB
     {
     ULONG cbSize;
-    /* [size_is] */ BYTE *pBlobData;
+    BYTE *pBlobData;
     }   BLOB;
 
 typedef struct tagBLOB *LPBLOB;
 ]]
+
+local BLOB = ffi.typeof("BLOB")
+local BLOB_mt = {
+    __tostring = function(self)
+        return string.format("BLOB(%d, %s)", self.cbSize, arch.pointerToString(self.pBlobData))
+    end,    
+}
+ffi.metatype(BLOB, BLOB_mt);
+
 
 ffi.cdef[[
 typedef struct tagCLIPDATA
@@ -663,6 +672,7 @@ local exports = {
     VARIANT_FALSE = ffi.cast("VARIANT_BOOL", 0);
 
     -- Types
+    BLOB = BLOB,
     POINT = ffi.typeof("POINT");
     RECT = RECT,
     SIZE = ffi.typeof("SIZE");
