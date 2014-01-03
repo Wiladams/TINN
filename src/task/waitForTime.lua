@@ -20,8 +20,8 @@ function waitForTime.init(self, scheduler)
 	}
 	setmetatable(obj, waitForTime_mt)
 
-	scheduler:addQuantaStep(Functor(obj.step,obj));
-	scheduler:addContinuationCheck(Functor(obj.tasksPending, obj));
+	--scheduler:addQuantaStep(Functor(obj.step,obj));
+	--scheduler:spawn(obj.step, obj)
 
 	return obj;
 end
@@ -34,11 +34,47 @@ function waitForTime.create(self, scheduler)
 	return self:init(scheduler)
 end
 
-function waitForTime.tasksPending(self)
+function waitForTime.tasksArePending(self)
 	return #self.TasksWaitingForTime > 0
 end
 
+function waitForTime.tasksPending(self)
+	return #self.TasksWaitingForTime;
+end
+
+local function compareTaskDueTime(task1, task2)
+	if task1.DueTime < task2.DueTime then
+		return true
+	end
+	
+	return false;
+end
+
+function waitForTime.yieldUntilTime(self, atime)
+	--print("waitForTime.yieldUntilTime: ", atime, self.Scheduler.Clock:Milliseconds())
+	--print("Current Fiber: ", self.CurrentFiber)
+	local currentFiber = self.Scheduler:getCurrentFiber();
+	if currentFiber == nil then
+		return false, "not currently in a running task"
+	end
+
+	currentFiber.DueTime = atime;
+	tabutils.binsert(self.TasksWaitingForTime, currentFiber, compareTaskDueTime);
+
+	return self.Scheduler:suspend()
+end
+
+function waitForTime.yield(self, millis)
+	--print('waitForTime.yield, CLOCK: ', self.Scheduler.Clock)
+
+	local nextTime = self.Scheduler.Clock:Milliseconds() + millis;
+
+	return self:yieldUntilTime(nextTime);
+end
+
 function waitForTime.step(self)
+	--print("waitForTime.step, CLOCK: ", self.Scheduler.Clock);
+
 	local currentTime = self.Scheduler.Clock:Milliseconds();
 
 	-- traverse through the fibers that are waiting
@@ -54,7 +90,7 @@ function waitForTime.step(self)
 			-- preferably at the front of the list
 			fiber.DueTime = 0;
 			--print("waitForTime.step: ", self)
-			self.Scheduler:scheduleFiber(fiber);
+			self.Scheduler:scheduleTask(fiber);
 
 			-- Remove the fiber from the list of fibers that are
 			-- waiting on time
@@ -63,33 +99,11 @@ function waitForTime.step(self)
 	end
 end
 
-local function compareTaskDueTime(task1, task2)
-	if task1.DueTime < task2.DueTime then
-		return true
+function waitForTime.start(self)
+	while true do
+		self:step();
+		self.Scheduler:yield();
 	end
-	
-	return false;
-end
-
-waitForTime.yieldUntilTime = function(self, atime)
-	--print("IOProcessor.yieldUntilTime: ", atime, self.Clock:Milliseconds())
-	--print("Current Fiber: ", self.CurrentFiber)
-	local currentFiber = self.Scheduler:getCurrentFiber();
-	if currentFiber == nil then
-		return false, "not currently in a running task"
-	end
-
-	currentFiber.DueTime = atime;
-	currentFiber.state = "suspended"
-	tabutils.binsert(self.TasksWaitingForTime, currentFiber, compareTaskDueTime);
-
-	return self.Scheduler:yield();
-end
-
-waitForTime.yield = function(self, millis)
-	local nextTime = self.Scheduler.Clock:Milliseconds() + millis;
-
-	return self:yieldUntilTime(nextTime);
 end
 
 return waitForTime

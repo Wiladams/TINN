@@ -14,19 +14,20 @@ local waitForCondition_mt = {
 	__index = waitForCondition;
 }
 
-waitForCondition.init = function(self, scheduler)
+function waitForCondition.init(self, scheduler)
 	local obj = {
 		Scheduler = scheduler,
 		FibersAwaitingCondition = Collections.Queue(),
 	}
 	setmetatable(obj, waitForCondition_mt)
 
-	scheduler:addQuantaStep(Functor(obj.step,obj));
+	--scheduler:addQuantaStep(Functor(obj.step,obj));
+	--scheduler:spawn(obj.step, obj)
 
 	return obj;
 end
 
-waitForCondition.create = function(self, scheduler)
+function waitForCondition.create(self, scheduler)
 	if not scheduler then
 		return nil, "no scheduler specified"
 	end
@@ -34,9 +35,27 @@ waitForCondition.create = function(self, scheduler)
 	return self:init(scheduler)
 end
 
+function waitForCondition.tasksArePending(self)
+	return self.FibersAwaitingCondition:Len() > 0;
+end
+
+
+function waitForCondition.yield(self, predicate)
+	--print("waitForCondition.yield: ", predicate, self.Scheduler.CurrentFiber)
+	
+	local currentFiber = self.Scheduler:getCurrentFiber();
+	if currentFiber == nil then
+		return false, "not currently in a running task"
+	end
+
+	currentFiber.Predicate = predicate;
+	self.FibersAwaitingCondition:enqueue(currentFiber)
+
+	return self.Scheduler:suspend()
+end
 
 -- each time we get CPU cycles, perform the following
-waitForCondition.step = function(self)
+function waitForCondition.step(self)
 	local nPredicates = self.FibersAwaitingCondition:length()
 
 --print("waitForCondition.step ==> ", nPredicates)
@@ -45,7 +64,7 @@ waitForCondition.step = function(self)
 		local fiber = self.FibersAwaitingCondition:dequeue();
 		if fiber.Predicate() then
 			fiber.Predicate = nil;
-			self.Scheduler:scheduleFiber(fiber);
+			self.Scheduler:scheduleTask(fiber);
 			--print("Conditional FIBER To Be RESCHEDULED")
 		else
 			-- stick the fiber back in the queue if it does not
@@ -53,22 +72,13 @@ waitForCondition.step = function(self)
 			self.FibersAwaitingCondition:enqueue(fiber)
 		end
 	end
-
 end
 
-waitForCondition.yield = function(self, predicate)
---	print("waitForCondition.yield: ", predicate, self.Scheduler.CurrentFiber)
-	
-	local currentFiber = self.Scheduler:getCurrentFiber();
-	if currentFiber == nil then
-		return false, "not currently in a running task"
+function waitForCondition.start(self)
+	while true do
+		self:step();
+		self.Scheduler:yield();
 	end
-
-	currentFiber.Predicate = predicate;
-	currentFiber.state = "suspended";
-	self.FibersAwaitingCondition:enqueue(currentFiber)
-
-	return self.Scheduler:yield();
 end
 
 return waitForCondition

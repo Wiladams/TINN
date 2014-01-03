@@ -16,7 +16,6 @@
 @set LJCOMPILE=cl /nologo /c /MD /O2 /W3 /D_CRT_SECURE_NO_DEPRECATE
 @set LJLINK=link /nologo
 @set LJMT=mt /nologo
-@set LJLIB=lib /nologo
 @set LUAC=luajit -b
 @set LJDLLNAME=lua51.dll
 @set LJLIBNAME=lua51.lib
@@ -47,17 +46,21 @@
 @set TINNLIB=arch.obj base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  Functor.obj langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stdlib.obj stream.obj StreamOps.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
 
 @rem TINN Task library
+%LUAC% task/Application.lua Application.obj
 %LUAC% task/IOOps.lua IOOps.obj
 %LUAC% task/IOProcessor.lua IOProcessor.obj
 %LUAC% task/luajit_ffi.lua luajit_ffi.obj
 %LUAC% task/LuaState.lua LuaState.obj
 %LUAC% task/parallel.lua parallel.obj
+%LUAC% task/Scheduler.lua Scheduler.obj
 %LUAC% task/SimpleFiber.lua SimpleFiber.obj
+%LUAC% task/Task.lua Task.obj
 %LUAC% task/Timer.lua Timer.obj
 %LUAC% task/TINNThread.lua TINNThread.obj
 %LUAC% task/waitForCondition.lua waitForCondition.obj
+%LUAC% task/waitForIO.lua waitForIO.obj
 %LUAC% task/waitForTime.lua waitForTime.obj
-@set TASKLIB=IOOps.obj IOProcessor.obj luajit_ffi.obj LuaState.obj parallel.obj SimpleFiber.obj Timer.obj TINNThread.obj waitForCondition.obj waitForTime.obj
+@set TASKLIB=Application.obj IOOps.obj IOProcessor.obj luajit_ffi.obj LuaState.obj parallel.obj Scheduler.obj SimpleFiber.obj Task.obj Timer.obj TINNThread.obj waitForCondition.obj waitForIO.obj waitForTime.obj
 
 
 @rem The Net library

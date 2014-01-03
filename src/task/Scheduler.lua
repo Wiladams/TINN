@@ -1,30 +1,14 @@
 
-if Scheduler_Included then
-	return Scheduler;
-end
-
-Scheduler_Included = true;
-
 local ffi = require("ffi");
 
 local Collections = require("Collections");
 local StopWatch = require("StopWatch");
-local SimpleFiber = require("SimpleFiber");
-local WinError = require("win_error");
-local Functor = require("Functor")
-local tabutils = require("tabutils");
 
 
 --[[
 	The Scheduler supports a collaborative processing
 	environment.  As such, it manages multiple tasks which
 	are represented by Lua coroutines.
-
-	There may be multiple instances of schedulers running in
-	the system at the same time.  The complexity of dealing 
-	with io events, timed events, and the like, are supported
-	through a plug-in mechanism.  Any additional features
-	can be supported through this plug-in mechanism.
 --]]
 local Scheduler = {}
 setmetatable(Scheduler, {
@@ -36,20 +20,14 @@ local Scheduler_mt = {
 	__index = Scheduler,
 }
 
-function Scheduler.init(self, ...)
+function Scheduler.init(self, scheduler)
 	local obj = {
 		Clock = StopWatch();
-		QuantaSteps = {};
-		ContinuationChecks = {};
 
-		TaskID = 0;
 		TasksReadyToRun = Collections.Queue();
-
 	}
 	setmetatable(obj, Scheduler_mt)
 	
-	obj:addQuantaStep(Functor(obj.step,obj));
-
 	return obj;
 end
 
@@ -57,24 +35,28 @@ function Scheduler.create(self, ...)
 	return self:init(...)
 end
 
-
 --[[
 		Instance Methods
 --]]
+function Scheduler.tasksArePending(self)
+	return self.TasksReadyToRun:Len() > 0
+end
+
+function Scheduler.tasksPending(self)
+	return self.TasksReadyToRun:Len();
+end
+
+
 function Scheduler.getClock(self)
 	return self.Clock;
 end
 
 
 --[[
-	Fiber Handling
+	Task Handling
 --]]
-function Scheduler.getTaskID(self)
-	self.TaskID = self.TaskID + 1;
-	return self.TaskID;
-end
 
-function Scheduler.scheduleFiber(self, afiber, ...)
+function Scheduler.scheduleTask(self, afiber, ...)
 	if not afiber then
 		return false, "no fiber specified"
 	end
@@ -165,95 +147,49 @@ function Scheduler.step(self)
 	-- is if it's state is 'readytorun', otherwise, it will
 	-- stay out of the readytorun list.
 	if task.state == "readytorun" then
-		self:scheduleFiber(task, results);
+		self:scheduleTask(task, results);
 	end
 end
 
-
-function Scheduler.addQuantaStep(self, astep)
-	table.insert(self.QuantaSteps,astep)
-end
-
--- returns an iterator of all the steps
--- to be executed per quanta
-function Scheduler.quantumSteps(self)
-
-	local index = 0;
-	local listSize = #self.QuantaSteps;
-
-	local closure = function()
-		if not self.ContinueRunning then
-			return nil;
-		end
-
-		index = index + 1;
-		
-		local astep = self.QuantaSteps[index]
-
-		if (index % listSize) == 0 then
-			index = 0
-		end
-
-		return astep
-	end
-
-	return closure	
-end
 
 --[[
 	Primary Interfaces
 --]]
 
-function Scheduler.spawn(self, aroutine, ...)
-	--print("Scheduler.spawn()", aroutine, ...);
-	local task = SimpleFiber(aroutine)
-	task.TaskID = self:getTaskID();
-	self:scheduleFiber(task, ...);
-
-	return task;
-end
-
 function Scheduler.suspend(self, aTask)
-	aTask = aTask or self.CurrentFiber;
+	if not aTask then
+		self.CurrentFiber.state = "suspended"
+		return self:yield()
+	end
 
 	aTask.state = "suspended";
 
-	return self:yield();
+	return true
 end
 
 function Scheduler.yield(self, ...)
 	return coroutine.yield(...);
 end
 
+
+--[[
+	Running the scheduler itself
+--]]
+function Scheduler.start(self)
+	if self.ContinueRunning then
+		return false, "scheduler is already running"
+	end
+	
+	self.ContinueRunning = true;
+
+	while self.ContinueRunning do
+		self:step();
+	end
+	--print("FINISHED STEP ITERATION")
+end
+
 function Scheduler.stop(self)
 	self.ContinueRunning = false;
 end
-
-function Scheduler.start(self)
-	self.ContinueRunning = true;
-
-
-	for astep in self:quantumSteps() do
-		astep()
-		
-		-- if we're running in a coroutine
-		-- then yield
-		if not self:inMainFiber() then
-			self:yield();
-		end
-	end
-
-	print("FINISHED STEP ITERATION")
-end
-
-function Scheduler.run(self, func, ...)
-	if func ~= nil then
-		self:spawn(func, ...);
-	end
-
-
-	self:start();
-end
-
 
 return Scheduler

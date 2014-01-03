@@ -3,7 +3,9 @@
 local Functor = require("Functor")
 local IOCompletionPort = require("IOCompletionPort");
 
-local waitForIO = {}
+local waitForIO = {
+	MessageQuanta = 10;
+}
 setmetatable(waitForIO, {
 	__call = function(self, ...)
 		return self:create(...)
@@ -21,23 +23,24 @@ function waitForIO.init(self, scheduler)
 		FibersAwaitingEvent = {};
 		EventFibers = {};
 
-		MessageQuanta = 10;		-- milliseconds
+		MessageQuanta = self.MessageQuanta;		-- milliseconds
 		OperationId = 0;
 	}
 	setmetatable(obj, waitForIO_mt)
-
-	scheduler:addQuantaStep(Functor(obj.step,obj));
-	scheduler:addContinuationCheck(Functor(obj.tasksPending, obj));
 
 	return obj;
 end
 
 function waitForIO.create(self, scheduler)
-	return self:init(scheduler)
+
+	local obj = self:init(scheduler)
+	--scheduler:spawn(obj.step, obj)
+
+	return obj;
 end
 
 
-function waitForIO.tasksPending(self)
+function waitForIO.tasksArePending(self)
 	local fibersawaitio = false;
 
 	for fiber in pairs(self.FibersAwaitingEvent) do
@@ -72,7 +75,7 @@ function waitForIO.yield(self, socket, overlapped)
 	self.EventFibers[overlapped] = currentFiber;
 	self.FibersAwaitingEvent[currentFiber] = true;
 	
-	return self.Scheduler:suspend(currentFiber)
+	return self.Scheduler:suspend()
 end
 
 
@@ -97,7 +100,7 @@ function waitForIO.processIOEvent(self, key, numbytes, overlapped)
 	-- overlapped structure
 	self.EventFibers[overlapped] = nil;
 
-	self.Scheduler:scheduleFiber(fiber, key, numbytes, overlapped);
+	self.Scheduler:scheduleTask(fiber, key, numbytes, overlapped);
 
 	return true;
 end
@@ -142,5 +145,12 @@ function waitForIO.step(self)
 	return status, err;
 end
 
+function waitForIO.start(self)
+	while true do
+		self:step();
+		self.Scheduler:yield();
+	end
+end
 
 
+return waitForIO

@@ -3,7 +3,6 @@ local ffi = require("ffi")
 
 local MMDevice_ffi = require("MMDevice_ffi")
 local ObjBase = require("ObjBase")
---local win_error = require("win_error")
 local core_string = require("core_string_l1_1_0");
 
 local MMDevice = {}

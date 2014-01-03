@@ -60,7 +60,6 @@ local whenever = function(pred, func)
 	Task:spawn(watchit)
 end
 
--- when(Functor(self.noMoreTasks,self), function() self.ContinueRunning = false; end);
 
 
 local exports = {

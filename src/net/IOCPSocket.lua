@@ -71,13 +71,11 @@ IOCPSocket.create = function(self, family, socktype, protocol, autoclose)
 
 	-- Create the actual socket
 	local sock = ws2_32.WSASocketA(family, socktype, protocol, lpProtocolInfo, group, dwFlags);
-	--local sock = ws2_32.socket(family, socktype, protocol);
 	
 	if sock == INVALID_SOCKET then
 		return nil, ws2_32.WSAGetLastError();
 	end
 				
-
 	local socket, err = self:init(sock, autoclose);
 
 	if not socket then
@@ -88,7 +86,6 @@ IOCPSocket.create = function(self, family, socktype, protocol, autoclose)
 end
 
 IOCPSocket.createClient = function(self, hostname, port)
---print("IOCPSocket.createClient(): ", hostname, port);
 	local family = AF_INET;
 	local socktype = SOCK_STREAM;
 	local protocol = protocol or 0;
@@ -277,7 +274,7 @@ end
 --[[
 			Connection Management
 --]]
-IOCPSocket.IsConnected = function(self)
+IOCPSocket.isConnected = function(self)
 	success, err = self:getConnectionTime()
 	if success and success >= 0 then
 		return true
@@ -632,54 +629,12 @@ end
 -- Some aliases
 IOCPSocket.CloseDown = IOCPSocket.closeDown
 
-
 return IOCPSocket;
 
 
 
 --[[
-IOProcessor.createClientSocket = function(self, hostname, port)
-	local socket = IOCPSocket:createClient(hostname, port)
-	
-	-- see if we already think there is an active socket with the 
-	-- native socket handle.
-	-- if there is, it means that the socket was closed, but we never
-	-- cleaned up the associated object.
-	-- So, clean it up, before creating a new one.
-	local alreadyActive = self.ActiveSockets[socket:getNativeSocket()];
-	if alreadyActive then
-		print("IOProcessor.createClientSocket(), ALREADY ACTIVE: ", socket:getNativeSocket());
-		self.ActiveSockets[socket:getNativeSocket()] = nil;
-	end
-
-	-- add the socket to the active socket table
-	self.ActiveSockets[socket:getNativeSocket()] = socket;
-
-	return socket;
-end
-
-IOProcessor.createServerSocket = function(self, params)
-	local socket = IOCPSocket:createServer(params)
-
-	-- add the socket to the active socket table
-	self.ActiveSockets[socket:getNativeSocket()] = socket;
-
-	return socket;
-end
-
-IOProcessor.removeDeadSocket = function(self, sock)
-	local socketentry = self.ActiveSockets[sock];
-	if socketentry then
-		print("REMOVING DEAD SOCKET: ", sock);
-		self.ActiveSockets[sock] = nil;
-	end
-
-	return true;
-end
---]]
-
-
---[[
+-- another way to check on the completion of IO
 IOProcessor.getCompletionStatus = function(self, sock, Overlapped)
 	local lpcbTransfer = ffi.new("DWORD[1]");
 	local Flags = ffi.new("DWORD[1]");
