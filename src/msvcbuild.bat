@@ -139,6 +139,17 @@
 
 @set WINCOREAPI=core_console_l1_1_0.obj core_console_l2_1_0.obj core_datetime_l1_1_1.obj core_debug_l1_1_1.obj core_errorhandling_l1_1_1.obj core_file_l1_2_0.obj core_file_l2_1_0.obj core_firmware_l1_1_0.obj core_interlocked.obj core_io_l1_1_1.obj core_libraryloader_l1_1_1.obj core_memory_l1_1_1.obj core_namedpipe_l1_2_0.obj core_processenvironment.obj core_processthreads_l1_1_1.obj core_profile_l1_1_0.obj core_psapi_l1_1_0.obj core_shutdown_l1_1_0.obj core_string_l1_1_0.obj core_synch_l1_2_0.obj core_sysinfo_l1_2_0.obj core_timezone_l1_1_0.obj crypt.obj dsrole.obj Handle_ffi.obj Heap_ffi.obj httpapi.obj lmcons.obj mswsock.obj NTSecAPI.obj power_base_l1_1_0.obj samcli.obj security_base_l1_2_0.obj security_credentials_l1_1_0.obj security_lsalookup_l2_1_0.obj security_sddl_l1_1_0.obj service_core_l1_1_1.obj service_management_l1_1_0.obj sspi_ffi.obj sspicli.obj SubAuth.obj UMS_ffi.obj Util_ffi.obj WinBer_ffi.obj WinCon.obj wkscli.obj wldap32_ffi.obj ws2_32.obj
 
+@rem Ole library
+%LUAC% ole/IUnknown.lua IUnknown.obj
+%LUAC% ole/OaIdl.lua OaIdl.obj
+%LUAC% ole/ObjBase.lua ObjBase.obj
+%LUAC% ole/ObjIdl.lua ObjIdl.obj
+%LUAC% ole/PropIdl.lua PropIdl.obj
+%LUAC% ole/propsys.lua propsys.obj
+
+@set OLELIB=IUnknown.obj OaIdl.obj ObjBase.obj ObjIdl.obj PropIdl.obj propsys.obj
+
+
 
 @rem Create the Win32 specific stuff
 %LUAC% Win32/basetsd.lua basetsd.obj
@@ -238,7 +249,7 @@
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinn.exe %LJLIBNAME% %ZLIBNAME% tinn.obj %CLIBS% %COMPUTICLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
+%LJLINK% /out:tinn.exe %LJLIBNAME% %ZLIBNAME% tinn.obj %CLIBS% %COMPUTICLELIB% %OLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinn.exe.manifest^
   %LJMT% -manifest tinn.exe.manifest -outputresource:tinn.exe
