@@ -6,15 +6,13 @@ local ffi = require "ffi"
 local bit = require "bit"
 local bor = bit.bor
 
-local Task = require("IOProcessor")
-local parallel = require("parallel")()
+local Application = require("Application")
 local Timer = require("Timer")
 
 local Gdi32 = require "GDI32"
 local User32 = require "user32_ffi"
 local errorhandling = require("core_errorhandling_l1_1_1")
 local libraryloader = require("core_libraryloader_l1_1_1");
-local core_synch = require("core_synch_l1_2_0");
 local WindowKind = require("WindowKind");
 
 
@@ -96,29 +94,33 @@ end
 local winKind = WindowKind:create("GDIApp", WindowProc);
 
 
-GDIApp.init = function(self, nativewindow, params)
+function GDIApp.init(self, nativewindow, params)
 
-	local obj = {
-		NativeWindow = nativewindow,
+	local obj = Application(true);
 
-		Width = params.Extent[1];
-		Height = params.Extent[2];
+	obj.NativeWindow = nativewindow,
 
-		IsReady = false;
-		IsValid = false;
-		IsRunning = false;
+	obj.Width = params.Extent[1];
+	obj.Height = params.Extent[2];
+
+	obj.IsReady = false;
+	obj.IsValid = false;
+	obj.IsRunning = false;
 
 		-- Interactor routines
-		MessageDelegate = params.MessageDelegate;
-		OnCreatedDelegate = params.OnCreatedDelegate;
-		OnSetFocusDelegate = params.OnSetFocusDelegate;
-		OnTickDelegate = params.OnTickDelegate;
-		OnQuitDelegate = params.OnQuitDelegate;
+	obj.MessageDelegate = params.MessageDelegate;
+	obj.OnCreatedDelegate = params.OnCreatedDelegate;
+	obj.OnSetFocusDelegate = params.OnSetFocusDelegate;
+	obj.OnTickDelegate = params.OnTickDelegate;
+	obj.OnQuitDelegate = params.OnQuitDelegate;
 
-		KeyboardInteractor = params.KeyboardInteractor;
-		MouseInteractor = params.MouseInteractor;
-		GestureInteractor = params.GestureInteractor;
-	}
+	obj.KeyboardInteractor = params.KeyboardInteractor;
+	obj.MouseInteractor = params.MouseInteractor;
+	obj.GestureInteractor = params.GestureInteractor;
+
+	-- get the current metatable
+	local objmeta = getmetatable(obj)
+
 	setmetatable(obj, GDIApp_mt);
 	
 	obj:setFrameRate(params.FrameRate)
@@ -127,7 +129,7 @@ GDIApp.init = function(self, nativewindow, params)
 	return obj;
 end	
 
-GDIApp.create = function(self, params)
+function GDIApp.create(self, params)
 	params = params or GDIApp.Defaults
 
 	params.ClassName = params.ClassName or GDIApp.Defaults.ClassName
@@ -135,7 +137,6 @@ GDIApp.create = function(self, params)
 	params.Origin = params.Origin or GDIApp.Defaults.Origin
 	params.Extent = params.Extent or GDIApp.Defaults.Extent
 	params.FrameRate = params.FrameRate or GDIApp.Defaults.FrameRate
-
 	-- try to create a window of our kind
 	local win, err = winKind:createWindow(params.Extent[1], params.Extent[2], params.Title);
 	
@@ -146,7 +147,7 @@ GDIApp.create = function(self, params)
 	return self:init(win, params);
 end
 
-GDIApp.getBackBuffer = function(self)
+function GDIApp.getBackBuffer(self)
 	if not self.BackBuffer then
 		-- get the GDIcontext for the native window
 		local err
@@ -181,7 +182,7 @@ function GDIApp:hide()
 	self.NativeWindow:Hide();
 end
 
-GDIApp.redraw = function(self, flags)
+function GDIApp.redraw(self, flags)
 	return self.NativeWindow:redraw(flags);
 end
 
@@ -240,7 +241,7 @@ print("GDIApp:OnQuit")
 	return true;
 end
 
-GDIApp.handleFrameTick = function(self)
+function GDIApp.handleFrameTick(self)
 	local tickCount = 0;
 
 	local closure = function(timer)
@@ -281,7 +282,7 @@ end
 	A simple predicate that tells us whether or not a message
 	is waiting in the thread's message queue or not.
 --]]
-local user32MessageIsAvailable = function()
+local function user32MessageIsAvailable()
 	local msg = ffi.new("MSG")
 
 	local closure = function()
@@ -297,7 +298,7 @@ local user32MessageIsAvailable = function()
 	return closure;
 end
 
-local handleUser32Message = function(win)
+local function handleUser32Message(win)
 	local msg = ffi.new("MSG")
 
 	local closure = function()
@@ -318,7 +319,7 @@ local handleUser32Message = function(win)
 end
 
 
-local appToClose = function(win)
+local function appToClose(win)
 
 	local closure = function()
 		if win.IsRunning == false then
@@ -331,7 +332,7 @@ local appToClose = function(win)
 	return closure;
 end
 
-GDIApp.main = function(self)
+function GDIApp.main(self)
 	print("GDIApp.main - BEGIN")
 
 	self:show()
@@ -352,14 +353,14 @@ GDIApp.main = function(self)
 	end
 end
 
-GDIApp.run = function(self)
+function GDIApp.run(self)
 	if not self.IsValid then
 		print('Window Handle is NULL')
 		return
 	end
 	-- set quanta to 0 so we don't waste time
 	-- in i/o processing if there's nothing there
-	Task:setMessageQuanta(0);
+	--Task:setMessageQuanta(0);
 	
 
 	-- spawn the thread that will wait

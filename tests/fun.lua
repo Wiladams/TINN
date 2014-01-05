@@ -10,14 +10,14 @@
 -- Tools
 --------------------------------------------------------------------------------
 
-local return_if_not_empty = function(state_x, ...)
+local function return_if_not_empty(state_x, ...)
     if state_x == nil then
         return nil
     end
     return ...
 end
 
-local call_if_not_empty = function(fun, state_x, ...)
+local function call_if_not_empty(fun, state_x, ...)
     if state_x == nil then
         return nil
     end
@@ -394,12 +394,12 @@ local filter1_gen = function(fun, gen_x, param_x, state_x, a)
 end
 
 -- call each other
-local filterm_gen
-local filterm_gen_shrink = function(fun, gen_x, param_x, state_x)
+--local filterm_gen
+local function filterm_gen_shrink(fun, gen_x, param_x, state_x)
     return filterm_gen(fun, gen_x, param_x, gen_x(param_x, state_x))
 end
 
-filterm_gen = function(fun, gen_x, param_x, state_x, ...)
+function filterm_gen(fun, gen_x, param_x, state_x, ...)
     if state_x == nil then
         return nil
     end
@@ -540,15 +540,15 @@ local product = function(gen, param, state)
     return p
 end
 
-local min_cmp = function(m, n)
+local function min_cmp(m, n)
     if n < m then return n else return m end
 end
 
-local max_cmp = function(m, n)
+local function max_cmp(m, n)
     if n > m then return n else return m end
 end
 
-local min = function(gen, param, state)
+local function min(gen, param, state)
     local gen, param, state = iter(gen, param, state)
     local state, m = gen(param, state)
     if state == nil then
