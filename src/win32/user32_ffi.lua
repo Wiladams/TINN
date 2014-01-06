@@ -194,6 +194,18 @@ BOOL WaitMessage(void);
 ]]
 
 ffi.cdef[[
+BOOL
+AdjustWindowRect(
+    LPRECT lpRect,
+    DWORD dwStyle,
+    BOOL bMenu);
+
+BOOL
+AdjustWindowRectEx(
+    LPRECT lpRect,
+    DWORD dwStyle,
+    BOOL bMenu,
+    DWORD dwExStyle);
 
 LRESULT CallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 

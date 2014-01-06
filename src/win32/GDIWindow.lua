@@ -1,5 +1,5 @@
 --
--- GDIApp.lua
+-- GDIWindow.lua
 --
 
 local ffi = require "ffi"
@@ -17,9 +17,9 @@ local WindowKind = require("WindowKind");
 
 
 
-local GDIApp = {
+local GDIWindow = {
 	Defaults = {
-		ClassName = "GDIApp",
+		ClassName = "GDIWindow",
 		Title = "GDI Application",
 		Origin = {10,10},
 		Extent = {320, 240},
@@ -28,14 +28,14 @@ local GDIApp = {
 	
 	WindowMap = {},
 }
-setmetatable(GDIApp, {
+setmetatable(GDIWindow, {
 	__call = function(self, ...)
 		return self:create(...);
 	end,
 });
 
-local GDIApp_mt = {
-	__index = GDIApp;
+local GDIWindow_mt = {
+	__index = GDIWindow;
 }
 
 
@@ -57,7 +57,7 @@ function WindowProc(hwnd, msg, wparam, lparam)
 	local winptr = ffi.cast("intptr_t", hwnd)
 	local winnum = tonumber(winptr)
 
-	local self = GDIApp.WindowMap[winnum]
+	local self = GDIWindow.WindowMap[winnum]
 
 --print(string.format("WindowProc: 0x%x, Window: 0x%x, self: %s", msg, winnum, tostring(self)))
 
@@ -91,12 +91,13 @@ end
 
 
 
-local winKind = WindowKind:create("GDIApp", WindowProc);
+local winKind = WindowKind:create("GDIWindow", WindowProc);
 
 
-function GDIApp.init(self, nativewindow, params)
+function GDIWindow.init(self, nativewindow, params)
 
-	local obj = Application(true);
+	--local obj = Application(true);
+	local obj = {}
 
 	obj.NativeWindow = nativewindow,
 
@@ -118,10 +119,8 @@ function GDIApp.init(self, nativewindow, params)
 	obj.MouseInteractor = params.MouseInteractor;
 	obj.GestureInteractor = params.GestureInteractor;
 
-	-- get the current metatable
-	local objmeta = getmetatable(obj)
 
-	setmetatable(obj, GDIApp_mt);
+	setmetatable(obj, GDIWindow_mt);
 	
 	obj:setFrameRate(params.FrameRate)
 	obj:OnCreated(nativewindow);
@@ -129,14 +128,14 @@ function GDIApp.init(self, nativewindow, params)
 	return obj;
 end	
 
-function GDIApp.create(self, params)
-	params = params or GDIApp.Defaults
+function GDIWindow.create(self, params)
+	params = params or GDIWindow.Defaults
 
-	params.ClassName = params.ClassName or GDIApp.Defaults.ClassName
-	params.Title = params.Title or GDIApp.Defaults.Title
-	params.Origin = params.Origin or GDIApp.Defaults.Origin
-	params.Extent = params.Extent or GDIApp.Defaults.Extent
-	params.FrameRate = params.FrameRate or GDIApp.Defaults.FrameRate
+	params.ClassName = params.ClassName or GDIWindow.Defaults.ClassName
+	params.Title = params.Title or GDIWindow.Defaults.Title
+	params.Origin = params.Origin or GDIWindow.Defaults.Origin
+	params.Extent = params.Extent or GDIWindow.Defaults.Extent
+	params.FrameRate = params.FrameRate or GDIWindow.Defaults.FrameRate
 	-- try to create a window of our kind
 	local win, err = winKind:createWindow(params.Extent[1], params.Extent[2], params.Title);
 	
@@ -147,7 +146,7 @@ function GDIApp.create(self, params)
 	return self:init(win, params);
 end
 
-function GDIApp.getBackBuffer(self)
+function GDIWindow.getBackBuffer(self)
 	if not self.BackBuffer then
 		-- get the GDIcontext for the native window
 		local err
@@ -163,46 +162,46 @@ function GDIApp.getBackBuffer(self)
 	return self.BackBuffer;
 end
 
-function GDIApp:getClientSize()
+function GDIWindow:getClientSize()
 	return self.NativeWindow:GetClientSize();
 end
 
-function GDIApp:setFrameRate(rate)
+function GDIWindow:setFrameRate(rate)
 	self.FrameRate = rate
 	self.Interval = 1/self.FrameRate
 end
 
 
 
-function GDIApp:show()
+function GDIWindow:show()
 	self.NativeWindow:Show();
 end
 
-function GDIApp:hide()
+function GDIWindow:hide()
 	self.NativeWindow:Hide();
 end
 
-function GDIApp.redraw(self, flags)
+function GDIWindow.redraw(self, flags)
 	return self.NativeWindow:redraw(flags);
 end
 
-function GDIApp:update()
+function GDIWindow:update()
 	self.NativeWindow:Update();
 end
 
 
-function GDIApp:swapBuffers()
+function GDIWindow:swapBuffers()
 	gdi32.SwapBuffers(self.GDIContext.Handle);
 end
 
 
-function GDIApp:OnCreated(nativewindow)
-print("GDIApp:OnCreated: ", nativewindow)
+function GDIWindow:OnCreated(nativewindow)
+print("GDIWindow:OnCreated: ", nativewindow)
 
 	local winptr = ffi.cast("intptr_t", nativewindow:getNativeHandle())
 	local winnum = tonumber(winptr)
 
-	GDIApp.WindowMap[winnum] = self
+	GDIWindow.WindowMap[winnum] = self
 
 	self.GDIContext = DeviceContext:init(User32.GetDC(nativewindow:getNativeHandle()));
 
@@ -218,19 +217,19 @@ print("GDIApp:OnCreated: ", nativewindow)
 	if self.OnCreatedDelegate then
 		self.OnCreatedDelegate(self)
 	end
-print("GDIApp:OnCreated - END")
+print("GDIWindow:OnCreated - END")
 end
 
-function GDIApp:OnDestroy()
-	print("GDIApp:OnDestroy")
+function GDIWindow:OnDestroy()
+	print("GDIWindow:OnDestroy")
 
 	ffi.C.PostQuitMessage(0)
 
 	return 0
 end
 
-function GDIApp:OnQuit()
-print("GDIApp:OnQuit")
+function GDIWindow:OnQuit()
+print("GDIWindow:OnQuit")
 	self.IsRunning = false
 
 	if self.OnQuitDelegate then
@@ -241,7 +240,7 @@ print("GDIApp:OnQuit")
 	return true;
 end
 
-function GDIApp.handleFrameTick(self)
+function GDIWindow.handleFrameTick(self)
 	local tickCount = 0;
 
 	local closure = function(timer)
@@ -255,14 +254,14 @@ function GDIApp.handleFrameTick(self)
 	return closure;
 end
 
-function GDIApp:OnFocusMessage(msg)
+function GDIWindow:OnFocusMessage(msg)
 print("OnFocusMessage")
 	if (self.OnSetFocusDelegate) then
 		self.OnSetFocusDelegate(self, msg)
 	end
 end
 
-function GDIApp:OnKeyboardMessage(msg, wparam, lparam)
+function GDIWindow:OnKeyboardMessage(msg, wparam, lparam)
 	if self.KeyboardInteractor then
 		self.KeyboardInteractor(msg)
 		return 0;
@@ -270,7 +269,7 @@ function GDIApp:OnKeyboardMessage(msg, wparam, lparam)
 	return 1;
 end
 
-function GDIApp:OnMouseMessage(msg)
+function GDIWindow:OnMouseMessage(msg)
 	if self.MouseInteractor then
 		self.MouseInteractor(msg)
 		return 0;
@@ -332,8 +331,8 @@ local function appToClose(win)
 	return closure;
 end
 
-function GDIApp.main(self)
-	print("GDIApp.main - BEGIN")
+function GDIWindow.main(self)
+	print("GDIWindow.main - BEGIN")
 
 	self:show()
 	self:update()
@@ -353,7 +352,7 @@ function GDIApp.main(self)
 	end
 end
 
-function GDIApp.run(self)
+function GDIWindow.run(self)
 	if not self.IsValid then
 		print('Window Handle is NULL')
 		return
@@ -365,12 +364,12 @@ function GDIApp.run(self)
 
 	-- spawn the thread that will wait
 	-- for messages to finish
-	Task:spawn(GDIApp.main, self);
+	Task:spawn(GDIWindow.main, self);
 
 	Task:run()
 
-	print("EXIT GDIApp.run")
+	print("EXIT GDIWindow.run")
 end
 
 
-return GDIApp;
+return GDIWindow;
