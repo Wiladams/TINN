@@ -2,6 +2,8 @@
 -- api-ms-win-core-libraryloader-l1-1-1.dll
 
 local ffi = require("ffi");
+
+local WTypes = require("WTypes")
 local k32Lib = ffi.load("kernel32");
 local u32Lib = ffi.load("user32");
 

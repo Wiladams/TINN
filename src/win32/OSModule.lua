@@ -8,8 +8,7 @@ local ffi = require("ffi");
 
 local libraryloader = require("core_libraryloader_l1_1_1");
 local errorhandling = require("core_errorhandling_l1_1_1");
-local reflect = require("reflect");
-local console = require("core_console");
+--local reflect = require("reflect");
 
 ffi.cdef[[
 typedef struct {
@@ -36,28 +35,11 @@ ffi.metatype(OSModuleHandle, OSModuleHandle_mt);
 
 
 local OSModule = {}
-local OSModule_t = {};
-
-OSModule_t.load = function(self, name, flags)
-	flags = flags or 0
-	local handle = libraryloader.LoadLibraryExA(name, nil, flags);
-	if handle == nil then
-		return false, errorhandling.GetLastError();
-	end
-
-	return OSModule(handle);
-end
-
 setmetatable(OSModule,{
 	__call = function(self, ...)
-		return self:new(...);
+		return self:create(...);
 	end,
-
-	__index = OSModule_t,
-
 })
-
-
 
 --[[
 	Metatable for instances of the OSModule 
@@ -86,15 +68,21 @@ local OSModule_mt = {
 		--end
 
 		-- turn the function information into a function pointer
+		local proc = self.Handle:getProcAddress(key);
+		if not proc then
+			return nil, "function not found in module"
+		end
+		
 		ffitype = ffi.typeof("$ *", ffitype);
-		local castval = ffi.cast(ffitype, self.Handle:getProcAddress(key));
+		local castval = ffi.cast(ffitype, proc);
 		
 		return castval;
 	end,
 };
 
 
-OSModule.new = function(self, handle)
+
+OSModule.init = function(self, handle)
 	local obj = {
 		Handle = OSModuleHandle(handle);
 	};
@@ -102,6 +90,18 @@ OSModule.new = function(self, handle)
 	setmetatable(obj, OSModule_mt);
 
 	return obj;
+end
+
+OSModule.create = function(self, name, flags)
+	flags = flags or 0
+
+	local handle = libraryloader.LoadLibraryExA(name, nil, flags);
+	
+	if handle == nil then
+		return nil, errorhandling.GetLastError();
+	end
+
+	return self:init(handle);
 end
 
 return OSModule
