@@ -96,6 +96,8 @@ function Application.waitFor(self, pred)
 	self.wfc:yield(pred)
 end
 
+-- taskIsFinished
+-- A function that can be used as a predicate
 function Application.taskIsFinished(task)
 	local function closure()
 		return task:getStatus() == "dead"
