@@ -6,13 +6,11 @@ local ffi = require "ffi"
 local bit = require "bit"
 local bor = bit.bor
 
-local Application = require("Application")
-local Timer = require("Timer")
-
+local Application = require("Application")(true)
+local Functor = require("Functor")
 local Gdi32 = require "GDI32"
 local User32 = require "user32_ffi"
 local errorhandling = require("core_errorhandling_l1_1_1")
-local libraryloader = require("core_libraryloader_l1_1_1");
 local WindowKind = require("WindowKind");
 
 
@@ -99,7 +97,7 @@ function GDIWindow.init(self, nativewindow, params)
 	--local obj = Application(true);
 	local obj = {}
 
-	obj.NativeWindow = nativewindow,
+	obj.NativeWindow = nativewindow;
 
 	obj.Width = params.Extent[1];
 	obj.Height = params.Extent[2];
@@ -322,7 +320,7 @@ local function appToClose(win)
 
 	local closure = function()
 		if win.IsRunning == false then
-			--print("APP CLOSE, IsRunning == false")		
+			print("APP CLOSE, IsRunning == false")		
 			return true;
 		end
 		return false;
@@ -341,22 +339,21 @@ function GDIWindow.main(self)
 	whenever(user32MessageIsAvailable(), handleUser32Message(self))
 
 	-- Start the FrameTimer
-	self.FrameTimer = Timer {OnTime = self:handleFrameTick(), Period = 1000/self.FrameRate}
-
+	self.FrameTimer = periodic(Functor(self.handleFrameTick,self), 1000/self.FrameRate)
 
 	-- wait here until the application window is closed
 	waitFor(appToClose(self))
 
-	if self.FrameTimer then
-		self.FrameTimer:cancel();
-	end
+	--if self.FrameTimer then
+	--	self.FrameTimer:cancel();
+	--end
+
+	stop();
+
+	print("GDIWindow.main - END")
 end
 
 function GDIWindow.run(self)
-	if not self.IsValid then
-		print('Window Handle is NULL')
-		return
-	end
 	-- set quanta to 0 so we don't waste time
 	-- in i/o processing if there's nothing there
 	--Task:setMessageQuanta(0);
@@ -364,9 +361,10 @@ function GDIWindow.run(self)
 
 	-- spawn the thread that will wait
 	-- for messages to finish
-	Task:spawn(GDIWindow.main, self);
+	self.IsRunning = true;
+	spawn(self.main, self);
 
-	Task:run()
+	run()
 
 	print("EXIT GDIWindow.run")
 end

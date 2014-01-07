@@ -56,9 +56,31 @@ setmetatable(SID, {
 	__call = function(self, ...)
 		return self:init(...);
 	end,
+});
 
-	__index = {
-		create = function(self, pIdentifierAuthority, nSubAuthorityCount, 
+local SID_mt = {
+	__index = SID;
+
+	__tostring = function(self)
+		return self:asString();
+	end,
+
+	__eq = function(self, other)
+		return security_base.EqualSid(self:getNativeHandle(), other:getNativeHandle()) ~= 0;
+	end,
+}
+
+SID.init = function(self, rawhandle)
+	--print("SID.new");
+	local obj = {
+		Handle = SIDHandle(rawhandle);
+	}
+	setmetatable(obj, SID_mt);
+
+	return obj;
+end
+
+function SID.create(self, pIdentifierAuthority, nSubAuthorityCount, 
 			subauth0, subauth1, subauth2, subauth3, 
 			subauth4, subauth5, subauth6,subauth7)
 
@@ -85,31 +107,7 @@ setmetatable(SID, {
 			end
 
 			return SID(pSID[0], true);
-		end,
-	},
-});
-
-local SID_mt = {
-	__index = SID;
-
-	__tostring = function(self)
-		return self:asString();
-	end,
-
-	__eq = function(self, other)
-		return security_base.EqualSid(self:getNativeHandle(), other:getNativeHandle()) ~= 0;
-	end,
-}
-
-SID.init = function(self, rawhandle)
-	--print("SID.new");
-	local obj = {
-		Handle = SIDHandle(rawhandle);
-	}
-	setmetatable(obj, SID_mt);
-
-	return obj;
-end
+		end
 
 SID.getNativeHandle = function(self)
 	return self.Handle.Handle;

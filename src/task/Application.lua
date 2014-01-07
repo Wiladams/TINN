@@ -92,7 +92,7 @@ end
 
 
 function Application.waitFor(self, pred)
-	--print("Application.waitFor: ", pred)
+	print("Application.waitFor: ", pred)
 	self.wfc:yield(pred)
 end
 

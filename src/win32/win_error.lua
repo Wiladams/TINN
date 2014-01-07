@@ -1,7 +1,10 @@
 
+local ffi = require("ffi")
 local bit = require("bit")
 local band = bit.band;
+local bor = bit.bor;
 local rshift = bit.rshift;
+local lshift = bit.lshift;
 
 NO_ERROR		= 0;
 
@@ -52,6 +55,17 @@ ERROR_LOGON_FAILURE             = 1326;
 ERROR_LOGON_TYPE_NOT_GRANTED    = 1385;
 
 
+ffi.cdef[[
+static const int FACILITY_WIN32  = 7;
+]]
+
+local function __HRESULT_FROM_WIN32(x) 
+  if x <= 0 then
+    return x
+  end
+
+  return bor(band(x, 0x0000FFFF), bor(lshift(ffi.C.FACILITY_WIN32, 16), 0x80000000))
+end
 
 function HRESULT_CODE(hr)
 	return band(hr, 0xFFFF)
@@ -72,3 +86,7 @@ end
 function FAILED(hr)
 	return HRESULT_SEVERITY(hr) ~= 0;
 end
+
+return {
+	__HRESULT_FROM_WIN32 = __HRESULT_FROM_WIN32,
+}
