@@ -1,14 +1,11 @@
 -- test_OSModule.lua
 --
--- References:
--- http://www.corsix.org/lua/reflect/api.html
 --
 
 local ffi = require("ffi");
 
 local libraryloader = require("core_libraryloader_l1_1_1");
 local errorhandling = require("core_errorhandling_l1_1_1");
---local reflect = require("reflect");
 
 ffi.cdef[[
 typedef struct {
@@ -73,6 +70,8 @@ local OSModule_mt = {
 			return nil, "function not found in module"
 		end
 		
+print("OSModule.__index, getProcAddress: ", proc)
+
 		ffitype = ffi.typeof("$ *", ffitype);
 		local castval = ffi.cast(ffitype, proc);
 		
