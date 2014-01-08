@@ -184,6 +184,9 @@ function Scheduler.start(self)
 
 	while self.ContinueRunning do
 		self:step();
+		if self.OnStepped then
+			self.OnStepped()
+		end
 	end
 	--print("FINISHED STEP ITERATION")
 end

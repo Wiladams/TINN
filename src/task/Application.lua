@@ -7,6 +7,7 @@ local Functor = require("Functor")
 
 -- scheduler plug-ins
 local waitForCondition = require("waitForCondition")
+local waitForSignal = require("waitForSignal")
 local waitForTime = require("waitForTime")
 local waitForIO = require("waitForIO")
 
@@ -33,6 +34,7 @@ function Application.init(self, ...)
 		Scheduler = sched;
 		TaskID = 0;
 		wfc = waitForCondition(sched);
+		wfs = waitForSignal(sched);
 		wft = waitForTime(sched);
 		wfio = waitForIO(sched);
 	}
@@ -61,7 +63,9 @@ end
 --  Predicates
 --  Timer
 --  IOEvents
+--  Events
 
+-- Time related functions
 function Application.sleep(self, millis)
 	self.wft:yield(millis)
 end
@@ -91,7 +95,7 @@ function Application.periodic(self, func, millis)
 	return self:spawn(closure)
 end
 
-
+-- Conditional functions
 function Application.waitFor(self, pred)
 	--print("Application.waitFor: ", pred)
 	self.wfc:yield(pred)
@@ -129,20 +133,46 @@ function Application.whenever(self, pred, func)
 	self:spawn(watchit)
 end
 
+-- Event Related Functions
+function Application.signalOne(self, eventName)
+	return self.wfs:signalOne(eventName)
+end
+
+function Application.signalAll(self, eventName)
+	return self.wfs:signalAll(eventName)
+end
+
+function Application.waitForSignal(self, eventName)
+	return self.wfs:yield(eventName)
+end
+
+function Application.onSignal(self, func, eventName)
+	local function closure()
+		--print("Application.onEvent: ", func, eventName)
+		self:waitForSignal(eventName)
+		--print("Application.onEvent, waited: ", func, eventName)
+		func();
+	end
+
+	return self:spawn(closure)
+end
+
+
+
 -- Put core scheduler routines in global namespace
-function Application.noMoreTasks(self)
+function Application.onStepped(self)
+	--print("Application.onStepped, IN MAIN: ", self.Scheduler:inMainFiber())
+
 	if not self.wfc:tasksArePending() then
 		--print("No Conditionals Pending")
 		if (self.wft:tasksPending() < 1) then
 			--print("No Timers Pending")
 			if not (self.Scheduler:tasksPending() > 3) then
 				--print("No Tasks Pending: ", self.Scheduler:tasksPending())
-				return true;
+				return self.Scheduler:stop();
 			end
 		end
 	end
-
-	return false;
 end
 
 function Application.getNewTaskID(self)
@@ -174,8 +204,8 @@ function Application.start(self)
 end
 
 function Application.run(self, func, ...)
-	self:when(Functor(self.noMoreTasks, self), Functor(self.stop, self));
-	
+	self.Scheduler.OnStepped = Functor(self.onStepped, self)
+
 	if func ~= nil then
 		self:spawn(func, ...)
 	end
@@ -185,11 +215,15 @@ end
 
 function Application.exportGlobals(self)
 	_G.delay = Functor(self.delay, self);
+	_G.onSignal = Functor(self.onSignal, self);
 	_G.periodic = Functor(self.periodic, self);
 	_G.run = Functor(self.run, self);
+	_G.signalAll = Functor(self.signalAll, self);
+	_G.signalOne = Functor(self.signalOne, self);
 	_G.sleep = Functor(self.sleep, self);
 	_G.spawn = Functor(self.spawn, self);
 	_G.stop = Functor(self.stop, self);
+	_G.waitSignal = Functor(self.waitForSignal, self);
 	_G.waitFor = Functor(self.waitFor, self);
 	_G.when = Functor(self.when, self);
 	_G.whenever = Functor(self.whenever, self);
@@ -197,6 +231,5 @@ function Application.exportGlobals(self)
 
 	return self;
 end
-
 
 return Application

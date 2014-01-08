@@ -95,6 +95,8 @@ function waitForTime.step(self)
 			-- Remove the fiber from the list of fibers that are
 			-- waiting on time
 			table.remove(self.TasksWaitingForTime, 1);
+
+			print("waitForTime.step, after schedule: ", self.Scheduler:tasksPending())
 		end
 	end
 end

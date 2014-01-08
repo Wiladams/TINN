@@ -57,9 +57,10 @@
 %LUAC% task/Timer.lua Timer.obj
 %LUAC% task/TINNThread.lua TINNThread.obj
 %LUAC% task/waitForCondition.lua waitForCondition.obj
+%LUAC% task/waitForSignal.lua waitForSignal.obj
 %LUAC% task/waitForIO.lua waitForIO.obj
 %LUAC% task/waitForTime.lua waitForTime.obj
-@set TASKLIB=Application.obj IOOps.obj IOProcessor.obj luajit_ffi.obj LuaState.obj Scheduler.obj SimpleFiber.obj Task.obj Timer.obj TINNThread.obj waitForCondition.obj waitForIO.obj waitForTime.obj
+@set TASKLIB=Application.obj IOOps.obj IOProcessor.obj luajit_ffi.obj LuaState.obj Scheduler.obj SimpleFiber.obj Task.obj Timer.obj TINNThread.obj waitForCondition.obj waitForSignal.obj waitForIO.obj waitForTime.obj
 
 
 @rem The Net library
