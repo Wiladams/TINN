@@ -21,7 +21,6 @@ local GDIWindow = {
 		Title = "GDI Application",
 		Origin = {10,10},
 		Extent = {320, 240},
-		FrameRate = 30,
 	},
 	
 	WindowMap = {},
@@ -120,7 +119,6 @@ function GDIWindow.init(self, nativewindow, params)
 
 	setmetatable(obj, GDIWindow_mt);
 	
-	obj:setFrameRate(params.FrameRate)
 	obj:OnCreated(nativewindow);
 	
 	return obj;
@@ -133,7 +131,6 @@ function GDIWindow.create(self, params)
 	params.Title = params.Title or GDIWindow.Defaults.Title
 	params.Origin = params.Origin or GDIWindow.Defaults.Origin
 	params.Extent = params.Extent or GDIWindow.Defaults.Extent
-	params.FrameRate = params.FrameRate or GDIWindow.Defaults.FrameRate
 	-- try to create a window of our kind
 	local win, err = winKind:createWindow(params.Extent[1], params.Extent[2], params.Title);
 	
@@ -163,13 +160,6 @@ end
 function GDIWindow:getClientSize()
 	return self.NativeWindow:GetClientSize();
 end
-
-function GDIWindow:setFrameRate(rate)
-	self.FrameRate = rate
-	self.Interval = 1/self.FrameRate
-end
-
-
 
 function GDIWindow:show()
 	self.NativeWindow:Show();
@@ -338,8 +328,6 @@ function GDIWindow.main(self)
 	-- handle the user32 message queue
 	whenever(user32MessageIsAvailable(), handleUser32Message(self))
 
-	-- Start the FrameTimer
-	self.FrameTimer = periodic(Functor(self.handleFrameTick,self), 1000/self.FrameRate)
 
 	-- wait here until the application window is closed
 	waitFor(appToClose(self))

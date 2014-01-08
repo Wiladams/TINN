@@ -17,6 +17,7 @@ local waitForIO_mt = {
 
 
 function waitForIO.init(self, scheduler)
+	print("waitForIO.init, MessageQuanta: ", self.MessageQuanta)
 	local obj = {
 		Scheduler = scheduler;
 		IOEventQueue = IOCompletionPort:create();

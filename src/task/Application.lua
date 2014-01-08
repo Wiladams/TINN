@@ -10,6 +10,7 @@ local waitForCondition = require("waitForCondition")
 local waitForTime = require("waitForTime")
 local waitForIO = require("waitForIO")
 
+waitForIO.MessageQuanta = 0;
 
 -- The main application object
 local Application = {}
@@ -92,7 +93,7 @@ end
 
 
 function Application.waitFor(self, pred)
-	print("Application.waitFor: ", pred)
+	--print("Application.waitFor: ", pred)
 	self.wfc:yield(pred)
 end
 
