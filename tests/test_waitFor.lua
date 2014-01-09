@@ -1,8 +1,6 @@
 -- test_waitFor.lua
 
-local IOProcessor = require("IOProcessor")
-local parallel = require("parallel")()
-local Timer = require("Timer")
+local Application = require("Application")(true)
 
 local count = 0;
 
@@ -35,7 +33,7 @@ end
 
 -- setup a timer to increment the count
 -- every 500 milliseconds
-local incrTimer = Timer({Period = 500; OnTime = function(timer) count = count+1 end})
+periodic(function() count = count+1 end, 500)
 
 spawn(finalGoal)	
 

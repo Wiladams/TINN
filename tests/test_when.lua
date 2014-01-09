@@ -1,8 +1,6 @@
 -- test_when.lua
 
-local Task = require("IOProcessor")
-local Timer = require("Timer")
-local parallel = require("parallel")()
+local Application = require("Application")(true)
 
 
 local counter = 0;
@@ -23,15 +21,15 @@ end
 
 local function stopWorld()
 	print("Goodbye World!")
-	Task:stop();
+	stop();
 end
 
 local function main()
 
 	-- Create a timer with the task of incrementing
 	-- the counter every few milliseconds
-	local t1 = Timer({Period=500, OnTime=incrementCounter})
-	
+	periodic(incrementCounter, 500)
+
 	-- start the task to watch the counter expiration
 	when(counterExpires, stopWorld)
 end
