@@ -25,11 +25,17 @@ function waitForEvent.init(self, scheduler)
 end
 
 function waitForEvent.create(self, scheduler)
+	scheduler = scheduler or self.Scheduler
+
 	if not scheduler then
 		return nil, "no scheduler specified"
 	end
 
 	return self:init(scheduler)
+end
+
+function waitForEvent.setScheduler(self, scheduler)
+	self.Scheduler = scheduler;
 end
 
 function waitForEvent.tasksArePending(self)

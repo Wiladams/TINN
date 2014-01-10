@@ -20,18 +20,21 @@ function waitForTime.init(self, scheduler)
 	}
 	setmetatable(obj, waitForTime_mt)
 
-	--scheduler:addQuantaStep(Functor(obj.step,obj));
-	--scheduler:spawn(obj.step, obj)
-
 	return obj;
 end
 
 function waitForTime.create(self, scheduler)
+	scheduler = scheduler or self.Scheduler
+	
 	if not scheduler then
 		return nil, "no scheduler specified"
 	end
 
 	return self:init(scheduler)
+end
+
+function waitForTime.setScheduler(self, scheduler)
+	self.Scheduler = scheduler;
 end
 
 function waitForTime.tasksArePending(self)
@@ -96,7 +99,7 @@ function waitForTime.step(self)
 			-- waiting on time
 			table.remove(self.TasksWaitingForTime, 1);
 
-			print("waitForTime.step, after schedule: ", self.Scheduler:tasksPending())
+			--print("waitForTime.step, after schedule: ", self.Scheduler:tasksPending())
 		end
 	end
 end

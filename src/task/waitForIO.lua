@@ -17,7 +17,8 @@ local waitForIO_mt = {
 
 
 function waitForIO.init(self, scheduler)
-	print("waitForIO.init, MessageQuanta: ", self.MessageQuanta)
+	-- print("waitForIO.init, MessageQuanta: ", self.MessageQuanta)
+	
 	local obj = {
 		Scheduler = scheduler;
 		IOEventQueue = IOCompletionPort:create();
@@ -33,13 +34,19 @@ function waitForIO.init(self, scheduler)
 end
 
 function waitForIO.create(self, scheduler)
+	scheduler = scheduler or self.Scheduler
 
-	local obj = self:init(scheduler)
-	--scheduler:spawn(obj.step, obj)
+	if not scheduler then
+		return nil, "no scheduler specified"
+	end
 
-	return obj;
+
+	return self:init(scheduler)
 end
 
+function waitForIO.setScheduler(self, scheduler)
+	self.Scheduler = scheduler;
+end
 
 function waitForIO.tasksArePending(self)
 	local fibersawaitio = false;

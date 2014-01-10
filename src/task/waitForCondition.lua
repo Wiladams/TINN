@@ -21,18 +21,21 @@ function waitForCondition.init(self, scheduler)
 	}
 	setmetatable(obj, waitForCondition_mt)
 
-	--scheduler:addQuantaStep(Functor(obj.step,obj));
-	--scheduler:spawn(obj.step, obj)
-
 	return obj;
 end
 
 function waitForCondition.create(self, scheduler)
+	scheduler = scheduler or self.Scheduler
+
 	if not scheduler then
 		return nil, "no scheduler specified"
 	end
 
 	return self:init(scheduler)
+end
+
+function waitForIO.setScheduler(self, scheduler)
+	self.Scheduler = scheduler;
 end
 
 function waitForCondition.tasksArePending(self)
