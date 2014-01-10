@@ -34,7 +34,7 @@ function waitForCondition.create(self, scheduler)
 	return self:init(scheduler)
 end
 
-function waitForIO.setScheduler(self, scheduler)
+function waitForCondition.setScheduler(self, scheduler)
 	self.Scheduler = scheduler;
 end
 

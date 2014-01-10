@@ -23,6 +23,7 @@ SimpleFiber.init = function(self, aroutine, ...)
 	local obj = {
 		routine = coroutine.create(aroutine), 
 		params = {...},
+		timeused = 0,
 	}
 	setmetatable(obj, SimpleFiber_mt);
 	
