@@ -23,7 +23,7 @@ Computicle = require("Computicle");
 ComputicleOps = require("ComputicleOps");
 IOCompletionPort = require("IOCompletionPort");
 Heap = require("Heap");
-Task = require("IOProcessor");
+Application = require("Application");
 
 exit = function()
     SELFICLE:quit();
@@ -103,13 +103,13 @@ local handlemessages = function()
     end
   
     -- give up time to other tasks
-    IOProcessor:yield();
+    Application:yield();
   end
 
   print("BROKEN OUT")
 end
 
-Task:run(handlemessages);
+Application:run(handlemessages);
 ]];
 }
 setmetatable(Computicle, {
@@ -163,7 +163,7 @@ Computicle.createThreadChunk = function(self, codechunk, params, codeparams)
 	table.insert(res, [[end]]);
 
 	-- make sure the user's code is running in a coroutine
-	table.insert(res, [[IOProcessor:spawn(_cmain)]]);
+	table.insert(res, [[Application:spawn(_cmain)]]);
 
 	-- What we want to execute after the user's code is loaded
 	-- By default, this will be a message pump

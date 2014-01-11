@@ -10,7 +10,7 @@ local WinBase = require("WinBase")
 local IOOps = require("IOOps")
 local StreamOps = require("StreamOps")
 local Handle = require("Handle")
-
+local Application = require("Application")
 
 -- A win32 file interfaces
 -- put the standard async stream interface onto a file
@@ -32,9 +32,7 @@ BlockFile.init = function(self, rawHandle)
 	}
 	setmetatable(obj, BlockFile_mt)
 
-	if IOProcessor then
-		IOProcessor:observeIOEvent(obj:getNativeHandle(), obj:getNativeHandle());
-	end
+	Application:watchForIO(obj:getNativeHandle(), obj:getNativeHandle());
 
 	return obj;
 end
@@ -123,9 +121,6 @@ BlockFile.getSize = function(self)
 end
 
 BlockFile.createOverlapped = function(self, buff, bufflen, operation)
-	if not IOProcessor then 
-		return nil 
-	end
 	
 	fileoffset = fileoffset or 0;
 
@@ -133,7 +128,7 @@ BlockFile.createOverlapped = function(self, buff, bufflen, operation)
 	
 	obj.file = self:getNativeHandle();
 	obj.OVL.operation = operation;
-	obj.OVL.opcounter = IOProcessor:getNextOperationId();
+	obj.OVL.opcounter = Application:getNextOperationId();
 	obj.OVL.Buffer = buff;
 	obj.OVL.BufferLength = bufflen;
 	obj.OVL.OVL.Offset = self.DeviceOffset;
@@ -183,14 +178,11 @@ BlockFile.writeBytes = function(self, buff, nNumberOfBytesToWrite, offset)
 	end
 
 
-	if IOProcessor then
-    	local key, bytes, ovl = IOProcessor:yieldForIo(self, IOOps.WRITE, lpOverlapped.OVL.opcounter);
+    local key, bytes, ovl = Application:waitForIO(self, IOOps.WRITE, lpOverlapped.OVL.opcounter);
 --print("key, bytes, ovl: ", key, bytes, ovl)
-		self.DeviceOffset = self.DeviceOffset + bytes;
+	self.DeviceOffset = self.DeviceOffset + bytes;
 	
-	    return bytes
-	end
-
+	return bytes
 end
 
 
@@ -224,18 +216,15 @@ BlockFile.readBytes = function(self, buff, nNumberOfBytesToRead, offset)
 		return lpNumberOfBytesRead[0];
 	end
 
-	if IOProcessor then
-    	local key, bytes, ovl = IOProcessor:yieldForIo(self, IOOps.READ, lpOverlapped.OVL.opcounter);
+    local key, bytes, ovl = Application:waitForIO(self, IOOps.READ, lpOverlapped.OVL.opcounter);
 
 --    	local ovlp = ffi.cast("OVERLAPPED *", ovl)
 --    	print("overlap offset: ", ovlp.Offset)
 
 --print("key, bytes, ovl: ", key, bytes, ovl)
-		self.DeviceOffset = self.DeviceOffset + bytes;
+	self.DeviceOffset = self.DeviceOffset + bytes;
 
-	    return bytes
-	end
-
+	return bytes
 end
 
 

@@ -1,7 +1,7 @@
 -- comp_msgpump.lua
 
 local ffi = require("ffi");
-require("IOProcessor");
+local Application = require("Application");
 
 -- This is a basic message pump
 -- 
@@ -69,8 +69,8 @@ local handlemessages = function()
     end
   
     -- give up time to other computicles
-    IOProcessor:yield();
+    Application:yield();
   end
 end
 
-IOProcessor:spawn(handlemessages);
+Application:spawn(handlemessages);

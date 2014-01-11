@@ -1,5 +1,4 @@
-local Task = require("IOProcessor")
-local parallel = require("parallel")
+local Application = require("Application")
 
 
 local Timer = {}
@@ -40,7 +39,7 @@ Timer.start = function(self)
 
 	local function closure()
 		if self.Delay then
-			parallel.sleep(self.Delay);
+			Application:sleep(self.Delay);
 			self.OnTime(self);
 		end
 
@@ -49,7 +48,7 @@ Timer.start = function(self)
 		end
 
 		while self.Running do
-			parallel.sleep(self.Period)
+			Application:sleep(self.Period)
 			self.OnTime(self);
 		end
 	end

@@ -6,7 +6,6 @@ local mswsock = require("mswsock");
 local WinSock = require "WinSock_Utils"
 local SocketUtils = require("SocketUtils");
 local SocketOps = require("SocketOps");
-local waitForIO = require("waitForIO")
 
 --[[
 	NativeSocketHandle
@@ -42,11 +41,12 @@ local NativeSocketHandle_mt = {
 	end,
 
 	__index = {
-		function free(self)
+		free = function(self)
 			ws2_32.closesocket(self.sock);
+			--self.sock = -1;
 		end,
 
-	end,	
+	},	
 }
 ffi.metatype(NativeSocketHandle, NativeSocketHandle_mt);
 
@@ -59,9 +59,7 @@ ffi.metatype(NativeSocketHandle, NativeSocketHandle_mt);
 	The NativeSocket encapsulates the various socket related
 	functions for Windows.
 --]]
-local NativeSocket = {
-	Scheduler = waitForIO();
-};
+local NativeSocket = {}
 setmetatable(NativeSocket, {
 	__call = function(self, ...)
 		return self:create(...);
@@ -80,7 +78,7 @@ NativeSocket.init = function(self, sock, autoclose)
 	};
 	setmetatable(obj, NativeSocket_mt);
 
-	waitForIO:observeIOEvent(self, obj:getNativeHandle(), obj:getNativeSocket())
+	watchForIO(obj:getNativeHandle(), obj:getNativeSocket())
 
 	return obj;
 end
@@ -336,16 +334,15 @@ end
 --[[
 
 --]]
-
 NativeSocket.createOverlapped = function(self, buff, bufflen, operation)
 	local obj = ffi.new("SocketOverlapped");
 	obj.sock = self:getNativeSocket();
 	obj.OVL.operation = operation;
-	obj.OVL.opcounter = IOProcessor:getNextOperationId();
+	--obj.OVL.opcounter = Application:getNextOperationId();
 	obj.OVL.Buffer = buff;
 	obj.OVL.BufferLength = bufflen;
 
-	return obj, obj.OVL.opcounter;
+	return obj;
 end
 
 
@@ -426,7 +423,7 @@ NativeSocket.accept = function(self)
 	-- If we've gotten this far, it means an accept was queued
 	-- so we should yield, and we'll continue when completion is indicated
 
-   	local key, bytes, ovl = NativeSocket.Scheduler:yield(self, lpOverlapped);
+   	local key, bytes, ovl = waitForIO(self, lpOverlapped);
 
 --print("++ NativeSocket.accept(), after YIELD: ", key, bytes, ovl);
 
@@ -455,7 +452,6 @@ NativeSocket.send = function(self, buff, bufflen)
 
 	local lpBuffers = ffi.new("WSABUF", bufflen, ffi.cast("char *",buff));
 	local dwBufferCount = 1;
-	--local lpNumberOfBytesSent = ffi.new("DWORD[1]");
 	local lpNumberOfBytesSent = nil;
 	local dwFlags = 0;
 	local lpOverlapped = self:createOverlapped(ffi.cast("uint8_t *",buff), bufflen, SocketOps.WRITE);
@@ -483,15 +479,18 @@ NativeSocket.send = function(self, buff, bufflen)
 		--print("#### NativeSocket, WSASend STATUS == 0 ####")
 		-- return the number of bytes transferred
 		--return lpNumberOfBytesSent[0];
-	else
-		local err = ws2_32.WSAGetLastError();
-		if err ~= WSA_IO_PENDING then
-			print("    NativeSocket.send, ERROR: ", err);
-			return false, err;
-		end
 	end
-    
-    local key, bytes, ovl = NativeSocket.Scheduler:yield(self, lpOverlapped);
+
+	local err = ws2_32.WSAGetLastError();
+--	print("LAST ERROR: ", err)
+
+	if (err ~= 0) and (err ~= WSA_IO_PENDING) then
+		print("    NativeSocket.send, ERROR: ", err);
+		return false, err;
+	end
+	
+--print("ABOUT TO WAIT for IO: ", self, lpOverlapped)
+    local key, bytes, ovl = waitForIO(self, lpOverlapped);
 
 --print("WSASEND: ", key, bytes, ovl);
 
@@ -541,7 +540,7 @@ NativeSocket.sendTo = function(self, lpTo, iTolen, buff, bufflen)
 		end
 	end
     
-    local key, bytes, ovl = NativeSocket.Scheduler:yield(self, lpOverlapped);
+    local key, bytes, ovl = waitForIO(self, lpOverlapped);
 
 --print("WSASEND: ", key, bytes, ovl);
 
@@ -589,7 +588,7 @@ NativeSocket.receive = function(self, buff, bufflen)
     	end
     end
 
-    local key, bytes, ovl = NativeSocket.Scheduler:yield(self, lpOverlapped);
+    local key, bytes, ovl = waitForIO(self, lpOverlapped);
 
 --print("WSARECV: ", key, bytes, ovl);
 
@@ -642,16 +641,13 @@ NativeSocket.receiveFrom = function(self, lpFrom, fromLen, buff, bufflen)
     	end
     end
 
-    local key, bytes, ovl = NativeSocket.Scheduler:yield(self, lpOverlapped);
+    local key, bytes, ovl = waitForIO(self, lpOverlapped);
 
 --print("WSARecvFrom: ", key, bytes, ovl);
 
     return bytes;
 end
 
-
--- Some aliases
---NativeSocket.CloseDown = NativeSocket.closeDown
 
 return NativeSocket;
 

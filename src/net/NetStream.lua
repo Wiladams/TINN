@@ -1,25 +1,25 @@
 
 local ffi = require "ffi"
 
+local NativeSocket = require("NativeSocket")
 local StopWatch = require ("StopWatch")
 local MemoryStream = require("MemoryStream");
-local IOCPSocket = require("IOCPSocket");
 
 
-local IOCPNetStream = {}
-setmetatable(IOCPNetStream, {
+local NetStream = {}
+setmetatable(NetStream, {
 	__call = function(self, ...)
 		return self:create(...);
 	end,
 });
 
-local IOCPNetStream_mt = {
-	__index = IOCPNetStream,
+local NetStream_mt = {
+	__index = NetStream,
 }
 
 
-function IOCPNetStream:init(socket)
---	print("IOCPNetStream.init")
+function NetStream:init(socket)
+--	print("NetStream.init")
 
 	if not socket then
 		return nil
@@ -42,13 +42,17 @@ function IOCPNetStream:init(socket)
 		ReadingBuffer = MemoryStream(1500);
 	}
 
-	setmetatable(obj, IOCPNetStream_mt)
+	setmetatable(obj, NetStream_mt)
 
 	return obj;
 end
 
-function IOCPNetStream.create(self, hostname, port, autoclose)
-	local socket, err = IOCPSocket:createClient(hostname, port);
+function NetStream.create(self, socket, ...)
+	return self:init(socket, ...)
+end
+
+function NetStream.connect(self, hostname, port, autoclose)
+	local socket, err = NativeSocket:createClient(hostname, port);
 
 	if not socket then
 		return nil, err
@@ -58,7 +62,7 @@ function IOCPNetStream.create(self, hostname, port, autoclose)
 end
 
 
-function IOCPNetStream:isConnected()
+function NetStream:isConnected()
 	return self.Socket:isConnected();
 end
 
@@ -72,25 +76,25 @@ end
 
 	All other cases will return false.
 --]]
-function IOCPNetStream:isIdle()
-	--print("IOCPNetStream: IsIdle()");
+function NetStream:isIdle()
+	--print("NetStream: IsIdle()");
 
 	-- First condition of expiration
 	-- both timeouts exist
 	if self.ReadTimeout and self.WriteTimeout then
 		if (self.ReadTimer:Seconds() > self.ReadTimeout) and
 			(self.WriteTimer:Seconds() > self.WriteTimeout) then
-			--print("IOCPNetStream:IsIdle: BOTH");
+			--print("NetStream:IsIdle: BOTH");
 			return true;
 		end
 	elseif self.ReadTimeout then
 		if (self.ReadTimer:Seconds() > self.ReadTimeout) then
-			--print("IOCPNetStream:IsIdle: READ");
+			--print("NetStream:IsIdle: READ");
 			return true;
 		end
 	elseif self.WriteTimeout then
 		if (self.WriteTimer:Seconds() > self.WriteTimeout) then
-			--print("IOCPNetStream:IsIdle: WRITE");
+			--print("NetStream:IsIdle: WRITE");
 			return true;
 		end
 	end
@@ -98,7 +102,7 @@ function IOCPNetStream:isIdle()
 	return false
 end
 
-function IOCPNetStream:resetTimeout()
+function NetStream:resetTimeout()
 	self.ReadTimer:Reset();
 	self.WriteTimer:Reset();
 end
@@ -108,33 +112,33 @@ end
 -- Set the timeout for inactivity
 -- After the specified amount of time off
 -- inactivity, timeout, and forcefully close the stream
-function IOCPNetStream:setIdleInterval(seconds)
+function NetStream:setIdleInterval(seconds)
 	self:SetReadTimeout(seconds);
 	self:SetWriteTimeout(seconds);
 end
 
-function IOCPNetStream:setReadTimeout(seconds)
+function NetStream:setReadTimeout(seconds)
 	self.ReadTimeout = seconds
 end
 
-function IOCPNetStream:setWriteTimeout(seconds)
+function NetStream:setWriteTimeout(seconds)
 	self.WriteTimeout = seconds;
 end
 
 
-function IOCPNetStream:closeDown()
+function NetStream:closeDown()
 	return self.Socket:closeDown();
 end
 
-function IOCPNetStream:getLength()
+function NetStream:getLength()
 	return 0	-- or math.huge
 end
 
-function IOCPNetStream:getPosition()
+function NetStream:getPosition()
 	return self.Consumed  -- or number of bytes consumed so far
 end
 
-function IOCPNetStream:setNonBlocking(nonblocking)
+function NetStream:setNonBlocking(nonblocking)
 	return self.Socket:setNonBlocking(nonblocking)
 end
 
@@ -143,8 +147,8 @@ end
 --]]
 
 
-function IOCPNetStream:refillReadingBuffer()
-	--print("IOCPNetStream:RefillReadingBuffer(): ",self.ReadingBuffer:BytesReadyToBeRead());
+function NetStream:refillReadingBuffer()
+	--print("NetStream:RefillReadingBuffer(): ",self.ReadingBuffer:BytesReadyToBeRead());
 
 	-- if the buffer already has data in it
 	-- then just return the number of bytes that
@@ -182,7 +186,7 @@ end
 	Return the single byte read, or nil
 --]]
 
-function IOCPNetStream:readByte()
+function NetStream:readByte()
 	self.ReadTimer:Reset();
 
 	-- First see if we can get a byte out of the
@@ -204,14 +208,14 @@ function IOCPNetStream:readByte()
 
 	-- If there was an error
 	-- then return that error immediately
-	--print("-- IOCPNetStream:readByte, ERROR: ", err)
+	--print("-- NetStream:readByte, ERROR: ", err)
 	return false, err
 end
 
 
-function IOCPNetStream:readBytes(buffer, len, offset)
+function NetStream:readBytes(buffer, len, offset)
 	offset = offset or 0
---print("IOCPNetStream:readBytes: ", buffer, len, offset);
+--print("NetStream:readBytes: ", buffer, len, offset);
 
 	-- Reset the stopwatch
 	--self.ReadTimer:Reset();
@@ -234,7 +238,7 @@ function IOCPNetStream:readBytes(buffer, len, offset)
 		local maxbytes = math.min(nleft, refilled)
 		nread, err = self.ReadingBuffer:readBytes(buffer, maxbytes, offset + len-nleft)
 
---print("IOCPNetStream:readBytes()loop: ", nread, err)
+--print("NetStream:readBytes()loop: ", nread, err)
 
 		nleft = nleft - nread;
 	end
@@ -253,10 +257,10 @@ function IOCPNetStream:readBytes(buffer, len, offset)
 end
 
 
-function IOCPNetStream:readString(bufflen)
+function NetStream:readString(bufflen)
 	bufflen = bufflen or 1500
 
---print("IOCPNetStream:ReadString: 1.0: ", bufflen);
+--print("NetStream:ReadString: 1.0: ", bufflen);
 
 	local buff = ffi.new("uint8_t[?]", bufflen);
 	if not buff then
@@ -283,7 +287,7 @@ end
 local CR = string.byte("\r")
 local LF = string.byte("\n")
 
-function IOCPNetStream:readOneLine(buffer, size)
+function NetStream:readOneLine(buffer, size)
 	local nchars = 0;
 	local byteread
 	local err
@@ -319,7 +323,7 @@ function IOCPNetStream:readOneLine(buffer, size)
 	return nchars
 end
 
-function IOCPNetStream:readLine(size)
+function NetStream:readLine(size)
 	size = size or 1024;
 
 	if size > ffi.sizeof(self.LineBuffer) then
@@ -329,8 +333,6 @@ function IOCPNetStream:readLine(size)
 	assert(self.LineBuffer, "out of memory");
 
 	local bytesread, err = self:readOneLine(self.LineBuffer, size)
-
---	self.ReadTimer:Reset();
 
 	if not bytesread then
 		print("NS:ReadLine(), Error: ", err)
@@ -350,11 +352,11 @@ end
 	WRITING
 --]]
 
-function IOCPNetStream:canWrite()
+function NetStream:canWrite()
 	return self.Socket:canWriteWithoutBlocking();
 end
 
-function IOCPNetStream:writeByte(value)
+function NetStream:writeByte(value)
 	self.wb_onebyte[0] = value;
 	local byteswritten, err = self.Socket:send(self.wb_onebyte, 1);
 
@@ -363,7 +365,9 @@ function IOCPNetStream:writeByte(value)
 	return byteswritten, err
 end
 
-function IOCPNetStream:writeBytes(buffer, len, offset)
+function NetStream:writeBytes(buffer, len, offset)
+--print("NetStream:writeBytes: ", buffer, len, offset)
+
 	len = len or #buffer
 	offset = offset or 0
 	local ptr = ffi.cast("const uint8_t *", buffer)+offset;
@@ -398,7 +402,7 @@ function IOCPNetStream:writeBytes(buffer, len, offset)
 	return byteswritten, err
 end
 
-function IOCPNetStream:writeString(str, count, offset)
+function NetStream:writeString(str, count, offset)
 	count = count or #str
 	offset = offset or 0
 
@@ -406,11 +410,12 @@ function IOCPNetStream:writeString(str, count, offset)
 end
 
 
-function IOCPNetStream:writeLine(line)
+function NetStream:writeLine(line)
+
 	local BytesWritten = 0;
 	local err = nil;
 	
-	if line and #line > 0 then
+	if line and (#line > 0) then
 		byteswritten, err = self:writeBytes(line, #line, 0)
 	
 		if err then
@@ -428,7 +433,7 @@ function IOCPNetStream:writeLine(line)
 end
 
 
-function IOCPNetStream:writeStream(stream, size)
+function NetStream:writeStream(stream, size)
 	local count = 0
 	local abyte = stream:readByte()
 	while abyte and count < size do
@@ -440,11 +445,5 @@ function IOCPNetStream:writeStream(stream, size)
 	return count
 end
 
-IOCPNetStream.ReadByte = IOCPNetStream.readByte;
-IOCPNetStream.ReadBytes = IOCPNetStream.readBytes;
-IOCPNetStream.ReadLine = IOCPNetStream.readLine;
-IOCPNetStream.ReadString = IOCPNetStream.readString;
-IOCPNetStream.WriteBytes = IOCPNetStream.writeBytes;
-IOCPNetStream.WriteLine = IOCPNetStream.writeLine;
 
-return IOCPNetStream;
+return NetStream;

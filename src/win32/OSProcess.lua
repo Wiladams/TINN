@@ -4,88 +4,37 @@ local Handle = require("Handle")
 local core_psapi = require("core_psapi_l1_1_0");
 local core_string = require("core_string_l1_1_0");
 local errorhandling = require("core_errorhandling_l1_1_1");
-
+local WinNT = require("WinNT")
+local WinError = require("win_error")
 
 local OSProcess={}
-
-setmetatable(OSProcess, 
-{
-	__call = function(self,...) 
-		return OSProcess.new(...);
+setmetatable(OSProcess, {
+	__call = function(self, ...)
+		return self:create(...)
 	end,
-
-	__index = {
-		open  = function(self, processId, desiredAccess, inheritable)
-			desiredAccess = desiredAccess or ffi.C.PROCESS_ALL_ACCESS;
-			inheritable = inheritable or false;
-
-			local procHandle = procthreads.OpenProcess(desiredAccess, inheritable, processId);
-
-			return OSProcess(procHandle);
-		end,
-
-		processIds = function(self)
-			-- enumerate processes
-			local lpidProcess = ffi.new("DWORD[1024]");
-			local cb = ffi.sizeof(lpidProcess);
-			local lpcbNeeded = ffi.new("DWORD[1]");
-
-			local status = core_psapi.EnumProcesses (lpidProcess, cb, lpcbNeeded);
-
-			if status == 0 then
-				return false, errorhandling.GetLastError();
-			end 
-
-			local cbNeeded = lpcbNeeded[0];
-			local nEntries = cbNeeded / ffi.sizeof("DWORD");
-
-			local idx = -1;
-			local closure = function()
-				idx = idx + 1;
-				if idx >= nEntries then
-					return nil;
-				end
-
-				return lpidProcess[idx];
-			end
-
-			return closure;
-		end,
-
-		processes = function(self)
-			local nextRecord = self:processIds()
-
-			local closure = function()
-				while true do
-					local processId = nextRecord();
-
-					-- ran out of process ids
-					if not processId then return nil end
-
-					local process = OSProcess:open(processId);
-				
-					if process then
-						return {
-							id = process:getId(), 
-							filename = process:getImageName(),
-							priorityClass = process:getPriorityClass(),
-							sessionId = process:getSessionId(),
-							isActive = process:isActive(),
-						};
-					end
-				end
-			end
-
-			return closure;
-		end,
-	},
-});
+})
 
 local OSProcess_mt = {
 	__index = OSProcess;
 }
 
-OSProcess.new = function(...)
+OSProcess.init = function(self, rawHandle)
+	local obj = {
+		Handle = Handle(rawHandle);
+	}
+
+	setmetatable(obj, OSProcess_mt);
+
+	obj.id = obj:getId();
+	obj.filename = obj:getImageName();
+	obj.priorityClass = obj:getPriorityClass();
+	obj.sessionId = obj:getSessionId();
+	obj.isActive = obj:isActive();
+
+	return obj;
+end
+
+OSProcess.create = function(...)
 	local nargs = select('#',...);
 	
 	local procHandle = nil;
@@ -98,18 +47,35 @@ OSProcess.new = function(...)
 	end
 	
 	if procHandle == nil then
-		return false, errorhandling.GetLastError();
+		return nil, errorhandling.GetLastError();
 	end
 
-	local obj = {
-		Handle = Handle(procHandle);
-	}
-	setmetatable(obj, OSProcess_mt);
-
-	return obj;
+	return self:init(procHandle)
 end
 
-OSProcess.clone = function(self, desiredAccess, inheritable)
+function OSProcess.open(self, processId, desiredAccess, inheritable)
+	desiredAccess = desiredAccess or ffi.C.PROCESS_ALL_ACCESS;
+	inheritable = inheritable or false;
+	if inheritable then
+		inheritable = 1
+	else
+		inheritable = 0
+	end
+
+	--print("processID: ", processId)
+	--print("desiredAccess: ", desiredAccess);
+	--print("inheritable: ", inheritable)
+	
+	local procHandle = procthreads.OpenProcess(desiredAccess, inheritable, processId);
+
+	if procHandle == nil then
+		return nil, errorhandling.GetLastError();
+	end
+
+	return OSProcess:init(procHandle);
+end
+
+function OSProcess.clone(self, desiredAccess, inheritable)
 	desiredAccess = desiredAccess or ffi.C.PROCESS_ALL_ACCESS;
 	inheritable = inheritable or false;
 
@@ -125,6 +91,88 @@ OSProcess.clone = function(self, desiredAccess, inheritable)
 	return OSProcess(procHandle);
 end
 
+function OSProcess.processIds(self)
+	-- enumerate processes
+	local lpidProcess = ffi.new("DWORD[1024]");
+	local cb = ffi.sizeof(lpidProcess);
+	local lpcbNeeded = ffi.new("DWORD[1]");
+
+	local status = core_psapi.EnumProcesses (lpidProcess, cb, lpcbNeeded);
+
+--print("processIds: ", status)
+
+	if status == 0 then
+		local err = errorhandling.GetLastError();
+		print("ERROR: ", err)
+		return false, err;
+	end 
+
+	local cbNeeded = lpcbNeeded[0];
+	local nEntries = cbNeeded / ffi.sizeof("DWORD");
+
+--print("Needed: ", cbNeeded)
+
+	local idx = -1;
+	local function closure()
+		idx = idx + 1;
+		if idx >= nEntries then
+			return nil;
+		end
+
+		return lpidProcess[idx];
+	end
+
+	return closure;
+end
+
+--[[
+				if process then
+					return {
+						id = process:getId(), 
+						filename = process:getImageName(),
+						priorityClass = process:getPriorityClass(),
+						sessionId = process:getSessionId(),
+						isActive = process:isActive(),
+					};
+				end
+--]]
+
+function OSProcess.processes(self)
+	local nextRecord = self:processIds()
+
+	local function closure()
+		while true do
+			local processId = nextRecord();
+--print("processID: ", processId)
+			-- ran out of process ids
+			if not processId then 
+				return nil 
+			end
+
+			local process, err = OSProcess:open(processId);
+				
+			if process then
+				return process
+			end
+
+--print("OSProcess.processes: ", process, err)
+--[[
+			if (err == ERROR_ACCESS_DENIED) or
+				(err == ERROR_INVALID_PARAMETER) then				
+					-- do nothing
+			else
+				return process;
+			end
+--]]
+		end
+	end
+
+	return closure;
+end
+
+--[[
+	Instance methods
+--]]
 OSProcess.getExitCode = function(self)
 	local lpExitCode = ffi.new("DWORD[1]");
 	local res = procthreads.GetExitCodeProcess(self.Handle.Handle, lpExitCode);

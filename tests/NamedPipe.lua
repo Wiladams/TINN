@@ -18,6 +18,8 @@ local core_string = require("core_string_l1_1_0")
 local errorhandling = require("core_errorhandling_l1_1_1");
 
 local Handles = require("FsHandles")
+local Application = require("Application")
+
 
 local NamedPipe = {}
 setmetatable(NamedPipe, {
@@ -142,12 +144,9 @@ NamedPipe.writeBytes = function(self, buff, nNumberOfBytesToWrite, offset, devic
 		return lpNumberOfBytesWritten[0];
 	end
 
-
-	if IOProcessor then
-    	local key, bytes, ovl = IOProcessor:yieldForIo(self, IOOps.WRITE, lpOverlapped.OVL.opcounter);
+    local key, bytes, ovl = Application:waitForIO(self, IOOps.WRITE, lpOverlapped.OVL.opcounter);
 --print("key, bytes, ovl: ", key, bytes, ovl)
-	    return bytes
-	end
+	return bytes
 end
 
 NamedPipe.readBytes = function(self, buff, nNumberOfBytesToRead, offset, deviceoffset)
@@ -182,15 +181,13 @@ NamedPipe.readBytes = function(self, buff, nNumberOfBytesToRead, offset, deviceo
 		return lpNumberOfBytesRead[0];
 	end
 
-	if IOProcessor then
-    	local key, bytes, ovl = IOProcessor:yieldForIo(self, IOOps.READ, lpOverlapped.OVL.opcounter);
+    local key, bytes, ovl = Application:waitForIO(self, IOOps.READ, lpOverlapped.OVL.opcounter);
 
-    	local ovlp = ffi.cast("OVERLAPPED *", ovl)
-    	print("overlap offset: ", ovlp.Offset)
+    local ovlp = ffi.cast("OVERLAPPED *", ovl)
+    print("overlap offset: ", ovlp.Offset)
 
 --print("key, bytes, ovl: ", key, bytes, ovl)
-	    return bytes
-	end
+	return bytes
 
 end
 

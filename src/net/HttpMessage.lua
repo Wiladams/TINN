@@ -72,7 +72,7 @@ HttpMessage_t.ReadHeaders = function(self, stream)
 		-- Read a line, terminated with crlf
 		-- a 'nil' return would indicate either
 		-- an error, or 'eof', so check the err
-		headerline, err = stream:ReadLine(4096)
+		headerline, err = stream:readLine(4096)
 
 		if not headerline then 
 			return nil, err
@@ -113,7 +113,7 @@ HttpMessage_t.WriteHeaders = function(self, stream)
 		--local hdr = string.format("%s: %s", value.name, value.value);
 		local hdr = string.format("%s: %s", name, value);
 		--print("-- Response Header: ", hdr);
-		success, err = stream:WriteLine(hdr);
+		success, err = stream:writeLine(hdr);
 
 		if err then
 			return nil, err

@@ -1,6 +1,6 @@
 -- test_waitFor.lua
 
-local Application = require("Application")(true)
+local Application = require("Application")
 
 local count = 0;
 

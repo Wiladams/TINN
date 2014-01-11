@@ -1,8 +1,6 @@
 local Application = require("Application")
 local Stopwatch = require("StopWatch")
 
-local app = Application(true);
-
 local loopcount = 5000
 local clock = Stopwatch();
 
@@ -112,4 +110,3 @@ killTime(5);
 
 
 run()
---app:start();

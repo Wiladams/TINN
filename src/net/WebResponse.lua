@@ -62,7 +62,7 @@ end
 WebResponse.parse = function(self, stream)
 --print("WebResponse.Parse() - 1.0");
 
-	local firstline, err = stream:ReadLine(4096);
+	local firstline, err = stream:readLine(4096);
 
 --print(string.format("WebResponse.Parse() - 1.1: '%s', %s", tostring(firstline), tostring(err)));
 --print("-- ISBLANK: ", firstline == "");
@@ -126,7 +126,7 @@ function WebResponse:WriteFirstLine(stream)
 
 --print("WebResponse:WriteFirstLine(): ",first_line);
 
-	return stream:WriteLine(first_line)
+	return stream:writeLine(first_line)
 end
 
 
@@ -151,7 +151,7 @@ function WebResponse:WritePreamble(stream)
 	end
 
 	-- Write blank line
-	success, err = stream:WriteLine()
+	success, err = stream:writeLine()
 --	print("WebResponse:WritePreamble() 3.0 - ", success, err);
 
 	return success, err

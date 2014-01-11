@@ -1,7 +1,11 @@
 -- waitForIO.lua
 
+local ffi = require("ffi")
 local Functor = require("Functor")
 local IOCompletionPort = require("IOCompletionPort");
+local arch = require("arch")
+
+
 
 local waitForIO = {
 	MessageQuanta = 10;
@@ -40,8 +44,11 @@ function waitForIO.create(self, scheduler)
 		return nil, "no scheduler specified"
 	end
 
-
 	return self:init(scheduler)
+end
+
+function waitForIO.setMessageQuanta(self, quanta)
+	self.MessageQuanta = quanta;
 end
 
 function waitForIO.setScheduler(self, scheduler)
@@ -65,22 +72,24 @@ function waitForIO.getNextOperationId(self)
 	return self.OperationId;
 end
 
-function waitForIO.observeIOEvent(self, handle, param)
+function waitForIO.watchForIOEvents(self, handle, param)
+	--print("waitForIO.observeIOEvent, adding: ", handle, param)
+
 	return self.IOEventQueue:addIoHandle(handle, param);
 end
 
 function waitForIO.yield(self, socket, overlapped)
---print("== waitForIO.yield: BEGIN: ", socket:getNativeSocket(), overlapped, self.Scheduler:getCurrentFiber());
+--print("== waitForIO.yield: BEGIN: ", arch.pointerToString(overlapped));
 
 	local currentFiber = self.Scheduler:getCurrentFiber()
 
 	if not currentFiber then
-		print("IOProcessor.yieldForIo:  NO CURRENT FIBER");
+		print("waitForIO.yield:  NO CURRENT FIBER");
 		return nil, "not currently running within a task"
 	end
 
-	-- Track the task based on the operation ID
-	self.EventFibers[overlapped] = currentFiber;
+	-- Track the task based on the overlapped structure
+	self.EventFibers[arch.pointerToString(overlapped)] = currentFiber;
 	self.FibersAwaitingEvent[currentFiber] = true;
 	
 	return self.Scheduler:suspend()
@@ -88,13 +97,14 @@ end
 
 
 function waitForIO.processIOEvent(self, key, numbytes, overlapped)
+--print("waitForIO.processIOEvent: ", key, numbytes, arch.pointerToString(overlapped))
+
 	local ovl = ffi.cast("IOOverlapped *", overlapped);
 
 	ovl.bytestransferred = numbytes;
 
 	-- Find the task that is waiting for this IO event
-	--local fiber = self.EventFibers[ovl.opcounter];
-	local fiber = self.EventFibers[overlapped]
+	local fiber = self.EventFibers[arch.pointerToString(overlapped)]
 
 	if not fiber then
 		return false, "waitForIO.processIOEvent,NO FIBER WAITING FOR IO EVENT: "
@@ -106,7 +116,7 @@ function waitForIO.processIOEvent(self, key, numbytes, overlapped)
 
 	-- remove the fiber from the index based on the
 	-- overlapped structure
-	self.EventFibers[overlapped] = nil;
+	self.EventFibers[arch.pointerToString(overlapped)] = nil;
 
 	self.Scheduler:scheduleTask(fiber, key, numbytes, overlapped);
 
@@ -117,6 +127,8 @@ function waitForIO.step(self)
 	-- Check to see if there are any IO Events to deal with
 	--local key, numbytes, overlapped = self.IOEventQueue:dequeue(self.MessageQuanta);
 	local param1, param2, param3, param4, param5 = self.IOEventQueue:dequeue(self.MessageQuanta);
+
+--print("waitForIO.step: ", param1, param2)
 
 	local key, bytes, ovl
 

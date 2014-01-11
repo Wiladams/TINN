@@ -1,6 +1,6 @@
 -- test_when.lua
 
-local Application = require("Application")(true)
+local Application = require("Application")
 
 
 local counter = 0;

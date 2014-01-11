@@ -2,7 +2,7 @@
 
 local WindowKind = require("WindowKind");
 local NativeWindow = require("NativeWindow");
-local Application = require("Application")(true);
+local Application = require("Application");
 
 
 

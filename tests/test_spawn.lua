@@ -1,11 +1,9 @@
-local Task = require("IOProcessor")
-local Timer = require("Timer")
-local parallel = require("parallel")()
+local Application = require("Application")
 
 
 -- Set quanto to zero to get a flat out loop
 -- no stalling waiting for IO events.
-Task:setMessageQuanta(0)
+Application:setMessageQuanta(0)
 
 local loopcount = 100
 
@@ -17,7 +15,7 @@ local fiber1 = function()
 			print("fiber1: ", count)
 		end
 
-		Task:yield();
+		yield();
 	end
 end
 
@@ -29,7 +27,7 @@ local fiber2 = function()
 			print("fiber2: ", count)
 		end
 
-		Task:yield();
+		yield();
 	end
 end
 
@@ -58,7 +56,7 @@ local killTime = function()
 	local killer = function()
 		waitFor(closure)
 		print("Ran out of time")
-		Task:stop();
+		stop();
 	end
 
 	spawn(killer)
@@ -83,7 +81,7 @@ end
 
 spawn(fiber1)
 spawn(fiber2)
-Timer{Period = 200, OnTime = printTime}
+periodic(printTime, 200)
 
 killTime();
 

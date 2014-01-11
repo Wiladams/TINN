@@ -1,7 +1,7 @@
 -- comp_webserver.lua
 
 local Collections = require("Collections");
-local IOProcessor = require("IOProcessor");
+local Application = require("Application");
 local SocketOps = require("SocketOps");
 local IOCPSocket = require("IOCPSocket");
 local IOCPSocketIo = require("IOCPSocketIo");
@@ -13,7 +13,7 @@ local PreamblePending = Collections.Queue();
 local HandleNewConnection = function(accepted)
 			
 	print("Accepted New Connection: ", accepted);
-	local socket = IOCPSocket:init(accepted, IOProcessor);
+	local socket = IOCPSocket:init(accepted);
 	local netstream = NetStream.new(socket, IOCPSocketIo)
 	PreamblePending:Enqueue(netstream);
 

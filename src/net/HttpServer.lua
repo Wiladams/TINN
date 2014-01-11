@@ -1,8 +1,8 @@
--- iocpserver.lua
+-- HttpServer.lua
 local SocketServer = require("SocketServer")
 
-local IOCPSocket = require("IOCPSocket")
-local IOCPNetStream = require("IOCPNetStream");
+local NativeSocket = require("NativeSocket")
+local NetStream = require("NetStream");
 local WebRequest = require("WebRequest");
 local WebResponse = require("WebResponse");
 local URL = require("url");
@@ -47,8 +47,8 @@ HttpServer.HandleRequestFinished = function(self, request)
 end
 
 HttpServer.HandlePreamblePending = function(self, sock)
-  local socket = IOCPSocket:init(sock);
-  local stream, err = IOCPNetStream:init(socket);
+  local socket = NativeSocket:init(sock);
+  local stream, err = NetStream:init(socket);
 
   if self.OnRequest then
 	local request, err  = WebRequest:Parse(stream);

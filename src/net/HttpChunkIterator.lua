@@ -47,7 +47,7 @@ local function ReadSingleChunk(stream)
 	local err
 
 	-- Read chunk size
-	local chunksizeline, err = stream:ReadLine(1024)
+	local chunksizeline, err = stream:readLine(1024)
 
 	if not chunksizeline then
 		return nil, err
@@ -64,7 +64,7 @@ assert(chunksize, "expected a valid number ", chunksizeline);
 	-- just read past the following blank line
 	if chunksize == 0 then
 		-- Read one more blank line chunk
-		blankline, err = stream:ReadLine(1024);
+		blankline, err = stream:readLine(1024);
 		if not blankline or blankline == "" then
 			return nil, "eof"
 		end

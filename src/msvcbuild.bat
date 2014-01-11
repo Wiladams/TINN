@@ -48,7 +48,6 @@
 @rem TINN Task library
 %LUAC% task/Application.lua Application.obj
 %LUAC% task/IOOps.lua IOOps.obj
-%LUAC% task/IOProcessor.lua IOProcessor.obj
 %LUAC% task/luajit_ffi.lua luajit_ffi.obj
 %LUAC% task/LuaState.lua LuaState.obj
 %LUAC% task/Scheduler.lua Scheduler.obj
@@ -60,7 +59,7 @@
 %LUAC% task/waitForSignal.lua waitForSignal.obj
 %LUAC% task/waitForIO.lua waitForIO.obj
 %LUAC% task/waitForTime.lua waitForTime.obj
-@set TASKLIB=Application.obj IOOps.obj IOProcessor.obj luajit_ffi.obj LuaState.obj Scheduler.obj SimpleFiber.obj Task.obj Timer.obj TINNThread.obj waitForCondition.obj waitForSignal.obj waitForIO.obj waitForTime.obj
+@set TASKLIB=Application.obj IOOps.obj luajit_ffi.obj LuaState.obj Scheduler.obj SimpleFiber.obj Task.obj Timer.obj TINNThread.obj waitForCondition.obj waitForSignal.obj waitForIO.obj waitForTime.obj
 
 
 @rem The Net library
@@ -70,9 +69,9 @@
 %LUAC% net/HttpHeaders.lua HttpHeaders.obj
 %LUAC% net/HttpMessage.lua HttpMessage.obj
 %LUAC% net/HttpServer.lua HttpServer.obj
-%LUAC% net/IOCPNetStream.lua IOCPNetStream.obj
-%LUAC% net/IOCPSocket.lua IOCPSocket.obj
 %LUAC% net/mime.lua mime.obj
+%LUAC% net/NetStream.lua NetStream.obj
+%LUAC% net/NativeSocket.lua NativeSocket.obj
 %LUAC% net/ResourceMapper.lua ResourceMapper.obj
 %LUAC% net/SocketServer.lua SocketServer.obj
 %LUAC% net/FileService.lua FileService.obj
@@ -85,7 +84,7 @@
 %LUAC% net/WebResponse.lua WebResponse.obj
 %LUAC% net/WebSocket.lua WebSocket.obj
 
-@set TINNNET=HtmlTemplate.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj IOCPNetStream.obj IOCPSocket.obj mime.obj SocketServer.obj FileService.obj SocketOps.obj TcpSplice.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
+@set TINNNET=HtmlTemplate.obj httpstatus.obj HttpChunkIterator.obj HttpHeaders.obj HttpMessage.obj HttpServer.obj mime.obj NativeSocket.obj NetStream.obj SocketServer.obj FileService.obj SocketOps.obj TcpSplice.obj url.obj utils.obj WebApp.obj WebRequest.obj WebResponse.obj WebSocket.obj 
 
 @rem Core windows API set
 %LUAC% apiset/core_console_l1_1_0.lua core_console_l1_1_0.obj

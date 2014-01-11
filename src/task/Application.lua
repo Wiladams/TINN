@@ -1,4 +1,10 @@
 -- Application.lua
+if Application_Included then
+	return appInstance
+end
+
+Application_Included = true;
+
 
 local Scheduler = require("Scheduler")
 local Stopwatch = require("StopWatch")
@@ -11,7 +17,7 @@ local waitForSignal = require("waitForSignal")
 local waitForTime = require("waitForTime")
 local waitForIO = require("waitForIO")
 
-waitForIO.MessageQuanta = 0;
+--waitForIO.MessageQuanta = 0;
 
 -- The main application object
 local Application = {}
@@ -95,6 +101,24 @@ function Application.periodic(self, func, millis)
 	return self:spawn(closure)
 end
 
+-- IO Functions
+function Application.getNextOperationId(self)
+	return self.wfio:getNextOperationId();
+end
+
+function Application.setMessageQuanta(self, millis)
+	return self.wfio:setMessageQuanta(millis);
+end
+
+function Application.waitForIO(self, socket, pOverlapped)
+	return self.wfio:yield(socket, pOverlapped);
+end
+
+function Application.watchForIO(self, handle, param)
+	return self.wfio:watchForIOEvents(handle, param)
+end
+
+
 -- Conditional functions
 function Application.waitFor(self, pred)
 	--print("Application.waitFor: ", pred)
@@ -167,9 +191,11 @@ function Application.onStepped(self)
 		--print("No Conditionals Pending")
 		if (self.wft:tasksPending() < 1) then
 			--print("No Timers Pending")
-			if not (self.Scheduler:tasksPending() > 3) then
-				--print("No Tasks Pending: ", self.Scheduler:tasksPending())
-				return self.Scheduler:stop();
+			if not self.wfio:tasksArePending() then
+				if not (self.Scheduler:tasksPending() > 3) then
+					--print("No Tasks Pending: ", self.Scheduler:tasksPending())
+					return self.Scheduler:stop();
+				end
 			end
 		end
 	end
@@ -225,6 +251,8 @@ function Application.exportGlobals(self)
 	_G.stop = Functor(self.stop, self);
 	_G.waitSignal = Functor(self.waitForSignal, self);
 	_G.waitFor = Functor(self.waitFor, self);
+	_G.waitForIO = Functor(self.waitForIO, self);
+	_G.watchForIO = Functor(self.watchForIO, self);
 	_G.when = Functor(self.when, self);
 	_G.whenever = Functor(self.whenever, self);
 	_G.yield = Functor(self.yield, self);
@@ -232,4 +260,6 @@ function Application.exportGlobals(self)
 	return self;
 end
 
-return Application
+local appInstance = Application(true)
+
+return appInstance;

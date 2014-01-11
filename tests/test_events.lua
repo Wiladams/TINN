@@ -1,6 +1,6 @@
 -- test_events.lua
 
-local Application = require("Application")(true)
+local Application = require("Application")
 
 local function waiter(num)
 	num = num or 0

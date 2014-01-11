@@ -1,12 +1,12 @@
 
 local ffi = require("ffi");
 
-local IOProcessor = require("IOProcessor");
-local IOCPSocket = require("IOCPSocket");
+local Application = require("Application");
+local NativeSocket = require("NativeSocket");
 local ws2_32 = require("ws2_32");
 
 
-IOProcessor:setMessageQuanta(5);
+Application:setMessageQuanta(5);
 
 local SocketServer = {}
 setmetatable(SocketServer, {
@@ -37,7 +37,7 @@ SocketServer.create = function(self, port, onAccept, onAcceptParam, autoclose)
   port = port or 9090;
 --print("SocketServer:create(): ", port, onAccept, onAcceptParam);
 
-  local socket, err = IOCPSocket:createServer({port = port, backlog = 15, autoclose = autoclose})
+  local socket, err = NativeSocket:createServer({port = port, backlog = 15, autoclose = autoclose})
 	
   if not socket then 
     print("Server Socket not created!!")

@@ -1,13 +1,12 @@
 -- comp_getbing.lua
---IOProcessor = require("IOProcessor");
-local IOCPNetStream = require("IOCPNetStream");
+local NetStream = require("NetStream");
 local HttpRequest = require("HttpRequest");
 local HttpResponse = require("HttpResponse");
 local HttpChunkIterator = require("HttpChunkIterator");
 
 local hostname = "www.google.com"
 
-local netstream, err = IOCPNetStream:create(hostname, 80);
+local netstream, err = NetStream:connect(hostname, 80);
 
 local function GET()
 
@@ -39,5 +38,5 @@ local function GET()
 	exit();
 end
 
-IOProcessor:spawn(GET);
+Application:spawn(GET);
 

@@ -1,6 +1,6 @@
 
 local ffi = require("ffi")
-local IOProcessor = require("IOProcessor");
+local Application = require("Application")
 
 local TcpSplice = {}
 setmetatable(TcpSplice, {
@@ -79,8 +79,8 @@ end
 
 TcpSplice.run = function(self)
 	-- Start a splice loop in both directions
-	spawn(splice, self.Part1, self.Part2);
-	spawn(splice, self.Part2, self.Part1);
+	Application:spawn(splice, self.Part1, self.Part2);
+	Application:spawn(splice, self.Part2, self.Part1);
 end
 
 return TcpSplice

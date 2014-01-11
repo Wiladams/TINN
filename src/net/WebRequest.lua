@@ -87,7 +87,7 @@ WebRequest.WritePreamble = function(self, stream)
 
 	-- Write request line
 	local req_line = string.format("%s %s HTTP/%s", self.Method, self.Resource,self.Version);
-	success, err = stream:WriteLine(req_line)
+	success, err = stream:writeLine(req_line)
 --print("-- WebRequest:WritePreamble(), Line Success: ", success, err);
 	if not success then
 		return nil, err
@@ -101,7 +101,7 @@ WebRequest.WritePreamble = function(self, stream)
 	end
 
 	-- Write blank line
-	success, err = stream:WriteLine()
+	success, err = stream:writeLine()
 --print("-- WebRequest:WritePreamble(), Blank Success: ", success, err);
 
 	return success, err
@@ -179,6 +179,5 @@ WebRequest.Parse = function(self, stream)
 
 	return req
 end
-
 
 return WebRequest;

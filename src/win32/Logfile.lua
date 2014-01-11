@@ -3,7 +3,7 @@ local ffi = require("ffi")
 local bit = require("bit")
 local bor = bit.bor;
 
-local IOProcessor = require("IOProcessor")
+local Application = require("Application")
 local Stream = require("stream")
 local BlockFile = require("BlockFile")
 local StreamOps = require("StreamOps")

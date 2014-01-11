@@ -19,8 +19,11 @@
 	so that each can remain fairly simple in terms of their implementations.
 --]]
 
-local query = function(params)
-	if not params or not params.source then
+local function query(params)
+print("query, BEGIN: ", params.source, params.filter, params.projection)
+	if (not params) or (not params.source) then
+		print("query, no params")
+
 		return false, "source not specified";
 	end
 
@@ -31,7 +34,7 @@ local query = function(params)
 
 	local function closure()
 		local record;
-
+print("query, 1.0")
 		if filter then
 			while true do
 				record = nextRecord();	
@@ -49,6 +52,8 @@ local query = function(params)
 		else
 			record = nextRecord();
 		end
+
+print("query, 2.0: ", record)
 
 		if not record then
 			return nil;

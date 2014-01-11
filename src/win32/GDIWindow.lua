@@ -6,7 +6,7 @@ local ffi = require "ffi"
 local bit = require "bit"
 local bor = bit.bor
 
-local Application = require("Application")(true)
+local Application = require("Application")
 local Functor = require("Functor")
 local Gdi32 = require "GDI32"
 local User32 = require "user32_ffi"
