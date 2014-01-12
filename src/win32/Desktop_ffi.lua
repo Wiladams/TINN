@@ -4,6 +4,7 @@ local ffi = require "ffi"
 local WTypes = require "WTypes"
 local WinNT = require("WinNT");
 local user32_ffi = require("user32_ffi");
+local gdi32_ffi = require("gdi32_ffi");
 
 ffi.cdef[[
 

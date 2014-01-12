@@ -13,9 +13,11 @@
 @if not defined INCLUDE goto :FAIL
 
 @setlocal
-@set LJCOMPILE=cl /nologo /c /MT /O2 /W3 /D_CRT_SECURE_NO_DEPRECATE
+@set LJCOMPILE=cl /nologo /c /O2 /W3 /D_CRT_SECURE_NO_DEPRECATE
 @set LJLINK=link /nologo
 @set LJMT=mt /nologo
+@set LJLIB=lib /nologo /nodefaultlib
+
 @set LUAC=luajit -b
 @set LJDLLNAME=lua51.dll
 @set LJLIBNAME=lua51.lib
@@ -51,7 +53,6 @@
 %LUAC% task/luajit_ffi.lua luajit_ffi.obj
 %LUAC% task/LuaState.lua LuaState.obj
 %LUAC% task/Scheduler.lua Scheduler.obj
-%LUAC% task/SimpleFiber.lua SimpleFiber.obj
 %LUAC% task/Task.lua Task.obj
 %LUAC% task/Timer.lua Timer.obj
 %LUAC% task/TINNThread.lua TINNThread.obj
@@ -59,7 +60,7 @@
 %LUAC% task/waitForSignal.lua waitForSignal.obj
 %LUAC% task/waitForIO.lua waitForIO.obj
 %LUAC% task/waitForTime.lua waitForTime.obj
-@set TASKLIB=Application.obj IOOps.obj luajit_ffi.obj LuaState.obj Scheduler.obj SimpleFiber.obj Task.obj Timer.obj TINNThread.obj waitForCondition.obj waitForSignal.obj waitForIO.obj waitForTime.obj
+@set TASKLIB=Application.obj IOOps.obj luajit_ffi.obj LuaState.obj Scheduler.obj Task.obj Timer.obj TINNThread.obj waitForCondition.obj waitForSignal.obj waitForIO.obj waitForTime.obj
 
 
 @rem The Net library
@@ -248,7 +249,7 @@
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinn.exe %LJLIBNAME% %ZLIBNAME% tinn.obj %CLIBS% %COMPUTICLELIB% %OLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
+%LJLINK% /out:tinn.exe %LJLIBNAME% tinn.obj %CLIBS% %COMPUTICLELIB% %OLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinn.exe.manifest^
   %LJMT% -manifest tinn.exe.manifest -outputresource:tinn.exe

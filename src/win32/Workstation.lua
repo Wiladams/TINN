@@ -26,13 +26,15 @@ WorkStation.new = function(self, params)
 	return obj;
 end
 
-WorkStation.uses = function(self)
+function WorkStation.uses(self)
 	local Level = 0;
 	local BufPtr = ffi.new("BYTE *[1]");
 	local PreferedMaximumSize = ffi.C.MAX_PREFERRED_LENGTH;
 	local EntriesRead = ffi.new("DWORD[1]");
 	local TotalEntries = ffi.new("DWORD[1]");
 	local ResumeHandle = ffi.new("DWORD[1]");
+
+print("WorkStation.uses, 1.0")
 
 	local status = wkscli.NetUseEnum (
      self.ServerName,
@@ -43,14 +45,14 @@ WorkStation.uses = function(self)
      TotalEntries,
      ResumeHandle);
 
-	--print("STATUS: ", status);
-	--print("Entries: ", EntriesRead[0]);
-	--print("TotalEntries: ", TotalEntries[0]);
+	print("uses, STATUS: ", status);
+	print("uses, Entries: ", EntriesRead[0]);
+	print("uses, TotalEntries: ", TotalEntries[0]);
 
 	local buff, err = netutils.NetApiBuffer(BufPtr[0]);
 
 	local idx = -1;
-	local closure = function()
+	local function closure()
 		idx = idx + 1;
 
 		if idx >= EntriesRead[0] then

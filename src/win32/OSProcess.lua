@@ -34,7 +34,7 @@ OSProcess.init = function(self, rawHandle)
 	return obj;
 end
 
-OSProcess.create = function(...)
+OSProcess.create = function(self, ...)
 	local nargs = select('#',...);
 	
 	local procHandle = nil;

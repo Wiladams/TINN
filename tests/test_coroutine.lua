@@ -1,13 +1,12 @@
 -- test_coroutine.lua
-local IOProcessor = require("IOProcessor");
-local SimpleFiber = require("SimpleFiber");
+local Application = require("Application");
+local Task = require("Task");
 
 local inMainFiber = function(self)
 	return coroutine.running() == nil; 
 end
 
-local func1 
-func1 = function(step)
+function func1(step)
 
 	if step == 1 then
 		print("func1: STEP: ", step);
@@ -20,11 +19,11 @@ func1 = function(step)
 end
 
 local function test_fiber()
-local fiber = SimpleFiber(func1, 1);
+local task = Task(func1, 1);
 
-print("FIBER: ", fiber)
+print("TASK: ", fiber)
 repeat
-	result = {fiber:resume()};
+	result = {task:resume()};
 	local success = result[1];
 	table.remove(result,1);
 	local step = unpack(result);
@@ -32,12 +31,12 @@ repeat
 	print("=========")
 	print("SUCCESS: ", success);
 	print(" VALUES: ", step);
-	print(" Status: ", fiber:getStatus());
+	print(" Status: ", task:getStatus());
 	print("---------")
-	fiber:setParams(step);
-until fiber:getStatus() == "dead"
+	task:setParams(step);
+until task:getStatus() == "dead"
 end
 
 
-
-run(func1, 1);
+test_fiber();
+--run(func1, 1);

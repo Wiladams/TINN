@@ -36,6 +36,7 @@ end
 local test_ProcessInfo = function()
 	local myProc, err = OSProcess();
 
+print("test_ProcessInfo: ", myProc, err)
 
 	print("Handle Count: ", myProc:getHandleCount());
 	print("Priority Class: ", myProc:getPriorityClass());

@@ -47,14 +47,16 @@ local function getCredentials()
 
 	local status = CredEnumerateA(nil, CRED_ENUMERATE_ALL_CREDENTIALS, pCount, pCredentialCollection);
 	if status == 0 then
-		return false, error_handling.GetLastError();
+		local err = error_handling.GetLastError();
+		print("CredEnumerateA, ERROR: ", err)
+		return false, err;
 	end
 
 	local CredentialCollection = pCredentialCollection[0];
 
 	local Count = pCount[0];
 
-	print("Collection: ", CredentialCollection);
+	--print("Collection: ", CredentialCollection);
 	print("Count: ", Count);
 
 	-- for decoding blobs
@@ -67,12 +69,15 @@ local function getCredentials()
 		EntropyData[i] = Tmp;
 	end
 
+
+
 	local BlobCrypt = ffi.new("DATA_BLOB");
 	local BlobPlainText = ffi.new("DATA_BLOB");
 	local BlobEntropy = ffi.new("DATA_BLOB");
 	BlobEntropy.pbData = ffi.cast("BYTE *", EntropyData);
 	BlobEntropy.cbData = ffi.sizeof(EntropyData);
 	
+
 
 
 	for i=0,Count-1 do
@@ -103,35 +108,35 @@ local function getCredentials()
 		if creds.AttributeCount > 0 then
 			local attribs = {};
 
-			print("+++++++++++++++++++++++++++++++++++++");
+			print("+++++++ ATTRIBUTES ++++++++++++++++++++");
 			for j=0,creds.AttributeCount-1 do
 				
 				local keyword = creds.Attributes[j].Keyword;
-				--print("KEYWORD: ", ffi.string(keyword));
+				print("KEYWORD: ", ffi.string(keyword));
 				local value = creds.Attributes[j].Value;
 				local valueSize = creds.Attributes[j].ValueSize;
-				--print("Value: ", valueSize, value);
+				print("    Value: ", valueSize, value);
 				local valueStr = ffi.string(value, valueSize);
 				--print("Value String: ", valueStr);
 				table.insert(attribs, valueStr);
 			end
-				valueStr = table.concat(attribs);
+			valueStr = table.concat(attribs);
 --			print("Attribute Value")
-			print(valueStr);			
+			--print(valueStr);			
 		end
---[[
+
 		print("====================================");
-		print("Flags: ", string.format("0x%x", Flags));
-		print("Type: ", string.format("0x%x", Type));
-		print("TargetName: ", TargetName);
-		print("Comment: ", Comment);
-		print("Blob Size: ", creds.CredentialBlobSize);
-		print("Blob Ptr: ", creds.CredentialBlob);
-		print("Persist: ", creds.Persist);
+		print("          Flags: ", string.format("0x%x", Flags));
+		print("           Type: ", string.format("0x%x", Type));
+		print("     TargetName: ", TargetName);
+		print("        Comment: ", Comment);
+		print("      Blob Size: ", creds.CredentialBlobSize);
+		print("       Blob Ptr: ", creds.CredentialBlob);
+		print("        Persist: ", creds.Persist);
 		print("Attribute Count: ", creds.AttributeCount);
-		print("TargetAlias: ", TargetAlias);
-		print("UserName: ", userName);
---]]
+		print("    TargetAlias: ", TargetAlias);
+		print("       UserName: ", userName);
+
 	end
 end
 
@@ -214,6 +219,6 @@ local function main()
 	end
 end
 
---print(main());
+print(main());
 
-print(getCredentials());
+--print(getCredentials());

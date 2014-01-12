@@ -166,6 +166,6 @@ end
 
 --test_lookupAccount("administrator");
 
---test_enumdomains();
+test_enumdomains();
 
-enumAccountRights();
+--enumAccountRights();

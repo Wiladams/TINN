@@ -57,7 +57,7 @@ if _WIN64 then
 ffi.cdef[[
 typedef int64_t   INT_PTR, *PINT_PTR;
 typedef uint64_t  UINT_PTR, *PUINT_PTR;
-typedef intptr_t   LONG_PTR, *PLONG_PTR;ONG
+typedef intptr_t   LONG_PTR, *PLONG_PTR, *PLONG_PTR;
 typedef uint64_t  ULONG_PTR, *PULONG_PTR;
 ]]
 else
