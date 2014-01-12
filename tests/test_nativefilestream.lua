@@ -1,8 +1,8 @@
 -- test_nativeflestream.lua
 
+local Application = require("Application")
 local BlockFile = require("BlockFile")
-local TextStream = require("stream")
-local IOProcessor = require("IOProcessor")
+local Stream = require("stream")
 
 
 local function main()
@@ -11,7 +11,7 @@ local function main()
 
 print("filedev, err: ", filedev, err)
 
-	local filestrm = TextStream(filedev)
+	local filestrm = Stream(filedev)
 
 
 	local line1, err = filestrm:readLine();

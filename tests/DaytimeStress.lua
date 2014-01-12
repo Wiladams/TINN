@@ -1,7 +1,7 @@
 local ffi = require "ffi"
 
-local IOCPSocket = require("IOCPSocket")
-local IOProcessor = require("Processor");
+local NativeSocket = require("NativeSocket")
+local Application = require("Application");
 local StopWatch = require("StopWatch");
 
 
@@ -17,7 +17,7 @@ local argc = #argv
 print("ARGC: ", argc);
 
 GetDateAndTime = function()
-    local socket, err = IOProcessor:createClient(hostname, serviceport);
+    local socket, err = NativeSocket:createClient(hostname, serviceport);
     
     if not socket then
         print("Socket Creation Failed: ", err);

@@ -63,8 +63,7 @@ local killTime = function()
 end
 
 local stats = function()
-	print("IOProcessor.step, ReadyToRun: ", Task.TasksReadyToRun:Len())
-	--print("IOProcessor.step, fibersawaitio: ", fibersawaitio);
+	print("Application.step, ReadyToRun: ", Application.Scheduler:tasksReadyToRun());
 end
 
 printStats = function()

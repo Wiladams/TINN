@@ -1,8 +1,6 @@
 -- test_when.lua
 
-local Task = require("IOProcessor")
-local Timer = require("Timer")
-local parallel = require("parallel")()
+local Application = require("Application")
 
 
 local counter = 0;
@@ -42,7 +40,7 @@ local function main()
 	when(taskIsFinished(sleepForAwhile()), showAppreciation)
 
 
-	when(taskIsFinished(spawn(countTo25)), function()  print("End of Time!!"); Task:stop() end)
+	when(taskIsFinished(spawn(countTo25)), function()  print("End of Time!!"); stop() end)
 end
 
 

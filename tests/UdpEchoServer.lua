@@ -1,13 +1,13 @@
 local ffi = require("ffi");
 
-local IOProcessor = require("IOProcessor");
-local IOCPSocket = require("IOCPSocket");
+local Application = require("Application");
+local NativeSocket = require("NativeSocket");
 
 local serverport = 9090;
 
 
 -- Setup the server socket
-local socket, err = IOCPSocket:create(AF_INET, SOCK_DGRAM, 0);
+local socket, err = NativeSocket:create(AF_INET, SOCK_DGRAM, 0);
 
 --if not socket then
 --	print("create socket ERROR: ", err);

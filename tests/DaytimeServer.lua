@@ -1,6 +1,6 @@
 
-local IOProcessor = require("Processor");
-local IOCPSocket = require("IOCPSocket");
+local Application = require("Application");
+local NativeSocket = require("NativeSocket");
 local IOCompletionPort = require("IOCompletionPort");
 
 local serverSocket;
@@ -9,7 +9,7 @@ local serverPort = 9091
 local acceptedSockets = IOCompletionPort();
 
 local function setup()
-	serverSocket, err = IOCPSocket:createServer({port = serverPort, backlog = 15});
+	serverSocket, err = NativeSocket:createServer({port = serverPort, backlog = 15});
 	
 	if not serverSocket then 
 		print("Server Socket not created!!")
@@ -18,7 +18,7 @@ local function setup()
 
 	print("Listener Created: ", serverSocket:getNativeSocket());
 
-	IOProcessor:setMessageQuanta(15);
+	Application:setMessageQuanta(15);
 end
 
 local function acceptor()
@@ -46,8 +46,8 @@ print("serverSocket:accept(): ", sock, err);
 		if sock then
 				--print("Accepted: ", acceptedsock);
 				-- BUGBUG
-				-- right here, with the IOCPSocket:init, the IOProcessor MUST be set!
-			local socket = IOCPSocket:init(sock, IOProcessor);
+				-- right here, with the IOCPSocket:init, the Application MUST be set!
+			local socket = NativeSocket:init(sock);
 			local datestr = os.date("%c");
 				--print(datestr);
 			socket:send(datestr);

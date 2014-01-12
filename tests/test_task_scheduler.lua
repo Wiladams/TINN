@@ -1,9 +1,9 @@
-require ("IOProcessor");
+local Application = require ("Application");
 
 local test_sleep = function(interval)
 	while true do
 		sleep(interval);
-		print(string.format("interval: %d - %d ", interval, IOProcessor.Clock:Milliseconds()));
+		print(string.format("interval: %d - %d ", interval, Application.Scheduler.Clock:Milliseconds()));
 	end
 end
 

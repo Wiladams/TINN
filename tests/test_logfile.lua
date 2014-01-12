@@ -1,5 +1,5 @@
 -- test_logfile.lua
-local IOProcessor = require("IOProcessor")
+local Application = require("Application")
 local Stream = require("stream")
 local BlockFile = require("BlockFile")
 

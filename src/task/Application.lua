@@ -249,6 +249,7 @@ function Application.exportGlobals(self)
 	_G.sleep = Functor(self.sleep, self);
 	_G.spawn = Functor(self.spawn, self);
 	_G.stop = Functor(self.stop, self);
+	_G.taskIsFinished = Application.taskIsFinished;
 	_G.waitSignal = Functor(self.waitForSignal, self);
 	_G.waitFor = Functor(self.waitFor, self);
 	_G.waitForIO = Functor(self.waitForIO, self);

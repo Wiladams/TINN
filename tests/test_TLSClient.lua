@@ -1,11 +1,11 @@
 
-local Processor = require("IOProcessor");
-
 local ffi = require("ffi");
+
+local Application = require("Application");
+local NativeSocket = require("NativeSocket")
 
 
 local stringzutils = require("stringzutils");
-local SocketUtils = require("SocketUtils");
 
 local TLSClient = require("TLSClient");
 local SecurityInterface = require("sspi").SecurityInterface;
@@ -17,7 +17,7 @@ local serverPort = 443;
 
 local function main()
 	-- 4.0  Connect to the server
-	local socket, err = IOProcessor:createClientSocket(serverName, serverPort, true);
+	local socket, err = NativeSocket:createClient(serverName, serverPort, true);
 	if not socket then
 		return false, err
 	end

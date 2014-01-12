@@ -178,7 +178,7 @@ BlockFile.writeBytes = function(self, buff, nNumberOfBytesToWrite, offset)
 	end
 
 
-    local key, bytes, ovl = Application:waitForIO(self, IOOps.WRITE, lpOverlapped.OVL.opcounter);
+    local key, bytes, ovl = Application:waitForIO(self, lpOverlapped);
 --print("key, bytes, ovl: ", key, bytes, ovl)
 	self.DeviceOffset = self.DeviceOffset + bytes;
 	
@@ -216,7 +216,7 @@ BlockFile.readBytes = function(self, buff, nNumberOfBytesToRead, offset)
 		return lpNumberOfBytesRead[0];
 	end
 
-    local key, bytes, ovl = Application:waitForIO(self, IOOps.READ, lpOverlapped.OVL.opcounter);
+    local key, bytes, ovl = Application:waitForIO(self, lpOverlapped);
 
 --    	local ovlp = ffi.cast("OVERLAPPED *", ovl)
 --    	print("overlap offset: ", ovlp.Offset)

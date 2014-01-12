@@ -1,7 +1,7 @@
 local ffi = require "ffi"
 
-local IOProcessor = require("IOProcessor");
-local IOCPSocket = require("IOCPSocket");
+local Application = require("Application");
+local NativeSocket = require("NativeSocket");
 local SocketUtils = require("SocketUtils");
 
 
@@ -13,7 +13,7 @@ local phrase = "HELLO UDP Test"
 
 local main = function()
     -- create the client socket
-    local socket, err = IOCPSocket:create(AF_INET, SOCK_DGRAM, 0);
+    local socket, err = NativeSocket:create(AF_INET, SOCK_DGRAM, 0);
 
     if not socket then
         print("Socket Creation Failed: ", err);

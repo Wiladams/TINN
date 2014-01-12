@@ -1,7 +1,7 @@
 local ffi = require "ffi"
 
-local IOProcessor = require("IOProcessor");
-local IOCPSocket = require("IOCPSocket");
+local Application = require("Application");
+local NativeSocket = require("NativeSocket");
 local ws2_32 = require("ws2_32");
 local SocketUtils = require("SocketUtils");
 
@@ -42,7 +42,7 @@ local EchoRequest = function(socket, addr, addrlen, phrase)
     if bytesreceived > 0 then
         --print("RECEIVED: ", bytesreceived);
         --return ffi.string(buff, bytesreceived);
-        return true
+        return true, ffi.string(buff, bytesreceived)
     end
 
     return string.format("bytesreceived == %d", bytesreceived);
@@ -59,7 +59,7 @@ loop = function(phrase)
 
 
     -- create the client socket
-    local socket, err = IOCPSocket:create(AF_INET, SOCK_DGRAM, 0);
+    local socket, err = NativeSocket:create(AF_INET, SOCK_DGRAM, 0);
 
     if not socket then
         print("Socket Creation Failed: ", err);
@@ -79,7 +79,7 @@ loop = function(phrase)
     
         if dtc then
             transcount = transcount + 1;
-            --print(transcount, dtc, transcount/sw:Seconds());
+            --print(transcount, dtc, err);
         else
             print("Error: ", i, err);        
         end

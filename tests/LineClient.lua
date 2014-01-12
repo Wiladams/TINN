@@ -1,6 +1,7 @@
 local ffi = require "ffi"
 
-local IOProcessor = require("IOProcessor");
+local Application = require("Application");
+local NativeSocket = require("NativeSocket")
 local StopWatch = require("StopWatch");
 
 local hostname = "localhost"
@@ -12,7 +13,7 @@ local argc = #argv
 
 
 EchoRequest = function()
-    local socket, err = IOProcessor:createClientSocket(hostname, serviceport, true);
+    local socket, err = NativeSocket:createClient(hostname, serviceport, true);
     
     if not socket then
         print("Socket Creation Failed: ", err);

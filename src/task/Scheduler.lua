@@ -110,9 +110,7 @@ function Scheduler.step(self)
 	-- is resumed.
 	self.CurrentFiber = task;
 	local results = {task:resume()};
-
-	-- no task is currently executing
-	self.CurrentFiber = nil;
+	--local success, results = task:resume();
 
 	-- once we get results back from the resume, one
 	-- of two things could have happened.
@@ -125,6 +123,8 @@ function Scheduler.step(self)
 	local success = results[1];
 	table.remove(results,1);
 
+	-- no task is currently executing
+	self.CurrentFiber = nil;
 
 	--print("SUCCESS: ", success);
 	if not success then

@@ -162,6 +162,7 @@
 %LUAC% Win32/Desktop.lua Desktop.obj
 %LUAC% Win32/Desktop_ffi.lua Desktop_ffi.obj
 %LUAC% Win32/dbghelp_ffi.lua dbghelp_ffi.obj
+%LUAC% Win32/FileSystem.lua FileSystem.obj
 %LUAC% Win32/FileSystemItem.lua FileSystemItem.obj
 %LUAC% Win32/FsHandles.lua FsHandles.obj
 %LUAC% Win32/GDI32.lua GDI32.obj
@@ -208,7 +209,7 @@
 %LUAC% Win32/Workstation.lua Workstation.obj
 %LUAC% Win32/WTypes.lua WTypes.obj
 
-@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj BlockFile.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj Desktop.obj Desktop_ffi.obj FileSystemItem.obj FsHandles.obj GDI32.obj gdi32_ffi.obj GDIWindow.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj Logfile.obj logoncli_ffi.obj NativeWindow.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  vkeys.obj win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WindowKind.obj WindowStation.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
+@set WIN32LIB=basetsd.obj BCrypt.obj BCryptUtils.obj BlockFile.obj console.obj ConsoleWindow.obj datetime.obj dbghelp_ffi.obj Desktop.obj Desktop_ffi.obj FileSystem.obj FileSystemItem.obj FsHandles.obj GDI32.obj gdi32_ffi.obj GDIWindow.obj guiddef.obj Handle.obj Heap.obj IOCompletionPort.obj KeyMouse.obj Logfile.obj logoncli_ffi.obj NativeWindow.obj netutils.obj netutils_ffi.obj Network.obj ntstatus.obj OSModule.obj OSProcess.obj processenvironment.obj SCManager.obj SID.obj User32.obj user32_ffi.obj schannel.obj SecError.obj SocketPool.obj SocketUtils.obj sspi.obj StopWatch.obj SysInfo.obj Token.obj UIOSimulator.obj  vkeys.obj win_error.obj win_socket.obj WinBase.obj WinCrypt.obj WindowKind.obj WindowStation.obj WinIoCtl.obj WinNT.obj WinSock_Utils.obj Workstation.obj WTypes.obj
  
 @rem Create the computicle specific stuff
 %LUAC% computicle/comp_msgpump.lua comp_msgpump.obj
@@ -256,7 +257,7 @@ if exist tinn.exe.manifest^
 
 %LJCOMPILE% tinnsh.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinnsh.exe %LJLIBNAME% tinnsh.obj %CLIBS% %COMPUTICLELIB% %NETLIB% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB% %LJLIBNAME%
+%LJLINK% /out:tinnsh.exe %LJLIBNAME% tinnsh.obj %CLIBS% %COMPUTICLELIB% %OLELIB% %TINNNET% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB% %LJLIBNAME%
 @if errorlevel 1 goto :BAD
 if exist tinnsh.exe.manifest^
   %LJMT% -manifest tinnsh.exe.manifest -outputresource:tinnsh.exe
