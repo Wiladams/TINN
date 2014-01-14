@@ -19,14 +19,17 @@ setmetatable(LuaState, {
 	__call = function(self, ...)
 		return self:new(...);
 	end,
+});
 
-	__index = {
-		loadBaseLibraries = function(self, L)
-			-- Must at least load base library
-			-- or 'require' and print won't work
-			-- MUST load jit, or JIT won't work
-			lua.luaL_openlibs(L);
-			--[[
+local LuaState_mt = {
+	__index = LuaState;
+}
+
+	-- Must at least load base library
+	-- or 'require' and print won't work
+	-- MUST load jit, or JIT won't work
+
+	--[[
 			lua.luaopen_base(L)
 			lua.luaopen_string(L);
 			lua.luaopen_math(L);
@@ -36,15 +39,11 @@ setmetatable(LuaState, {
 			lua.luaopen_bit(L);
 			lua.luaopen_jit(L);
 			lua.luaopen_ffi(L);
-			--]]
-		end,
-	},
-});
-local LuaState_mt = {
-	__index = LuaState;
-}
+	--]]
 
-
+LuaState.loadBaseLibraries = function(self, L)
+	lua.luaL_openlibs(L);	
+end
 
 
 LuaState.new = function(self, codechunk, autorun)

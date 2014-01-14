@@ -72,16 +72,14 @@ SocketServer.loop = function(self)
        print("Accept ERROR: ", err);
     end
 
-    collectgarbage();
+    --collectgarbage();
   end
 end
 
 SocketServer.run = function(self)
   print("SocketServer.run()");
   spawn(self.loop, self);
-  run();
+  Application:run();
 end
 
-
 return SocketServer;
-

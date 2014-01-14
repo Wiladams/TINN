@@ -5,66 +5,65 @@ local NativeSocket = require("NativeSocket")
 local StopWatch = require("StopWatch");
 
 local hostname = "localhost"
-local serviceport = 9090
+local serviceport = 8080
 
 
 local argv = {...}
 local argc = #argv
 
+local sw = StopWatch();
+local finished = 0;
 
-EchoRequest = function()
+local function EchoRequest(msg, len)
+--print("Echo Request: ", msg, len)
+
     local socket, err = NativeSocket:createClient(hostname, serviceport, true);
-    
+
     if not socket then
-        print("Socket Creation Failed: ", err);
-        return nil, err;
+        print("socket creation error: ", err)
+        return false;
     end
 
-    -- fill the buffer with current time
-    local datestr = os.date("%c");
-    datestr = datestr.."\r\n";
+    local bytessent, err = socket:send(msg, len);
+--print("EchoRequest: ", bytessent, err)
 
-    local bytessent, err = socket:send(datestr, #datestr);
+    --local buff = ffi.new("uint8_t[1500]");
+    --local n, err = socket:receive(buff, 1500)
 
-    local bufflen = 1500;
-    local buff = ffi.new("uint8_t[?]", bufflen);
-    local n, err = socket:receive(buff, bufflen)
+--print("EchoRequest, receive: ", n, err)
 
-    if not n then
-        return false, err;
-    end
+    --if n > 0 then
+        -- return ffi.string(buff, n);
+    --end
 
-    if n > 0 then
-        return ffi.string(buff, n);
-    end
+    finished = finished + 1;
 
-    return string.format("n == %d", n);
+    --collectgarbage();
 end
 
 
+local function cleanup()
+    print("Transactions: ", finished, finished/sw:Seconds());
+    stop();
+end
 
-loop = function()
-    local sw = StopWatch();
+local function loop()
 
     local iterations = tonumber(argv[1]) or 1;
     --print("iterations: ", iterations);
 
     local transcount = 0;
 
+    -- fill the buffer with current time
+    --local datestr = os.date("%c");
+    --datestr = datestr.."\r\n";
+    local msg = "GET /echo HTTP/1.1\r\n\r\n\r\n"
+
     for i=1,iterations do
-        local dtc, err = EchoRequest();
-    
-        if dtc ~= nil then
-            transcount = transcount + 1;
-            print(transcount, dtc, transcount/sw:Seconds());
-        else
-            print("Error: ", i, err);        
-        end
-        
-        collectgarbage();
+        spawn(EchoRequest, msg, #msg);            
     end
 
-    print("Transactions: ", transcount, transcount/sw:Seconds());
+    when(function() return finished == iterations end, cleanup)
 end
 
 run(loop);
