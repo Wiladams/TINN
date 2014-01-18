@@ -3,6 +3,7 @@ local ffi = require("ffi");
 
 local Collections = require("Collections");
 local StopWatch = require("StopWatch");
+local Task = require("Task");
 
 
 --[[
@@ -23,8 +24,8 @@ local Scheduler_mt = {
 function Scheduler.init(self, scheduler)
 	local obj = {
 		Clock = StopWatch();
-
 		TasksReadyToRun = Collections.Queue();
+		TaskID = 0;
 	}
 	setmetatable(obj, Scheduler_mt)
 	
@@ -55,17 +56,31 @@ end
 --[[
 	Task Handling
 --]]
+function Scheduler.getNewTaskID(self)
+	self.TaskID = self.TaskID + 1;
+	return self.TaskID;
+end
 
-function Scheduler.scheduleTask(self, afiber, ...)
-	if not afiber then
-		return false, "no fiber specified"
+function Scheduler.scheduleTask(self, task, ...)
+	if not task then
+		return false, "no task specified"
 	end
 
-	afiber:setParams(...);
-	self.TasksReadyToRun:Enqueue(afiber);	
-	afiber.state = "readytorun"
+	task:setParams(...);
+	self.TasksReadyToRun:Enqueue(task);	
+	task.state = "readytorun"
 
-	return afiber;
+	return task;
+end
+
+function Scheduler.spawn(self, func, ...)
+	print("Scheduler.spawn - BEGIN")
+	local task = Task(func, ...)
+	task.TaskID = self:getNewTaskID();
+	self:scheduleTask(task, ...);
+	print("Scheduler.spawn - END")
+	
+	return task;
 end
 
 function Scheduler.removeFiber(self, fiber)
@@ -102,6 +117,7 @@ function Scheduler.step(self)
 	-- We assume that some other part of the system is responsible for
 	-- keeping track of the task, and rescheduling it when appropriate.
 	if task.state == "suspended" then
+		print("suspended task wants to run")
 		return true;
 	end
 
@@ -110,7 +126,6 @@ function Scheduler.step(self)
 	-- is resumed.
 	self.CurrentFiber = task;
 	local results = {task:resume()};
-	--local success, results = task:resume();
 
 	-- once we get results back from the resume, one
 	-- of two things could have happened.
@@ -127,6 +142,8 @@ function Scheduler.step(self)
 	self.CurrentFiber = nil;
 
 	--print("SUCCESS: ", success);
+	--print("STATE: ", task.state)
+
 	if not success then
 		print("RESUME ERROR")
 		print(unpack(results));
@@ -137,7 +154,7 @@ function Scheduler.step(self)
 	-- bother putting it back into the readytorun queue
 	-- just remove the task from the list of tasks
 	if task:getStatus() == "dead" then
-		--print("Scheduler, DEAD coroutine, removing")
+		print("Scheduler, DEAD coroutine, removing")
 		self:removeFiber(task)
 
 		return true;
@@ -156,15 +173,9 @@ end
 	Primary Interfaces
 --]]
 
-function Scheduler.suspend(self, aTask)
-	if not aTask then
-		self.CurrentFiber.state = "suspended"
-		return self:yield()
-	end
-
-	aTask.state = "suspended";
-
-	return true
+function Scheduler.suspend(self, ...)
+	self.CurrentFiber.state = "suspended"
+	return self:yield(...)
 end
 
 function Scheduler.yield(self, ...)
@@ -188,7 +199,7 @@ function Scheduler.start(self)
 			self.OnStepped()
 		end
 	end
-	--print("FINISHED STEP ITERATION")
+	print("FINISHED STEP ITERATION")
 end
 
 function Scheduler.stop(self)

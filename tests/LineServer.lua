@@ -19,7 +19,7 @@ local function handleNewConnection(param, socket)
 
   -- read a line from the socket
   local line, err = netstream:readLine();
-  --print("LINE: ", line);
+  print("LINE: ", line);
 
   -- write the line back out to the socket
 --[=[

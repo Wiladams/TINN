@@ -15,7 +15,7 @@ void * realloc( void * ptr, size_t size );
 ]]
 
 return {
-	calloc = ffi.C.calloc;
+--	calloc = ffi.C.calloc;
 	free = ffi.C.free;
 	malloc = ffi.C.malloc;
 	realloc = ffi.C.realloc;

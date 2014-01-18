@@ -11,8 +11,6 @@ local basetsd = require("basetsd");
 local arch = require("arch");
 
 ffi.cdef[[
-
-
 typedef uint32_t *  PDWORD;
 typedef long *    PLONG;
 typedef long            *LPLONG;
@@ -82,8 +80,8 @@ typedef BYTE *      LPBYTE;
 typedef char *			LPSTR;
 typedef short *			LPWSTR;
 typedef short *			PWSTR;
-typedef const short *	LPCWSTR;
-typedef const short *	PCWSTR;
+typedef const WCHAR *	LPCWSTR;
+typedef const WCHAR *	PCWSTR;
 typedef PWSTR *PZPWSTR;
 typedef LPSTR			LPTSTR;
 

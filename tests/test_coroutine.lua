@@ -6,10 +6,10 @@ local inMainFiber = function(self)
 	return coroutine.running() == nil; 
 end
 
-function func1(step)
-
-	if step == 1 then
-		print("func1: STEP: ", step);
+function func1(...)
+	local nparams = select('#', ...)
+	if nparams == 1 and select(1,...) == 1 then
+		print("func1, param count: ", nparams)
 		
 		print("NEXT: ", coroutine.yield(2));
 	end
@@ -19,22 +19,22 @@ function func1(step)
 end
 
 local function test_fiber()
-local task = Task(func1, 1);
+	local task = Task(func1, 1);
 
-print("TASK: ", fiber)
-repeat
-	result = {task:resume()};
-	local success = result[1];
-	table.remove(result,1);
-	local step = unpack(result);
+	print("TASK: ", task)
+	repeat
+		result = {task:resume()};
+		local success = result[1];
+		table.remove(result,1);
+		local step = unpack(result);
 
-	print("=========")
-	print("SUCCESS: ", success);
-	print(" VALUES: ", step);
-	print(" Status: ", task:getStatus());
-	print("---------")
-	task:setParams(step);
-until task:getStatus() == "dead"
+		print("=========")
+		print("SUCCESS: ", success);
+		print(" VALUES: ", unpack(result));
+		print(" Status: ", task:getStatus());
+		print("---------")
+		task:setParams(unpack(result));
+	until task:getStatus() == "dead"
 end
 
 

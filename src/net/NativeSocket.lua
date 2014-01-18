@@ -400,7 +400,7 @@ NativeSocket.accept = function(self)
 		lpdwBytesReceived,
 		ffi.cast("OVERLAPPED *", lpOverlapped));
 
-	--print("NativeSocket.accept, AcceptEx(), STATUS: ", status);
+	print("NativeSocket.accept, AcceptEx(), STATUS: ", status);
 
 	-- If the accept completes successfully, then 
 	-- return the new socket
@@ -412,7 +412,7 @@ NativeSocket.accept = function(self)
 	else
 		local err = ws2_32.WSAGetLastError();
 
-		--print("  NativeSocket.accept(), ERR: ", err);
+		print("  NativeSocket.accept(), ERR: ", err);
 
 		if err ~= WSA_IO_PENDING then
 			print("NativeSocket.accept(), ERR, NOT == WSA_IO_PENDING: ", err);
@@ -425,7 +425,7 @@ NativeSocket.accept = function(self)
 
    	local key, bytes, ovl = waitForIO(self, lpOverlapped);
 
---print("++ NativeSocket.accept(), after YIELD: ", key, bytes, ovl);
+print("++ NativeSocket.accept(), after waitForIO: ", key, bytes, ovl);
 
     -- if no error, then return the socket
     return newsock;

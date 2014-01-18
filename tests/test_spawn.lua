@@ -3,7 +3,7 @@ local Application = require("Application")
 
 -- Set quanto to zero to get a flat out loop
 -- no stalling waiting for IO events.
-Application:setMessageQuanta(0)
+--Application:setMessageQuanta(0)
 
 local loopcount = 100
 

@@ -49,7 +49,7 @@ end
 
 
 SocketServer.handleAccepted = function(self, sock)
---print("SocketServer.handleAccepted(): ", sock);
+print("SocketServer.handleAccepted(): ", sock);
 
   if self.OnAccept then
 --print("CALLING self.OnAccept")
@@ -66,6 +66,8 @@ SocketServer.loop = function(self)
   while true do
     local sock, err = self.ServerSocket:accept();
 
+    print("Accepted: ", sock, err)
+    
     if sock then
       self:handleAccepted(sock);
     else
