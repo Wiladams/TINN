@@ -14,7 +14,7 @@ local Task_mt = {
 	__index = Task,
 }
 
-Task.init = function(self, aroutine, ...)
+function Task.init(self, aroutine, ...)
 
 	local obj = {
 		routine = coroutine.create(aroutine), 
@@ -26,24 +26,21 @@ Task.init = function(self, aroutine, ...)
 	return obj
 end
 
-Task.create = function(self, aroutine, ...)
+function Task.create(self, aroutine, ...)
 	-- The 'aroutine' should be something that is callable
 	-- either a function, or a table with a meta '__call'
 	-- implementation.  Checking with type == 'function'
 	-- is not good enough as it will miss the meta __call cases
-	--if not aroutine or type(aroutine) ~= "function" then
-	--	return nil;
-	--end
 
 	return self:init(aroutine, ...)
 end
 
 
-Task.getStatus = function(self)
+function Task.getStatus(self)
 	return coroutine.status(self.routine);
 end
 
-Task.setParams = function(self, ...)
+function Task.setParams(self, ...)
 	local nparams = select('#',...);
 
 	self.params = {...}
@@ -51,9 +48,13 @@ Task.setParams = function(self, ...)
 end
 
 
-Task.resume = function(self)
+function Task.resume(self)
 --print("Task, RESUMING: ", unpack(self.params));
 	return coroutine.resume(self.routine, unpack(self.params));
+end
+
+function Task.yield(self, ...)
+	return coroutine.yield(...)
 end
 
 return Task;

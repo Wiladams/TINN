@@ -54,15 +54,17 @@ local function compareTaskDueTime(task1, task2)
 end
 
 function waitForTime.yieldUntilTime(self, atime)
-	--print("waitForTime.yieldUntilTime: ", atime, self.Scheduler.Clock:Milliseconds())
+--	print("waitForTime.yieldUntilTime: ", atime, self.Scheduler.Clock:Milliseconds())
 	--print("Current Fiber: ", self.CurrentFiber)
 	local currentFiber = self.Scheduler:getCurrentFiber();
 	if currentFiber == nil then
+		--print("no current task")
 		return false, "not currently in a running task"
 	end
 
 	currentFiber.DueTime = atime;
 	tabutils.binsert(self.TasksWaitingForTime, currentFiber, compareTaskDueTime);
+--print("yieldUntilTime - END")
 
 	return self.Scheduler:suspend()
 end

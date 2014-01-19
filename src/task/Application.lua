@@ -90,8 +90,7 @@ end
 function Application.periodic(self, func, millis)
 	millis = millis or 1000
 
-	local closure = nil;
-	closure = function()
+	local function closure()
 		while true do
 			self:sleep(millis)
 			func();
@@ -149,9 +148,10 @@ end
 function Application.whenever(self, pred, func)
 
 	local function watchit()
-		self:waitFor(pred)
-		func()
-		self:spawn(watchit)
+		while true do
+			self:waitFor(pred)
+			func()
+		end
 	end
 
 	self:spawn(watchit)
@@ -172,9 +172,7 @@ end
 
 function Application.onSignal(self, func, eventName)
 	local function closure()
-		--print("Application.onEvent: ", func, eventName)
 		self:waitForSignal(eventName)
-		--print("Application.onEvent, waited: ", func, eventName)
 		func();
 	end
 
