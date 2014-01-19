@@ -2,7 +2,27 @@ local ffi = require("ffi")
 local core_file = require("core_file_l1_2_0");
 local core_string = require("core_string_l1_1_0")
 
+-- for WinBase
+ffi.cdef[[
+static const int DRIVE_UNKNOWN     =0;
+static const int DRIVE_NO_ROOT_DIR =1;
+static const int  DRIVE_REMOVABLE  = 2;
+static const int  DRIVE_FIXED      = 3;
+static const int  DRIVE_REMOTE     = 4;
+static const int  DRIVE_CDROM      = 5;
+static const int  DRIVE_RAMDISK    = 6;
+]]
 
+
+local driveTypes = {
+	[ffi.C.DRIVE_UNKNOWN] = "DRIVE_UNKNOWN",
+	[ffi.C.DRIVE_NO_ROOT_DIR] = "DRIVE_NO_ROOT_DIR",
+	[ffi.C.DRIVE_REMOVABLE] = "DRIVE_REMOVABLE",
+	[ffi.C.DRIVE_FIXED] = "DRIVE_FIXED",
+	[ffi.C.DRIVE_REMOTE] = "DRIVE_REMOTE",
+	[ffi.C.DRIVE_CDROM] = "DRIVE_CDROM",
+	[ffi.C.DRIVE_RAMDISK] = "DRIVE_RAMDISK",
+}
 
 local function logicalDriveNames()
 	local nBufferLength = 255;
@@ -43,7 +63,7 @@ local function logicalDriveNames()
 end
 
 for name in logicalDriveNames() do
-	print("DRIVE: ", name)
-	print("Drive Type: ", core_file.GetDriveTypeA(name))
+	local dtype = core_file.GetDriveTypeA(name)
+	print("DRIVE: ", name, driveTypes[dtype] or dtype)
 end
 

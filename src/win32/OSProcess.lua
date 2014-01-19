@@ -125,17 +125,7 @@ function OSProcess.processIds(self)
 	return closure;
 end
 
---[[
-				if process then
-					return {
-						id = process:getId(), 
-						filename = process:getImageName(),
-						priorityClass = process:getPriorityClass(),
-						sessionId = process:getSessionId(),
-						isActive = process:isActive(),
-					};
-				end
---]]
+
 
 function OSProcess.processes(self)
 	local nextRecord = self:processIds()

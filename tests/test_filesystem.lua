@@ -9,11 +9,7 @@ local WinBase = require("WinBase");
 local FileSystemItem = require("FileSystemItem");
 
 
-
 local FileSystem = {}
-
-FileSystem.volumes = function(self)
-end
 
 FileSystem.logicalDriveCount = function(self)
 	return core_file.GetLogicalDrives();
@@ -198,5 +194,4 @@ end
 
 --printHtml("c:\\tools", nodotdot);
 
-printDriveCount();
 printVolumes();
