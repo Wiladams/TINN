@@ -123,8 +123,6 @@ local printFileItems = function(startat, filterfunc)
 end
 
 
---printDriveCount();
---printVolumes();
 
 local function passHidden(item)
 	return item:isHidden();
@@ -198,4 +196,7 @@ local nodotdot = function(item)
 	return item.Name ~= "." and item.Name ~= "..";
 end
 
-printHtml("c:\\tools", nodotdot);
+--printHtml("c:\\tools", nodotdot);
+
+printDriveCount();
+printVolumes();
