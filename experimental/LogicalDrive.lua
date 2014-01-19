@@ -1,0 +1,4 @@
+GetDiskFreeSpaceA
+GetDiskFreeSpaceExA
+GetDriveTypeA
+GetLogicalDrives
