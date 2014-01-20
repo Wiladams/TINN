@@ -25,7 +25,7 @@ EchoRequest = function()
 
     local bytessent, err = socket:send(datestr, #datestr);
 
-print("bytessent: ", bytessent, err);
+--print("bytessent: ", bytessent, err);
 
     local bufflen = 1500;
     local buff = ffi.new("uint8_t[?]", bufflen);
@@ -57,7 +57,7 @@ loop = function()
     
         if dtc ~= nil then
             transcount = transcount + 1;
-            print(transcount, dtc, transcount/sw:Seconds());
+            --print(transcount, dtc, transcount/sw:Seconds());
         else
             print("Error: ", i, err);        
         end

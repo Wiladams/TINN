@@ -5,12 +5,14 @@ local core_string = require("core_string_l1_1_0")
 local errorhandling = require("core_errorhandling_l1_1_1");
 local WinError = require("win_error")
 local iterators = require("iterators")
+local Storage = require("Storage")
 
 local Machine = {
+	Storage = Storage,
 	Devices = {},
 }
 
-function Machine.Devices.DOSDevices(self, lpDeviceName)
+function Machine.Devices.DOSDeviceIterator(self, lpDeviceName)
 	if lpDeviceName then
 		lpDeviceName = core_string.toUnicode(lpDeviceName)
 	end

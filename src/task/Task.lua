@@ -21,7 +21,7 @@ function Task.init(self, aroutine, ...)
 	}
 	setmetatable(obj, Task_mt);
 	
-	obj:setParams(...);
+	obj:setParams({...});
 
 	return obj
 end
@@ -40,10 +40,10 @@ function Task.getStatus(self)
 	return coroutine.status(self.routine);
 end
 
-function Task.setParams(self, ...)
-	local nparams = select('#',...);
+function Task.setParams(self, params)
+	self.params = params
 
-	self.params = {...}
+	--print("Task.setParams: ", unpack(self.params))
 	return self;
 end
 

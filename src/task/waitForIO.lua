@@ -79,7 +79,7 @@ function waitForIO.watchForIOEvents(self, handle, param)
 end
 
 function waitForIO.yield(self, socket, overlapped)
-print("== waitForIO.yield: BEGIN: ", arch.pointerToString(overlapped));
+--print("== waitForIO.yield: BEGIN: ", arch.pointerToString(overlapped));
 
 	local currentFiber = self.Scheduler:getCurrentFiber()
 
@@ -97,7 +97,7 @@ end
 
 
 function waitForIO.processIOEvent(self, key, numbytes, overlapped)
-print("waitForIO.processIOEvent: ", key, numbytes, arch.pointerToString(overlapped))
+--print("waitForIO.processIOEvent: ", key, numbytes, arch.pointerToString(overlapped))
 
 	local ovl = ffi.cast("IOOverlapped *", overlapped);
 
@@ -105,6 +105,8 @@ print("waitForIO.processIOEvent: ", key, numbytes, arch.pointerToString(overlapp
 
 	-- Find the task that is waiting for this IO event
 	local fiber = self.EventFibers[arch.pointerToString(overlapped)]
+
+--print("waitForIO: fiber wiating: ", fiber)
 
 	if not fiber then
 		print("waitForIO: No fiber waiting for IO Completion")
@@ -118,9 +120,9 @@ print("waitForIO.processIOEvent: ", key, numbytes, arch.pointerToString(overlapp
 	-- remove the fiber from the index based on the
 	-- overlapped structure
 	self.EventFibers[arch.pointerToString(overlapped)] = nil;
-print("before rescheduler")
-	local task = self.Scheduler:scheduleTask(fiber, key, numbytes, overlapped);
-print("after reschedule: ", task.state)
+--print("waitForIO.processIOEvent, before rescheduler:", key, numbytes, overlapped)
+	local task = self.Scheduler:scheduleTask(fiber, {key, numbytes, overlapped});
+--print("after reschedule: ", task.state)
 
 	return true;
 end

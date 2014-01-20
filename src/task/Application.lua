@@ -12,10 +12,10 @@ local Task = require("Task")
 local Functor = require("Functor")
 
 -- scheduler plug-ins
-local waitForCondition = require("waitForCondition")
-local waitForSignal = require("waitForSignal")
-local waitForTime = require("waitForTime")
-local waitForIO = require("waitForIO")
+local fwaitForCondition = require("waitForCondition")
+local fwaitForSignal = require("waitForSignal")
+local fwaitForTime = require("waitForTime")
+local fwaitForIO = require("waitForIO")
 
 --waitForIO.MessageQuanta = 0;
 
@@ -33,16 +33,16 @@ local Application_mt = {
 function Application.init(self, ...)
 	local sched = Scheduler();
 
-	waitForIO.MessageQuanta = 0;
+	fwaitForIO.MessageQuanta = 0;
 
 	local obj = {
 		Clock = Stopwatch();
 		Scheduler = sched;
 		TaskID = 0;
-		wfc = waitForCondition(sched);
-		wfs = waitForSignal(sched);
-		wft = waitForTime(sched);
-		wfio = waitForIO(sched);
+		wfc = fwaitForCondition(sched);
+		wfs = fwaitForSignal(sched);
+		wft = fwaitForTime(sched);
+		wfio = fwaitForIO(sched);
 	}
 	setmetatable(obj, Application_mt)
 
@@ -207,7 +207,9 @@ end
 function Application.spawn(self, func, ...)
 	local task = Task(func, ...)
 	task.TaskID = self:getNewTaskID();
-	self.Scheduler:scheduleTask(task, ...);
+	self.Scheduler:scheduleTask(task, {...});
+
+--print("Application.spawn: ", ...)
 
 	return task;
 end

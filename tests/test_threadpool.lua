@@ -54,7 +54,7 @@ local testSchedule = function()
 
 	print("int17: ", int17.value)
 
-	local task1 = tp1:scheduleTask(somework, int17)
+	local task1 = tp1:scheduleTask(somework, {int17})
 	--local task2 = tp1:scheduleTask(somework)
 	--local task3 = tp1:scheduleTask(somework)
 	--local task4 = tp1:scheduleTask(somework)

@@ -1,12 +1,12 @@
 local ffi = require("ffi");
 
 local SocketServer = require("SocketServer");
-local IOCPSocket = require("IOCPSocket");
+local NativeSocket = require("NativeSocket");
 
-local OnAccept = function(param, sock) 
-	print("EchoServer.OnAccept(): ", sock)
+local OnAccept = function(sock) 
+	--print("EchoServer.OnAccept(): ", sock)
 
- 	local socket = IOCPSocket:init(sock, true);
+ 	local socket = NativeSocket:init(sock, true);
 	
  	-- read from the socket
  	local bufflen = 1500;

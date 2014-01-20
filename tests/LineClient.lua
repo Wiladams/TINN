@@ -25,16 +25,18 @@ local function EchoRequest(msg, len)
     end
 
     local bytessent, err = socket:send(msg, len);
+
 --print("EchoRequest: ", bytessent, err)
 
-    --local buff = ffi.new("uint8_t[1500]");
-    --local n, err = socket:receive(buff, 1500)
+    local buff = ffi.new("uint8_t[1500]");
+    local n, err = socket:receive(buff, 1500)
 
---print("EchoRequest, receive: ", n, err)
+print("EchoRequest, receive: ", n, err)
 
-    --if n > 0 then
+    if n > 0 then
         -- return ffi.string(buff, n);
-    --end
+        print(ffi.string(buff, n))
+    end
 
     finished = finished + 1;
 

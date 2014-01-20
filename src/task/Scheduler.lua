@@ -61,12 +61,15 @@ function Scheduler.getNewTaskID(self)
 	return self.TaskID;
 end
 
-function Scheduler.scheduleTask(self, task, ...)
+function Scheduler.scheduleTask(self, task, params)
+	--print("Scheduler.scheduleTask: ", task, params)
+	params = params or {}
+	
 	if not task then
 		return false, "no task specified"
 	end
 
-	task:setParams(...);
+	task:setParams(params);
 	self.TasksReadyToRun:Enqueue(task);	
 	task.state = "readytorun"
 
@@ -77,14 +80,14 @@ function Scheduler.spawn(self, func, ...)
 	print("Scheduler.spawn - BEGIN")
 	local task = Task(func, ...)
 	task.TaskID = self:getNewTaskID();
-	self:scheduleTask(task, ...);
+	self:scheduleTask(task, {...});
 	print("Scheduler.spawn - END")
 	
 	return task;
 end
 
 function Scheduler.removeFiber(self, fiber)
-	--print("DROPPING DEAD FIBER: ", fiber);
+	--print("REMOVING DEAD FIBER: ", fiber);
 	return true;
 end
 
@@ -102,6 +105,7 @@ function Scheduler.step(self)
 
 	-- If no fiber in ready queue, then just return
 	if task == nil then
+		print("Scheduler.step: NO TASK")
 		return true
 	end
 
@@ -135,8 +139,13 @@ function Scheduler.step(self)
 	-- In both cases, we parse out the results of the resume 
 	-- into a success indicator and the rest of the values returned 
 	-- from the routine
+	--local pcallsuccess = results[1];
+	--table.remove(results,1);
+
 	local success = results[1];
 	table.remove(results,1);
+
+--print("PCALL, RESUME: ", pcallsuccess, success)
 
 	-- no task is currently executing
 	self.CurrentFiber = nil;
@@ -154,7 +163,6 @@ function Scheduler.step(self)
 	-- bother putting it back into the readytorun queue
 	-- just remove the task from the list of tasks
 	if task:getStatus() == "dead" then
-		print("Scheduler, DEAD coroutine, removing")
 		self:removeFiber(task)
 
 		return true;

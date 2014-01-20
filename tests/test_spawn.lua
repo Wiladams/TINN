@@ -5,9 +5,8 @@ local Application = require("Application")
 -- no stalling waiting for IO events.
 --Application:setMessageQuanta(0)
 
-local loopcount = 100
 
-local fiber1 = function()
+local function fiber1(loopcount)
 	local count = 0;
 	for j=1,loopcount do
 		if j % 2 == 0 then
@@ -19,7 +18,7 @@ local fiber1 = function()
 	end
 end
 
-local fiber2 = function()
+local function fiber2(loopcount)
 	local count = 0
 	for j=1,loopcount do
 		if j % 5 == 0 then
@@ -28,6 +27,19 @@ local fiber2 = function()
 		end
 
 		yield();
+	end
+end
+
+local function fiber3(loopcount)
+	local spawned1 = false;
+
+	for i=1,loopcount do
+		print("fiber 3: ", i)
+		if (not spawned1) and (i >= loopcount/2) then
+			spawn(fiber1, i)
+			spawned1 = true;
+		end
+		yield(i);
 	end
 end
 
@@ -77,14 +89,25 @@ local test_sleep = function()
 	print("DONE SLEEPING")
 end
 
+local function test_spawn_parallel()
+	spawn(fiber1, 100)
+	spawn(fiber2, 100)
+end
 
-spawn(fiber1)
-spawn(fiber2)
-periodic(printTime, 200)
+local function test_spawn_serial()
+	spawn(fiber3, 100)
+end
 
-killTime();
+local function main()
+--periodic(printTime, 200)
+
+--killTime();
 
 --spawn(printStats)
-spawn(test_sleep)
+--spawn(test_sleep)
 
-run()
+test_spawn_serial();
+--test_spawn_parallel();
+end
+
+run(main)

@@ -25,11 +25,11 @@ OSProcess.init = function(self, rawHandle)
 
 	setmetatable(obj, OSProcess_mt);
 
-	obj.id = obj:getId();
-	obj.filename = obj:getImageName();
-	obj.priorityClass = obj:getPriorityClass();
-	obj.sessionId = obj:getSessionId();
-	obj.isActive = obj:isActive();
+	obj.ID = obj:getId();
+	obj.Filename = obj:getImageName();
+	obj.PriorityClass = obj:getPriorityClass();
+	obj.SessionId = obj:getSessionId();
+	obj.Active = obj:isActive();
 
 	return obj;
 end

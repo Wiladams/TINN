@@ -363,7 +363,7 @@ NativeSocket.makePassive = function(self, backlog)
 	return WinSock.listen(self:getNativeSocket(), backlog)
 end
 
-NativeSocket.accept = function(self)
+function NativeSocket.accept(self)
 	local family = AF_INET;
 	local socktype = SOCK_STREAM;
 	local protocol = 0;
@@ -382,7 +382,6 @@ NativeSocket.accept = function(self)
 	end
 
 	-- Now, construct up the accept call
-	local sAcceptSocket = newsock;
 	local dwReceiveDataLength = 0;
 	local dwLocalAddressLength = ffi.sizeof("struct sockaddr_in")+16;
 	local dwRemoteAddressLength = ffi.sizeof("struct sockaddr_in")+16;
@@ -392,7 +391,7 @@ NativeSocket.accept = function(self)
 
 	local lpOverlapped = self:createOverlapped(lpOutputBuffer, lpOutputBufferLen, SocketOps.ACCEPT);
 
-	local status = mswsock.AcceptEx(self:getNativeSocket(), sAcceptSocket, 
+	local status = mswsock.AcceptEx(self:getNativeSocket(), newsock, 
 		lpOutputBuffer, 
 		dwReceiveDataLength,
 		dwLocalAddressLength,
@@ -400,32 +399,18 @@ NativeSocket.accept = function(self)
 		lpdwBytesReceived,
 		ffi.cast("OVERLAPPED *", lpOverlapped));
 
-	print("NativeSocket.accept, AcceptEx(), STATUS: ", status);
+	local err = ws2_32.WSAGetLastError();
+	--print("NativeSocket.accept, AcceptEx(), STATUS, ERR: ", newsock, status, err);
 
-	-- If the accept completes successfully, then 
-	-- return the new socket
-	if status ~= 0 then
-		-- even though the indication is that we got a new socket
-		-- the notification won't come until later, so treat both 
-		-- cases as PENDING
-		--return newsock;
-	else
-		local err = ws2_32.WSAGetLastError();
-
-		print("  NativeSocket.accept(), ERR: ", err);
-
-		if err ~= WSA_IO_PENDING then
-			print("NativeSocket.accept(), ERR, NOT == WSA_IO_PENDING: ", err);
-			return false, err;
-		end
+	if err ~= WSA_IO_PENDING then
+		return false, err;
 	end
 
 	-- If we've gotten this far, it means an accept was queued
 	-- so we should yield, and we'll continue when completion is indicated
-
    	local key, bytes, ovl = waitForIO(self, lpOverlapped);
 
-print("++ NativeSocket.accept(), after waitForIO: ", key, bytes, ovl);
+--print("++ NativeSocket.accept(), after waitForIO: ", key, bytes, ovl);
 
     -- if no error, then return the socket
     return newsock;

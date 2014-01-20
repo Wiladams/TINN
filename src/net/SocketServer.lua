@@ -19,12 +19,11 @@ local SocketServer_mt = {
   __index = SocketServer;
 }
 
-SocketServer.init = function(self, socket, onAccept, onAcceptParam)
+SocketServer.init = function(self, socket, onAccept)
 --print("SocketServer.init: ", socket, onAccept, onAcceptParam)
   local obj = {
     ServerSocket = socket;
     OnAccept = onAccept;
-    OnAcceptParam = onAcceptParam;
   };
 
   setmetatable(obj, SocketServer_mt);
@@ -32,28 +31,28 @@ SocketServer.init = function(self, socket, onAccept, onAcceptParam)
   return obj;
 end
 
-SocketServer.create = function(self, port, onAccept, onAcceptParam, autoclose)
+SocketServer.create = function(self, port, onAccept, autoclose)
   autoclose = autoclose or false;
   port = port or 9090;
---print("SocketServer:create(): ", port, onAccept, onAcceptParam);
+--print("SocketServer:create(): ", port, onAccept);
 
-  local socket, err = NativeSocket:createServer({port = port, backlog = 15, autoclose = autoclose})
+  local socket, err = NativeSocket:createServer({port = port, backlog = 150, autoclose = autoclose})
 	
   if not socket then 
     print("Server Socket not created!!")
     return nil, err
   end
 
-  return self:init(socket, onAccept, onAcceptParam);
+  return self:init(socket, onAccept);
 end
 
 
-SocketServer.handleAccepted = function(self, sock)
-print("SocketServer.handleAccepted(): ", sock);
+function SocketServer.handleAccepted(self, sock)
+--print("SocketServer.handleAccepted(): ", sock);
 
   if self.OnAccept then
---print("CALLING self.OnAccept")
-    return self.OnAccept(self.OnAcceptParam, sock);
+    --print("SocketServer.handleAccepter, CALLING self.OnAccept: ", sock)
+    return self.OnAccept(sock);
   else
 --print("NO OnAccept available, closing  socket...")
     ws2_32.closesocket(sock);
@@ -66,7 +65,7 @@ SocketServer.loop = function(self)
   while true do
     local sock, err = self.ServerSocket:accept();
 
-    print("Accepted: ", sock, err)
+    --print("SocketServer.loop, Accepted: ", sock, err)
     
     if sock then
       self:handleAccepted(sock);
@@ -79,7 +78,7 @@ SocketServer.loop = function(self)
 end
 
 SocketServer.run = function(self)
-  print("SocketServer.run()");
+  --print("SocketServer.run()");
   spawn(self.loop, self);
   Application:run();
 end
