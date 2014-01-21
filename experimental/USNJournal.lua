@@ -41,16 +41,11 @@ setmetatable(ChangeJournal, {
 	__call = function(self, ...)
 		self:init(...);
 	end,
-
-
 });
 
 local ChangeJournal_mt = {
 	__index = ChangeJournal;
 }
-
-
-
 
 ChangeJournal.init = function(self, handle)
 
@@ -108,7 +103,6 @@ ChangeJournal.activate = function(self, driveLetter)
 end
 
 ChangeJournal.disable = function(self, driveLetter)
-
 end
 
 ChangeJournal.open = function(self, driveLetter)
@@ -120,7 +114,7 @@ ChangeJournal.open = function(self, driveLetter)
 	return self:init(handle);
 end
 
-ChangeJournal.getVolumeHandle = function(self, driveLetter, dwCreationDisposition, dwDesiredAccess)
+function ChangeJournal.getVolumeHandle(self, driveLetter, dwCreationDisposition, dwDesiredAccess)
 	local lpFileName = string.format("\\\\.\\%s", driveLetter);
 	local dwShareMode = bor(FILE_SHARE_READ, FILE_SHARE_WRITE);
 	local lpSecurityAttributes = nil;
@@ -250,7 +244,7 @@ ChangeJournal.entries = function(self, StartUsn, ReasonMask)
 	return closure;
 end
 
-ChangeJournal.waitForNextEntry = function(self, usn, ReasonMask) 
+function ChangeJournal.waitForNextEntry(self, usn, ReasonMask) 
  	usn = usn or self:getNextUsn();
  	local ReasonMask = ReasonMask or 0xFFFFFFFF;
  	local ReturnOnlyOnClose = false;

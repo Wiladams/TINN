@@ -206,9 +206,9 @@ BlockFile.readBytes = function(self, buff, nNumberOfBytesToRead, offset)
 		ffi.cast("OVERLAPPED *",lpOverlapped));
 
 
-	if res == 0 then
-		local err = errorhandling.GetLastError();
+	local err = errorhandling.GetLastError();
 
+	if res == 0 then
 		if err ~= ERROR_IO_PENDING then
 			return false, err
 		end
