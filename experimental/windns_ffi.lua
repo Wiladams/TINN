@@ -730,8 +730,7 @@ typedef  struct _DnsRecordA
         PBYTE               pDataPtr;
 
     } Data;
-}
-DNS_RECORDA, *PDNS_RECORDA;
+} DNS_RECORDA, *PDNS_RECORDA;
 ]]
 
 ffi.cdef[[
@@ -1295,6 +1294,8 @@ end
 local Lib = ffi.load("Dnsapi")
 
 return {
+    Lib = Lib, 
+
     DNS_BYTE_FLIP_HEADER_COUNTS = DNS_BYTE_FLIP_HEADER_COUNTS,
 
     DnsExtractRecordsFromMessage_W = Lib.DnsExtractRecordsFromMessage_W,
@@ -1304,7 +1305,8 @@ return {
     DnsQuery = Lib.DnsQuery_A,
     DnsQueryConfig = Lib.DnsQueryConfig,
     DnsQueryEx = Lib.DnsQueryEx,
-
+    DnsRecordListFree = Lib.DnsRecordListFree,
+    
     DnsValidateName = Lib.DnsValidateName_A,
     DnsWriteQuestionToBuffer_W = Lib.DnsWriteQuestionToBuffer_W,
     DnsWriteQuestionToBuffer_UTF8 = Lib.DnsWriteQuestionToBuffer_UTF8,
