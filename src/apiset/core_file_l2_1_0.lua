@@ -113,6 +113,8 @@ ReplaceFileW(
 ]]
 
 return {
+    Lib = k32Lib,
+    
 --CopyFile2
 	CopyFileExW = k32Lib.CopyFileExW,
 	CreateDirectoryExW = k32Lib.CreateDirectoryExW,

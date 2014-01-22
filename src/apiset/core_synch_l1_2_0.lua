@@ -460,6 +460,8 @@ void WakeConditionVariable (
 ]]
 
 return {
+    Lib = K32Lib,
+    
 AcquireSRWLockExclusive = k32Lib.AcquireSRWLockExclusive,
 AcquireSRWLockShared = k32Lib.AcquireSRWLockShared,
 CancelWaitableTimer = k32Lib.CancelWaitableTimer,

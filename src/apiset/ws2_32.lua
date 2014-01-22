@@ -1193,6 +1193,8 @@ sockaddr = ffi.metatype(sockaddr, sockaddr_mt);
 
 
 return {
+    Lib = Lib, 
+    
     families = families,
     socktypes = socktypes,
     protocols = protocols,

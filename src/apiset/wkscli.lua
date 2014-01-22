@@ -707,6 +707,8 @@ static const int TRANSPORT_NAME_PARMNUM                = 202;
 ]]
 
 return {
+  Lib = Lib,
+  
 NetAddAlternateComputerName = Lib.NetAddAlternateComputerName,
 NetEnumerateComputerNames = Lib.NetEnumerateComputerNames,
 NetGetJoinableOUs = Lib.NetGetJoinableOUs,

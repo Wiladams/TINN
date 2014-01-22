@@ -25,6 +25,8 @@ static const int HANDLE_FLAG_PROTECT_FROM_CLOSE = 0x00000002;
 ]]
 
 return {
+    Lib = k32Lib,
+    
 	CloseHandle = k32Lib.CloseHandle,
 	DuplicateHandle = k32Lib.DuplicateHandle,
 	GetHandleInformation = k32Lib.GetHandleInformation,

@@ -206,6 +206,8 @@ StartServiceW(SC_HANDLE            hService,
 
 
 return {
+  Lib = advapiLib,
+  
 	CloseServiceHandle = advapiLib.CloseServiceHandle,
 	ControlServiceExW = advapiLib.ControlServiceExW,
 	CreateServiceW = advapiLib.CreateServiceW,

@@ -6,6 +6,7 @@ local NetStream = require("NetStream");
 local WebRequest = require("WebRequest");
 local WebResponse = require("WebResponse");
 local URL = require("url");
+local Functor = require("Functor")
 
 local HttpServer = {}
 setmetatable(HttpServer, {
@@ -18,20 +19,19 @@ local HttpServer_mt = {
 	__index = HttpServer;
 }
 
-HttpServer.init = function(self, port, onRequest, onRequestParam)
+HttpServer.init = function(self, port, onRequest)
 	local obj = {
 		OnRequest = onRequest;
-		OnRequestParam = onRequestParam;
 	};
 	setmetatable(obj, HttpServer_mt);
 	
-	obj.SocketServer = SocketServer(port, HttpServer.OnAccept, obj);
+	obj.Listener = SocketServer(port, Functor(obj.OnAccept, obj));
 
 	return obj;
 end
 
-HttpServer.create = function(self, port, onRequest, onRequestParam)
-	return self:init(port, onRequest, onRequestParam);
+HttpServer.create = function(self, port, onRequest)
+	return self:init(port, onRequest);
 end
 
 
@@ -56,7 +56,7 @@ HttpServer.HandlePreamblePending = function(self, sock)
 	if request then
 		request.Url = URL.parse(request.Resource);
 		local response = WebResponse:OpenResponse(request.DataStream)
-		self.OnRequest(self.OnRequestParam, request, response);
+		self.OnRequest(request, response);
 	else
 		print("HandleSingleRequest, Dump stream: ", err)
 		socket:closeDown();
@@ -72,7 +72,7 @@ HttpServer.OnAccept = function(self, sock)
 end
 
 HttpServer.run = function(self)
-	return self.SocketServer:run();
+	return self.Listener:run();
 end
 
 return HttpServer;

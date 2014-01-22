@@ -137,6 +137,8 @@ InitiateSystemShutdownExW(
 ]]
 
 return {
+    Lib = Lib,
+    
 	AbortSystemShutdownW = Lib.AbortSystemShutdownW,
 	InitiateSystemShutdownExW = Lib.InitiateSystemShutdownExW,
 }

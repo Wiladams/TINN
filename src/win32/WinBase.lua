@@ -463,6 +463,8 @@ typedef struct _REASON_CONTEXT {
 
 
 return {
+    Lib = advapiLib,
+    
     CreateProcessWithLogonW = advapiLib.CreateProcessWithLogonW,
     CreateProcessWithTokenW = advapiLib.CreateProcessWithTokenW,
 }

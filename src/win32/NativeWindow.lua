@@ -5,7 +5,7 @@ local bor = bit.bor;
 
 local Gdi32 = require("GDI32");
 local User32 = require("user32_ffi");
-local User32Lib = ffi.load("User32");
+--local User32Lib = ffi.load("User32");
 local errorhandling = require("core_errorhandling_l1_1_1");
 local core_library = require("core_libraryloader_l1_1_1");
 

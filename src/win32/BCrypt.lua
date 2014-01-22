@@ -19,6 +19,7 @@ end
 
 
 local BCrypt = {
+    Lib = BCLib;
 
     -- Flags to BCryptGenRandom
     BCRYPT_RNG_USE_ENTROPY_IN_BUFFER   = 0x00000001;
@@ -401,7 +402,6 @@ CRYPT_PRIORITY_BOTTOM      = (0xFFFFFFFF);
 -- Default system-wide context
 CRYPT_DEFAULT_CONTEXT      = L"Default";
 
-	Lib = BCLib;
 
 }
 

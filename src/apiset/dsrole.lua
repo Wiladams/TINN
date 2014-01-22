@@ -89,6 +89,8 @@ DsRoleGetPrimaryDomainInformation(
 ]]
 
 local dsrole = {
+    Lib = Lib,
+    
     DsRoleFreeMemory = Lib.DsRoleFreeMemory,
     DsRoleGetPrimaryDomainInformation = Lib.DsRoleGetPrimaryDomainInformation,    
 };

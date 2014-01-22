@@ -401,6 +401,9 @@ UpdateProcThreadAttribute(
 
 
 return {
+    Lib = k32Lib,
+    AdvApi32Lib = advLib, 
+    
 	CreateProcessA = k32Lib.CreateProcessA,
 	CreateProcessAsUserW = advLib.CreateProcessAsUserW,
 

@@ -217,6 +217,9 @@ SizeofResource(
 
 
 return {	
+    Lib = k32Lib,
+    User32Lib = u32Lib,
+    
 	--AddDllDirectory
 	DisableThreadLibraryCalls = k32Lib.DisableThreadLibraryCalls,
 	EnumResourceLanguagesExA = k32Lib.EnumResourceLanguagesExA,

@@ -20,6 +20,8 @@ local errorhandling = require("core_errorhandling_l1_1_1");
 --]]
 
 local SecurityInterface = {
+	Lib = sspilib,
+	
 	VTable = sspilib.InitSecurityInterfaceA();
 }
 setmetatable(SecurityInterface, {

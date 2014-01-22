@@ -69,6 +69,8 @@ GetDateFormatEx(
 ]]
 
 return {
+    Lib = k32Lib,
+    
     GetDateFormatA = k32Lib.GetDateFormatA,
     GetDateFormatEx = k32Lib.GetDateFormatEx,
     GetDateFormatW = k32Lib.GetDateFormatW,

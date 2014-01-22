@@ -390,6 +390,8 @@ local Lib = ffi.load("user32");
 MAXIMUM_WAIT_OBJECTS = 64     -- Maximum number of wait objects
 
 local user32_ffi = {
+	Lib = Lib,
+	
 	CW_USEDEFAULT = 0x80000000,
 
 	CS_VREDRAW			= 0x0001,

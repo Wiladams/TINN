@@ -4,7 +4,7 @@
 local ffi = require("ffi");
 local WTypes = require("WTypes");
 local Lib = ffi.load("psapi");
-local k32Lib = ffi.load("kernel32");
+local K32Lib = ffi.load("kernel32");
 
 ffi.cdef[[
 // Structure for GetProcessMemoryInfo()
@@ -191,6 +191,9 @@ QueryFullProcessImageNameW(
 
 
 return {
+    Lib = Lib,
+    K32Lib = K32Lib,
+    
 	EmptyWorkingSet = Lib.EmptyWorkingSet,
 	EnumDeviceDrivers = Lib.EnumDeviceDrivers,
 	EnumPageFilesW = Lib.EnumPageFilesW,
@@ -206,5 +209,5 @@ return {
 	InitializeProcessForWsWatch = Lib.InitializeProcessForWsWatch,
 	QueryWorkingSet = Lib.QueryWorkingSet,
 	QueryWorkingSetEx = Lib.QueryWorkingSetEx,
-	QueryFullProcessImageName = k32Lib.QueryFullProcessImageNameW,
+	QueryFullProcessImageName = K32Lib.QueryFullProcessImageNameW,
 }

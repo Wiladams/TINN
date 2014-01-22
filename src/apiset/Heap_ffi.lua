@@ -96,6 +96,8 @@ BOOL HeapQueryInformation (HANDLE HeapHandle,
 
 
 return {
+    Lib = k32Lib,
+    
 GetProcessHeap = k32Lib.GetProcessHeap,
 GetProcessHeaps = k32Lib.GetProcessHeaps,
 

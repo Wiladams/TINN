@@ -305,6 +305,8 @@ static const int WRITE_WATCH_FLAG_RESET = 0x01;
 local Lib = ffi.load("kernel32");
 
 return {
+    Lib = Lib,
+    
 --CreateFileMappingFromApp
 CreateFileMappingNumaW = Lib.CreateFileMappingNumaW,
 CreateFileMappingW = Lib.CreateFileMappingW,

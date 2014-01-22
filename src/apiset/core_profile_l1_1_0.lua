@@ -40,6 +40,8 @@ end
 
 
 return {
+	Lib = k32Lib,
+	
 	getPerformanceCounter = GetPerformanceCounter,
 	getPerformanceFrequency = GetPerformanceFrequency,
 	getCurrentTickTime = GetCurrentTickTime,

@@ -496,6 +496,8 @@ NetRemoveServiceAccount(
 local Lib = ffi.load("logoncli"); -- logoncli.dll
 
 return {
+    Lib = Lib, 
+    
 DsAddressToSiteNamesA = Lib.DsAddressToSiteNamesA,
 DsAddressToSiteNamesExA = Lib.DsAddressToSiteNamesExA,
 DsAddressToSiteNamesExW = Lib.DsAddressToSiteNamesExW,

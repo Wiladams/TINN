@@ -1175,7 +1175,7 @@ NetValidatePasswordPolicyFree(
     );
 ]]
 
-
+samcli.Lib = Lib;
 samcli.NetGetDisplayInformationIndex = Lib.NetGetDisplayInformationIndex;
 samcli.NetGroupAdd = Lib.NetGroupAdd;
 samcli.NetGroupAddUser = Lib.NetGroupAddUser;

@@ -24,6 +24,8 @@ SetFirmwareEnvironmentVariableW(
 ]]
 
 return {
+    Lib = Lib,
+    
 	GetFirmwareEnvironmentVariableW = Lib.GetFirmwareEnvironmentVariableW,
 	SetFirmwareEnvironmentVariableW = Lib.SetFirmwareEnvironmentVariableW,
 }

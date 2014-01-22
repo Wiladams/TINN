@@ -20,9 +20,9 @@
 --]]
 
 local function query(params)
-print("query, BEGIN: ", params.source, params.filter, params.projection)
+--print("query, BEGIN: ", params.source, params.filter, params.projection)
 	if (not params) or (not params.source) then
-		print("query, no params")
+		--print("query, no params")
 
 		return false, "source not specified";
 	end
@@ -34,7 +34,7 @@ print("query, BEGIN: ", params.source, params.filter, params.projection)
 
 	local function closure()
 		local record;
-print("query, 1.0")
+--print("query, 1.0")
 		if filter then
 			while true do
 				record = nextRecord();	
@@ -53,7 +53,7 @@ print("query, 1.0")
 			record = nextRecord();
 		end
 
-print("query, 2.0: ", record)
+--print("query, 2.0: ", record)
 
 		if not record then
 			return nil;
@@ -101,12 +101,12 @@ end
 local recordfilter = function(record, filtertable)
 	for key,value in pairs(filtertable) do
 		if not record[key] then 
-			print("record does not have field: ", key)
+			--print("record does not have field: ", key)
 			return nil;
 		end
 
 		if tostring(record[key]) ~= tostring(value) then
-			print(record[key], "~=", value);
+			--print(record[key], "~=", value);
 			return nil;
 		end
 	end

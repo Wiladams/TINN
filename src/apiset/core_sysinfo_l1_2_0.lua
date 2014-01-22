@@ -259,6 +259,8 @@ VerSetConditionMask(
 
 
 return {
+    Lib = k32Lib,
+    
     SYSTEM_INFO = ffi.typeof("SYSTEM_INFO");
 
 EnumSystemFirmwareTables = k32Lib.EnumSystemFirmwareTables,

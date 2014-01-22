@@ -143,6 +143,8 @@ WaitForDebugEvent(LPDEBUG_EVENT lpDebugEvent, DWORD dwMilliseconds);
 
 
 return {
+    Lib = Lib,
+    
 	ContinueDebugEvent = Lib.ContinueDebugEvent,
 	DebugActiveProcess = Lib.DebugActiveProcess,
 	DebugActiveProcessStop = Lib.DebugActiveProcessStop,

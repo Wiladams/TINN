@@ -79,6 +79,8 @@ TzSpecificLocalTimeToSystemTime(
 
 
 return {
+    Lib = Lib,
+    
 	--EnumDynamicTimeZoneInformation = Lib.EnumDynamicTimeZoneInformation,
 	FileTimeToSystemTime = Lib.FileTimeToSystemTime,
 	GetDynamicTimeZoneInformation = Lib.GetDynamicTimeZoneInformation,

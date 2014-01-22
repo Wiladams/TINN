@@ -1500,6 +1500,9 @@ typedef PSecurityFunctionTableW (* INIT_SECURITY_INTERFACE_W)(void);
 
 
 return {
+    Secur32Lib = secur32lib,
+    AdvApi32Lib = advapiLib,
+    
 --[[
 AcceptSecurityContext
 AcquireCredentialsHandleA

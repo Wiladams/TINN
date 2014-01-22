@@ -2,6 +2,7 @@
 
 local OSProcess = require("OSProcess");
 local Query = require("Query")
+local Application = require("Application")
 
 local function test_query()
 	local res = {};
@@ -34,6 +35,11 @@ local function test_processids()
 	end
 end
 
-test_query();
---test_processids();
-test_processes();
+local function main()
+	--test_query();
+	--test_processids();
+	test_processes();
+end
+
+
+run(main)

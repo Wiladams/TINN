@@ -286,6 +286,8 @@ WriteConsoleOutputW(
 
 
 return {
+    Lib = k32Lib,
+    
 	AttachConsole = k32Lib.AttachConsole,
 	CreateConsoleScreenBuffer = k32Lib.CreateConsoleScreenBuffer,
 	FillConsoleOutputAttribute = k32Lib.FillConsoleOutputAttribute,

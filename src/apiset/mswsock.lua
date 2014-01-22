@@ -249,6 +249,8 @@ INT WSARecvEx(SOCKET s, CHAR *buf, INT len, INT *flags);
 local Lib = ffi.load("mswsock");
 
 return {
+    Lib = Lib,
+    
     AcceptEx = Lib.AcceptEx,
 -- dn_expand
     EnumProtocolsA = Lib.EnumProtocolsA,

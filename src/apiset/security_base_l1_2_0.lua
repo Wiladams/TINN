@@ -828,6 +828,8 @@ SetTokenInformation (
 ]]
 
 return {
+  Lib = advapiLib,
+  
 AccessCheck = advapiLib.AccessCheck,
 AccessCheckAndAuditAlarmW = advapiLib.AccessCheckAndAuditAlarmW,
 AccessCheckByType = advapiLib.AccessCheckByType,

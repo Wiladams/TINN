@@ -69,6 +69,8 @@ BOOL PostQueuedCompletionStatus(
 ]]
 
 return {
+    Lib = Lib,
+    
 	CancelIo = Lib.CancelIo,
 	CancelIoEx = Lib.CancelIoEx,
 	CancelSynchronousIo = Lib.CancelSynchronousIo,

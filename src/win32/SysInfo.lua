@@ -3,7 +3,7 @@
 local ffi = require("ffi");
 
 local core_sysinfo = require("core_sysinfo_l1_2_0");
-local k32Lib = ffi.load("kernel32");
+--local k32Lib = ffi.load("kernel32");
 local errorhandling = require("core_errorhandling_l1_1_1");
 
 

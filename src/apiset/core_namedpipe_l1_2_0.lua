@@ -131,6 +131,9 @@ static const int PIPE_UNLIMITED_INSTANCES    = 255;
 ]]
 
 return {
+    Lib = k32Lib,
+    AdvApi32 = advapiLib,
+    
 	ConnectNamedPipe = k32Lib.ConnectNamedPipe,
 	CreateNamedPipeW = k32Lib.CreateNamedPipeW,
 	CreatePipe = k32Lib.CreatePipe,

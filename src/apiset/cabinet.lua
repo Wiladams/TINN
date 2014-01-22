@@ -637,7 +637,8 @@ end
 
 -- windows 8 only
 return {
-
+    Lib = Lib,
+    
 CloseCompressor = Lib.CloseCompressor,
 CloseDecompressor = Lib.CloseDecompressor,
 Compress = Lib.Compress,

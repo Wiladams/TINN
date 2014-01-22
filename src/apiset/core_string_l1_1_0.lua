@@ -87,6 +87,8 @@ local TEXT = function (quote)
 end
 
 return {
+	Lib = k32Lib,
+	
 	toUnicode = toUnicode,
 	toAnsi = toAnsi,
 

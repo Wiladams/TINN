@@ -143,7 +143,8 @@ LsaOpenPolicy(
 
 
 return {
-
+  Lib = advapiLib,
+  
     LsaClose = advapiLib.LsaClose,
     LsaEnumerateAccountRights = advapiLib.LsaEnumerateAccountRights,
     LsaNtStatusToWinError = advapiLib.LsaNtStatusToWinError,

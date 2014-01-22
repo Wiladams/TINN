@@ -67,6 +67,8 @@ LsaEnumerateTrustedDomains(
 ]]
 
 return {
+    Lib = advapiLib,
+    
 	LookupAccountNameW = advapiLib.LookupAccountNameW,
 	LookupAccountSidW = advapiLib.LookupAccountSidW,
 	LookupPrivilegeDisplayNameW = advapiLib.LookupPrivilegeDisplayNameW,

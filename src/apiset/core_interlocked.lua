@@ -151,6 +151,9 @@ USHORT QueryDepthSList (PSLIST_HEADER ListHead);
 ]]
 
 return {
+    Lib = Lib,
+    NtdllLib = Ntdll,
+    
     InitializeSListHead = Lib.InitializeSListHead,
 --InterlockedCompareExchange = Lib.InterlockedCompareExchange,
 --InterlockedCompareExchange64 = Lib.InterlockedCompareExchange64,

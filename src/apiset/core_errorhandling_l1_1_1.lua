@@ -65,6 +65,8 @@ UnhandledExceptionFilter(struct _EXCEPTION_POINTERS *ExceptionInfo);
 
 
 return {
+	Lib = k32Lib,
+	
 	AddVectoredContinueHandler = k32Lib.AddVectoredContinueHandler,
 	AddVectoredExceptionHandler = k32Lib.AddVectoredExceptionHandler,
 	GetErrorMode = k32Lib.GetErrorMode,

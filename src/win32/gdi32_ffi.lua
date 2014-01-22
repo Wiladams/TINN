@@ -1260,6 +1260,7 @@ COLORREF SetDCPenColor(HDC hdc, COLORREF crColor);
 
 local gdi32_ffi = {
   Lib = Lib,
+  ImgLib = ImgLib,
   
 -- Pixel Types
   PFD_TYPE_RGBA = 0,

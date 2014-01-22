@@ -606,6 +606,8 @@ WriteFileGather(
 
 
 return {
+    Lib = Lib,
+    
 	CompareFileTime = Lib.CompareFileTime,
 	CreateDirectoryA = Lib.CreateDirectoryA,
 	CreateDirectoryW = Lib.CreateDirectoryW,

@@ -48,6 +48,8 @@ GetStdHandle(DWORD nStdHandle);
 ]]
 
 return {
+	Lib = k32Lib,
+	
 	GetCommandLineA = k32Lib.GetCommandLineA,
 	GetCommandLineW = k32Lib.GetCommandLineW,
 	GetCurrentDirectoryA = k32Lib.GetCurrentDirectoryA,

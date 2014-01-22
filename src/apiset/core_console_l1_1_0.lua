@@ -87,6 +87,8 @@ WriteConsoleW(HANDLE hConsoleOutput,
 ]]
 
 return {
+    Lib = k32Lib,
+    
     AllocConsole = k32Lib.AllocConsole,
     GetConsoleCP = k32Lib.GetConsoleCP,
     GetConsoleMode = k32Lib.GetConsoleMode,

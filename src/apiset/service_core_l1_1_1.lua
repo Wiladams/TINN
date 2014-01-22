@@ -175,6 +175,8 @@ StartServiceCtrlDispatcherW(
 
 
 return {
+  Lib = advapiLib,
+  
 	EnumDependentServicesW = advapiLib.EnumDependentServicesW,
 	EnumServicesStatusExA = advapiLib.EnumServicesStatusExA,
 	EnumServicesStatusExW = advapiLib.EnumServicesStatusExW,

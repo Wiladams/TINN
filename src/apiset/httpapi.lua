@@ -1336,6 +1336,8 @@ HttpWaitForDisconnectEx(
 
 
 local httpapi = {
+    Lib = Lib,
+    
 	HttpAddFragmentToCache = Lib.HttpAddFragmentToCache,
 	HttpAddUrl = Lib.HttpAddUrl,
 	HttpAddUrlToUrlGroup = Lib.HttpAddUrlToUrlGroup,
