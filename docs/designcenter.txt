@@ -1,0 +1,52 @@
+TINN Design Center
+
+As a multi-tool, TINN is intended to make doing things with the Windows
+environment fairly easy.  At its very core, TINN provides ffi bindings 
+to numerous Windows functions.  This core binding does not impose or 
+imply any processing model, it just gives you access to the low level 
+functions.
+
+Any developer who desires access to the API calls can pull the ffi bindings
+out and just use them in their own project without any interaction with 
+the rest of TINN.
+
+Then there is the tinn.exe executable program.  The program embeds the low
+level bindings as bytecode that is made available to scripts that are run
+using the tinn.exe program.  The developer can write a Lua script file, and 
+require various tinn modules. If the script is run using the tinn.exe program,
+the modules will be readily available.
+
+Execution Model
+===============
+
+There are various patterns of execution that can be supported by TINN.
+There is one model in particular though that is strongly supported.  The 
+basic execution model is a single threaded application, that has a 
+coroutine scheduler available.  This model is represented by the 'Application'
+module.
+
+
+-- A minimal tinn single threaded application
+local Application = require("Application")
+
+local function main()
+	print("Hello, World!")
+end
+
+run(main)
+
+
+Using the Application module is a requirement for usage of various other 
+modules, such as file and networking IO, as well as timers, and signals.
+
+
+Not Aping Windows
+=================
+
+TINN provides enough low level ffi bindings as well as object wrappers to 
+make it relatively easy to write any style of Windows application the developer
+might like.  As such, the developer can create threads, events, timers, locks,
+etc.  At that level, the developer is programming as if they were simply using C.
+In this environment, the benefit of using TINN is that many of the functions are
+conveniently wrapped, and a consistent calling convention is established for the
+less obvious Windows function calls.
