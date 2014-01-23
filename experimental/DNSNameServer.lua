@@ -150,5 +150,6 @@ end
 function DNSNameServer.A(self, domainToQuery) return self:Query(domainToQuery, ffi.C.DNS_TYPE_A) end
 function DNSNameServer.MX(self, domainToQuery) return self:Query(domainToQuery, ffi.C.DNS_TYPE_MX) end
 function DNSNameServer.CNAME(self, domainToQuery) return self:Query(domainToQuery, ffi.C.DNS_TYPE_CNAME) end
+function DNSNameServer.SRV(self, domainToQuery) return self:Query(domainToQuery, ffi.C.DNS_TYPE_SRV) end
 
 return DNSNameServer
