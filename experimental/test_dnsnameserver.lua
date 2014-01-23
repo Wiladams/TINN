@@ -30,7 +30,8 @@ local domains = {
 }
 
 
-local dnsservername = "209.244.0.3"
+--local dnsservername = "209.244.0.3"
+local dnsservername = "10.211.55.1"
 
 local function queryA()
 	local function queryDomain(name)
@@ -45,8 +46,8 @@ local function queryA()
 	end
 
 	for _, name in ipairs(domains) do 
-		spawn(queryDomain, name)
-		--queryDomain(name)
+		--spawn(queryDomain, name)
+		queryDomain(name)
 	end
 end
 
