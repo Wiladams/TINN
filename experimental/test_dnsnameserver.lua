@@ -30,7 +30,8 @@ local domains = {
 }
 
 
-local dnsservername = "209.244.0.3"
+--local dnsservername = "209.244.0.3"
+local dnsservername = "157.54.10.29" -- MS Corporate
 
 local function queryA()
 	local function queryDomain(name)
