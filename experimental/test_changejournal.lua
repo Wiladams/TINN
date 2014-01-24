@@ -128,7 +128,11 @@ local function main()
     --test_getLatestJournalEntries(journal);
 
 
-    --test_waitForNextEntry(journal);
+    spawn(test_waitForNextEntry, journal);
+
+    print("AFTER test_waitForNextEntry")
+
+    periodic(function() print("tick") end, 1000)
 end
 
 run(main)

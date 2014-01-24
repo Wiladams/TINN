@@ -37,16 +37,14 @@ function Device.init(self, rawhandle)
 end
 
 
-function Device.open(self, devicename, dwDesiredAccess)
+function Device.open(self, devicename, dwDesiredAccess, dwShareMode)
 	local lpFileName = string.format("\\\\.\\%s", devicename);
 	dwDesiredAccess = dwDesiredAccess or bor(ffi.C.GENERIC_READ, ffi.C.GENERIC_WRITE);
-	local dwShareMode = bor(FILE_SHARE_READ, FILE_SHARE_WRITE);
+	dwShareMode = bor(FILE_SHARE_READ, FILE_SHARE_WRITE);
 	local lpSecurityAttributes = nil;
 	local dwCreationDisposition = OPEN_EXISTING;
 	local dwFlagsAndAttributes = FILE_FLAG_OVERLAPPED;
 	local hTemplateFile = nil;
-
---print("Device.open, filename: ", lpFileName)
 
 	local handle = core_file.CreateFileA(
         lpFileName,
@@ -57,10 +55,8 @@ function Device.open(self, devicename, dwDesiredAccess)
         dwFlagsAndAttributes,
      	hTemplateFile);
 
---print("Device.open, handle: ", handle)
 
 	if handle == INVALID_HANDLE_VALUE then
-		print("Device.open, ERROR opening: ", lpFileName, err)
 		return nil, errorhandling.GetLastError();
 	end
 
@@ -83,15 +79,13 @@ end
 
 
 function Device.control(self, dwIoControlCode, lpInBuffer, nInBufferSize, lpOutBuffer, nOutBufferSize)
-	--local lpBytesReturned = ffi.new("DWORD[1]");
 	local lpBytesReturned = nil;
-	local lpOverlapped = self:createOverlapped(lpInBuffer, nInBufferSize);
+	local lpOverlapped = self:createOverlapped(ffi.cast("void *", lpInBuffer), nInBufferSize);
 
---print("Device.control: ", dwIoControlCode)
 
 	local status = core_io.DeviceIoControl(self:getNativeHandle(), 
           dwIoControlCode, 
-          lpInBuffer,
+          ffi.cast("void *", lpInBuffer),
           nInBufferSize,
           lpOutBuffer,
           nOutBufferSize,
@@ -100,7 +94,10 @@ function Device.control(self, dwIoControlCode, lpInBuffer, nInBufferSize, lpOutB
 
 	local err = errorhandling.GetLastError();
 
---print("Device.control, status: ", status, err)
+	-- Error conditions
+	-- status == 1, err == WAIT_TIMEOUT (258)
+	-- status == 0, err == ERROR_IO_PENDING (997)
+	-- status == 0, err == something else
 
 	if status == 0 then
 		if err ~= ERROR_IO_PENDING then
@@ -110,7 +107,6 @@ function Device.control(self, dwIoControlCode, lpInBuffer, nInBufferSize, lpOutB
 
     local key, bytes, ovl = Application:waitForIO(self, lpOverlapped);
 
---print("Device.control, waitForIO: ", key, bytes, ovl)
     return bytes;
 end
 

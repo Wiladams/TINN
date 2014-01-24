@@ -28,7 +28,7 @@ local WSAProtocolInfo_mt = {
 	end,
 }
 
-local WSAProtocolInfo = function(info)
+local function WSAProtocolInfo(info)
 	local obj = {
 		dwServiceFlags1 = info.dwServiceFlags1;
 		--ProviderId = GUID.new(info.ProviderId);
@@ -54,8 +54,7 @@ end
 
 local Network = {}
 
-
-Network.getHostName = function(self, nametype)
+function Network.getHostName(self, nametype)
 	nametype = nametype or ffi.C.ComputerNameDnsFullyQualified
 	local bufflen = 256;
 	local lpBuffer = ffi.new("char[?]", bufflen);
@@ -72,7 +71,7 @@ Network.getHostName = function(self, nametype)
 	return ffi.string(lpBuffer, nSize[0])
 end
 
-Network.GetProtocols = function(self)
+function Network.GetProtocols(self)
 	local results, err = WinSock.WSAEnumProtocols();
 
 	if not results then
@@ -90,7 +89,7 @@ Network.GetProtocols = function(self)
 	return protos;
 end
 
-Network.GetInterfaces = function(self, stype)
+function Network.GetInterfaces(self, stype)
     stype = stype or SOCK_STREAM;
 
     local interfaces = {};
@@ -150,12 +149,12 @@ Network.GetInterfaces = function(self, stype)
     return interfaces;
 end
 
-Network.GetLocalAddress = function(self)
+function Network.GetLocalAddress(self)
 
 	local interfaces = Network:GetInterfaces();
 
 	for _,interface in pairs(interfaces) do
-		if not interface.isloopback then
+		if (not interface.isloopback) and interface.isup then
 			return interface.address
 		end
 	end	

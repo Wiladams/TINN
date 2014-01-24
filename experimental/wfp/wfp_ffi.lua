@@ -2635,6 +2635,7 @@ ffi.cdef[[
 #define FWPM_WEIGHT_RANGE_IKE_EXEMPTIONS   (0xc)
 ]]
 
+--[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // IPsec transform constants.
@@ -2644,6 +2645,7 @@ ffi.cdef[[
 //////////
 // Authentication transform constants
 //////////
+--]]
 
 static const IPSEC_AUTH_TRANSFORM_ID0 IPSEC_AUTH_TRANSFORM_ID_HMAC_MD5_96 =
 {
@@ -2845,7 +2847,7 @@ static const IPSEC_CIPHER_TRANSFORM_ID0 IPSEC_CIPHER_TRANSFORM_ID_GCM_AES_256 =
 
 void WINAPI FwpmFreeMemory0(_Inout_ void** p);
 
-
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for managing the engine.
@@ -2929,8 +2931,9 @@ FwpmSessionDestroyEnumHandle0(
    _In_ HANDLE engineHandle,
    _Inout_ HANDLE enumHandle
    );
+]]
 
-
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for explicit transactions.
@@ -2953,8 +2956,9 @@ FwpmTransactionCommit0(_In_ HANDLE engineHandle);
 DWORD
 WINAPI
 FwpmTransactionAbort0(_In_ HANDLE engineHandle);
+]]
 
-
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for managing providers.
@@ -3064,8 +3068,9 @@ FwpmProviderSubscriptionsGet0(
        FWPM_PROVIDER_SUBSCRIPTION0*** entries,
    _Out_ UINT32* numEntries
    );
+]]
 
-
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for managing provider contexts.
@@ -3080,8 +3085,10 @@ FwpmProviderContextAdd0(
    _In_opt_ PSECURITY_DESCRIPTOR sd,
    _Out_opt_ UINT64* id
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 FwpmProviderContextAdd1(
@@ -3090,9 +3097,11 @@ FwpmProviderContextAdd1(
    _In_opt_ PSECURITY_DESCRIPTOR sd,
    _Out_opt_ UINT64* id
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN8)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN8)
 DWORD
 WINAPI
 FwpmProviderContextAdd2(
@@ -3101,9 +3110,10 @@ FwpmProviderContextAdd2(
    _In_opt_ PSECURITY_DESCRIPTOR sd,
    _Out_opt_ UINT64* id
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
-
+ffi.cdef[[
 DWORD
 WINAPI
 FwpmProviderContextDeleteById0(
@@ -3125,8 +3135,10 @@ FwpmProviderContextGetById0(
    _In_ UINT64 id,
    _Outptr_ FWPM_PROVIDER_CONTEXT0** providerContext
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 FwpmProviderContextGetById1(
@@ -3134,9 +3146,11 @@ FwpmProviderContextGetById1(
    _In_ UINT64 id,
    _Outptr_ FWPM_PROVIDER_CONTEXT1** providerContext
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN8)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN8)
 DWORD
 WINAPI
 FwpmProviderContextGetById2(
@@ -3144,9 +3158,10 @@ FwpmProviderContextGetById2(
    _In_ UINT64 id,
    _Outptr_ FWPM_PROVIDER_CONTEXT2** providerContext
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
-
+ffi.cdef[[
 DWORD
 WINAPI
 FwpmProviderContextGetByKey0(
@@ -3154,8 +3169,10 @@ FwpmProviderContextGetByKey0(
    _In_ const GUID* key,
    _Outptr_ FWPM_PROVIDER_CONTEXT0** providerContext
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 FwpmProviderContextGetByKey1(
@@ -3163,9 +3180,11 @@ FwpmProviderContextGetByKey1(
    _In_ const GUID* key,
    _Outptr_ FWPM_PROVIDER_CONTEXT1** providerContext
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN8)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN8)
 DWORD
 WINAPI
 FwpmProviderContextGetByKey2(
@@ -3173,8 +3192,10 @@ FwpmProviderContextGetByKey2(
    _In_ const GUID* key,
    _Outptr_ FWPM_PROVIDER_CONTEXT2** providerContext
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 FwpmProviderContextCreateEnumHandle0(
@@ -3193,8 +3214,10 @@ FwpmProviderContextEnum0(
       FWPM_PROVIDER_CONTEXT0*** entries,
    _Out_ UINT32* numEntriesReturned
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 FwpmProviderContextEnum1(
@@ -3205,9 +3228,11 @@ FwpmProviderContextEnum1(
       FWPM_PROVIDER_CONTEXT1*** entries,
    _Out_ UINT32* numEntriesReturned
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN8)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN8)
 DWORD
 WINAPI
 FwpmProviderContextEnum2(
@@ -3218,8 +3243,10 @@ FwpmProviderContextEnum2(
       FWPM_PROVIDER_CONTEXT2*** entries,
    _Out_ UINT32* numEntriesReturned
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 FwpmProviderContextDestroyEnumHandle0(
@@ -3282,8 +3309,9 @@ FwpmProviderContextSubscriptionsGet0(
        FWPM_PROVIDER_CONTEXT_SUBSCRIPTION0*** entries,
    _Out_ UINT32* numEntries
    );
+]]
 
-
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for managing sub-layers.
@@ -3393,8 +3421,9 @@ FwpmSubLayerSubscriptionsGet0(
        FWPM_SUBLAYER_SUBSCRIPTION0*** entries,
    _Out_ UINT32* numEntries
    );
+]]
 
-
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for managing layers.
@@ -3466,8 +3495,9 @@ FwpmLayerSetSecurityInfoByKey0(
    _In_opt_ const ACL* dacl,
    _In_opt_ const ACL* sacl
    );
+]]
 
-
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for managing callouts.
@@ -3593,8 +3623,9 @@ FwpmCalloutSubscriptionsGet0(
        FWPM_CALLOUT_SUBSCRIPTION0*** entries,
    _Out_ UINT32* numEntries
    );
+]]
 
-
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for managing filters.
@@ -3727,8 +3758,9 @@ FwpmGetAppIdFromFileName0(
    _In_ PCWSTR fileName,
    _Outptr_ FWP_BYTE_BLOB** appId
    );
+]]
 
-
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Helper functions for configuring an IPsec tunnel.
@@ -3737,10 +3769,10 @@ FwpmGetAppIdFromFileName0(
 
 // Create a point-to-point tunnel.
 #define FWPM_TUNNEL_FLAG_POINT_TO_POINT (0x00000001)
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 // Enable Virtual interface based IPsec tunnel mode.
 #define FWPM_TUNNEL_FLAG_ENABLE_VIRTUAL_IF_TUNNELING (0x00000002)
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
 
 DWORD
 WINAPI
@@ -3754,8 +3786,10 @@ FwpmIPsecTunnelAdd0(
       const FWPM_FILTER_CONDITION0* filterConditions,
    _In_opt_ PSECURITY_DESCRIPTOR sd
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 FwpmIPsecTunnelAdd1(
@@ -3769,9 +3803,11 @@ FwpmIPsecTunnelAdd1(
    _In_opt_ const GUID* keyModKey,
    _In_opt_ PSECURITY_DESCRIPTOR sd
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN8)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN8)
 DWORD
 WINAPI
 FwpmIPsecTunnelAdd2(
@@ -3785,16 +3821,19 @@ FwpmIPsecTunnelAdd2(
    _In_opt_ const GUID* keyModKey,
    _In_opt_ PSECURITY_DESCRIPTOR sd
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 FwpmIPsecTunnelDeleteByKey0(
    _In_ HANDLE engineHandle,
    _In_ const GUID* key
    );
+]]
 
-
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for managing IPsec.
@@ -3808,16 +3847,20 @@ IPsecGetStatistics0(
    _In_ HANDLE engineHandle,
    _Out_ IPSEC_STATISTICS0* ipsecStatistics
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 IPsecGetStatistics1(
    _In_ HANDLE engineHandle,
    _Out_ IPSEC_STATISTICS1* ipsecStatistics
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 IPsecSaContextCreate0(
@@ -3826,8 +3869,10 @@ IPsecSaContextCreate0(
    _Out_opt_ UINT64* inboundFilterId,
    _Out_ UINT64* id
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 IPsecSaContextCreate1(
@@ -3837,8 +3882,10 @@ IPsecSaContextCreate1(
    _Out_opt_ UINT64* inboundFilterId,
    _Out_ UINT64* id
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 IPsecSaContextDeleteById0(
@@ -3853,8 +3900,10 @@ IPsecSaContextGetById0(
    _In_ UINT64 id,
    _Outptr_ IPSEC_SA_CONTEXT0** saContext
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 IPsecSaContextGetById1(
@@ -3862,8 +3911,10 @@ IPsecSaContextGetById1(
    _In_ UINT64 id,
    _Outptr_ IPSEC_SA_CONTEXT1** saContext
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 IPsecSaContextGetSpi0(
@@ -3872,8 +3923,10 @@ IPsecSaContextGetSpi0(
    _In_ const IPSEC_GETSPI0* getSpi,
    _Out_ IPSEC_SA_SPI* inboundSpi
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 IPsecSaContextGetSpi1(
@@ -3891,8 +3944,10 @@ IPsecSaContextSetSpi0(
    _In_ const IPSEC_GETSPI1* getSpi,
    _In_ IPSEC_SA_SPI inboundSpi
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 IPsecSaContextAddInbound0(
@@ -3908,8 +3963,10 @@ IPsecSaContextAddOutbound0(
    _In_ UINT64 id,
    _In_ const IPSEC_SA_BUNDLE0* outboundBundle
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 IPsecSaContextAddInbound1(
@@ -3925,16 +3982,20 @@ IPsecSaContextAddOutbound1(
    _In_ UINT64 id,
    _In_ const IPSEC_SA_BUNDLE1* outboundBundle
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 IPsecSaContextExpire0(
    _In_ HANDLE engineHandle,
    _In_ UINT64 id
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 // Flags indicating the specific field in the IPSEC_SA_CONTEXT data type that is
 // being updated.
 //
@@ -3953,8 +4014,10 @@ IPsecSaContextUpdate0(
    _In_ UINT64 flags,
    _In_ const IPSEC_SA_CONTEXT1* newValues
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 IPsecSaContextCreateEnumHandle0(
@@ -3972,8 +4035,10 @@ IPsecSaContextEnum0(
    _Outptr_result_buffer_(*numEntriesReturned) IPSEC_SA_CONTEXT0*** entries,
    _Out_ UINT32* numEntriesReturned
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 IPsecSaContextEnum1(
@@ -3983,17 +4048,20 @@ IPsecSaContextEnum1(
    _Outptr_result_buffer_(*numEntriesReturned) IPSEC_SA_CONTEXT1*** entries,
    _Out_ UINT32* numEntriesReturned
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 IPsecSaContextDestroyEnumHandle0(
    _In_ HANDLE engineHandle,
    _Inout_ HANDLE enumHandle
    );
+]]
 
-
-#if (NTDDI_VERSION >= NTDDI_WIN8)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN8)
 
 typedef void (CALLBACK *IPSEC_SA_CONTEXT_CALLBACK0)(
   _Inout_ void *context,
@@ -4026,9 +4094,10 @@ IPsecSaContextSubscriptionsGet0(
    _Out_ UINT32* numEntries
    );
 
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
-
+ffi.cdef[[
 DWORD
 WINAPI
 IPsecSaCreateEnumHandle0(
@@ -4046,7 +4115,9 @@ IPsecSaEnum0(
    _Outptr_result_buffer_(*numEntriesReturned) IPSEC_SA_DETAILS0*** entries,
    _Out_ UINT32* numEntriesReturned
    );
+]]
 
+ffi.cdef[[
 #if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
@@ -4058,7 +4129,9 @@ IPsecSaEnum1(
    _Out_ UINT32* numEntriesReturned
    );
 #endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 IPsecSaDestroyEnumHandle0(
@@ -4088,8 +4161,10 @@ IPsecSaDbSetSecurityInfo0(
    _In_opt_ const ACL* dacl,
    _In_opt_ const ACL* sacl
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -4152,16 +4227,17 @@ IPsecDospSetSecurityInfo0(
    _In_opt_ const ACL* sacl
    );
 
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
-
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for managing key managers.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#if (NTDDI_VERSION >= NTDDI_WIN8)
+//#if (NTDDI_VERSION >= NTDDI_WIN8)
 
 typedef void ( CALLBACK * IPSEC_KEY_MANAGER_KEY_DICTATION_CHECK0)(
                              _In_ const IKEEXT_TRAFFIC0* ikeTraffic,
@@ -4237,8 +4313,10 @@ IPsecKeyManagerSetSecurityInfoByKey0(
    _In_opt_ const ACL* sacl
    );
 
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for managing IKE, Authip.
@@ -4251,7 +4329,9 @@ IkeextGetStatistics0(
    _In_ HANDLE engineHandle,
    _Out_ IKEEXT_STATISTICS0* ikeextStatistics
    );
+]]
 
+ffi.cdef[[
 #if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
@@ -4259,8 +4339,10 @@ IkeextGetStatistics1(
    _In_ HANDLE engineHandle,
    _Out_ IKEEXT_STATISTICS1* ikeextStatistics
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 IkeextSaDeleteById0(
@@ -4275,7 +4357,9 @@ IkeextSaGetById0(
    _In_ UINT64 id,
    _Outptr_ IKEEXT_SA_DETAILS0** sa
    );
+]]
 
+ffi.cdef[[
 #if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
@@ -4286,7 +4370,9 @@ IkeextSaGetById1(
    _Outptr_ IKEEXT_SA_DETAILS1** sa
    );
 #endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 #if (NTDDI_VERSION >= NTDDI_WIN8)
 DWORD
 WINAPI
@@ -4296,8 +4382,10 @@ IkeextSaGetById2(
    _In_opt_ GUID* saLookupContext,
    _Outptr_ IKEEXT_SA_DETAILS2** sa
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 IkeextSaCreateEnumHandle0(
@@ -4315,8 +4403,10 @@ IkeextSaEnum0(
    _Outptr_result_buffer_(*numEntriesReturned) IKEEXT_SA_DETAILS0*** entries,
    _Out_ UINT32* numEntriesReturned
    );
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
 IkeextSaEnum1(
@@ -4326,9 +4416,11 @@ IkeextSaEnum1(
    _Outptr_result_buffer_(*numEntriesReturned) IKEEXT_SA_DETAILS1*** entries,
    _Out_ UINT32* numEntriesReturned
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN8)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN8)
 DWORD
 WINAPI
 IkeextSaEnum2(
@@ -4338,9 +4430,10 @@ IkeextSaEnum2(
    _Outptr_result_buffer_(*numEntriesReturned) IKEEXT_SA_DETAILS2*** entries,
    _Out_ UINT32* numEntriesReturned
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
-
+ffi.cdef[[
 DWORD
 WINAPI
 IkeextSaDestroyEnumHandle0(
@@ -4370,7 +4463,9 @@ IkeextSaDbSetSecurityInfo0(
    _In_opt_ const ACL* dacl,
    _In_opt_ const ACL* sacl
    );
+]]
 
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for diagnostics.
@@ -4394,7 +4489,9 @@ FwpmNetEventEnum0(
    _Outptr_result_buffer_(*numEntriesReturned) FWPM_NET_EVENT0*** entries,
    _Out_ UINT32* numEntriesReturned
    );
+]]
 
+ffi.cdef[[
 #if (NTDDI_VERSION >= NTDDI_WIN7)
 DWORD
 WINAPI
@@ -4405,9 +4502,11 @@ FwpmNetEventEnum1(
    _Outptr_result_buffer_(*numEntriesReturned) FWPM_NET_EVENT1*** entries,
    _Out_ UINT32* numEntriesReturned
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN8)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN8)
 DWORD
 WINAPI
 FwpmNetEventEnum2(
@@ -4417,8 +4516,10 @@ FwpmNetEventEnum2(
    _Outptr_result_buffer_(*numEntriesReturned) FWPM_NET_EVENT2*** entries,
    _Out_ UINT32* numEntriesReturned
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
+ffi.cdef[[
 DWORD
 WINAPI
 FwpmNetEventDestroyEnumHandle0(
@@ -4448,7 +4549,11 @@ FwpmNetEventsSetSecurityInfo0(
    _In_opt_ const ACL* dacl,
    _In_opt_ const ACL* sacl
    );
-#if (NTDDI_VERSION >= NTDDI_WIN7)
+]]
+
+
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN7)
 
 typedef void (CALLBACK *FWPM_NET_EVENT_CALLBACK0)(
                            _Inout_ void* context,
@@ -4480,8 +4585,10 @@ FwpmNetEventSubscriptionsGet0(
        FWPM_NET_EVENT_SUBSCRIPTION0*** entries,
    _Out_ UINT32* numEntries
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 #if (NTDDI_VERSION >= NTDDI_WIN8)
 
 typedef void (CALLBACK *FWPM_NET_EVENT_CALLBACK1)(
@@ -4499,9 +4606,10 @@ FwpmNetEventSubscribe1(
    _Out_ HANDLE* eventsHandle
    );
 
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
-
+ffi.cdef[[
 #if (NTDDI_VERSION >= NTDDI_WIN7)
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4540,7 +4648,9 @@ FwpmSystemPortsUnsubscribe0(
    );
 
 #endif // (NTDDI_VERSION >= NTDDI_WIN7)
+]]
 
+ffi.cdef[[
 #if (NTDDI_VERSION >= NTDDI_WIN8)
 
 DWORD
@@ -4575,9 +4685,10 @@ FwpmConnectionDestroyEnumHandle0(
    _In_ HANDLE engineHandle,
    _In_ HANDLE enumHandle
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
-
+ffi.cdef[[
 DWORD
 WINAPI
 FwpmConnectionGetSecurityInfo0(
@@ -4600,9 +4711,10 @@ FwpmConnectionSetSecurityInfo0(
    _In_opt_ const ACL* dacl,
    _In_opt_ const ACL* sacl
    );
+]]
 
-
-#if (NTDDI_VERSION >= NTDDI_WIN8)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN8)
 
 typedef void (CALLBACK *FWPM_CONNECTION_CALLBACK0)(
    _Inout_ void* context,
@@ -4635,7 +4747,9 @@ FwpmConnectionSubscriptionsGet0(
        FWPM_CONNECTION_SUBSCRIPTION0*** entries,
    _Out_ UINT32* numEntries
    );
+]]
 
+ffi.cdef[[
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Functions for vSwitch events.
@@ -4664,9 +4778,11 @@ FwpmvSwitchEventUnsubscribe0(
    _Inout_ HANDLE subscriptionHandle
    );
 
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]
 
-#if (NTDDI_VERSION >= NTDDI_WIN8)
+ffi.cdef[[
+//#if (NTDDI_VERSION >= NTDDI_WIN8)
 DWORD
 WINAPI
 FwpmvSwitchEventsGetSecurityInfo0(
@@ -4689,11 +4805,5 @@ FwpmvSwitchEventsSetSecurityInfo0(
    _In_opt_ const ACL* dacl,
    _In_opt_ const ACL* sacl
    );
-#endif // (NTDDI_VERSION >= NTDDI_WIN8)
-
-
-#endif // FWPMX_H
-#endif // GUID_DEFS_ONLY
-#endif // (NTDDI_VERSION >= NTDDI_WIN6)
-
-
+//#endif // (NTDDI_VERSION >= NTDDI_WIN8)
+]]

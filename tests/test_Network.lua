@@ -5,17 +5,36 @@
 	connect to.
 --]]
 local Network = require("Network")
+local ws2_32 = require("ws2_32")
 
-local interfaces = Network:GetInterfaces();
 
-local printTable = nil
-printTable = function(tbl)
+local interfaces,err = Network:GetInterfaces(SOCK_DGRAM);
+print("interfaces: ", interfaces, err)
+
+local function printTable(tbl, indent)
+	indent = indent or ""
+
 	for k,v in pairs(tbl) do
-		print(k,v)
-		if type(v) == "table" then
-			printTable(v)
+		if type(v) == 'table' then
+			print("interface", k)
+			printTable(v, indent..'  ')
+		else
+			io.write(indent,k,'  ',tostring(v),'\n')
 		end
 	end
 end
 
-printTable(interfaces)
+local function getFirst(interfaces)
+	for k,v in pairs(interfaces) do
+		if v.isloopback == false and
+			v.isup then
+			return v.address;
+		end
+	end
+end
+
+
+--printTable(interfaces)
+
+print("local: ", Network:GetLocalAddress()
+

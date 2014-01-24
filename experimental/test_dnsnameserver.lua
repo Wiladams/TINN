@@ -31,7 +31,11 @@ local domains = {
 
 
 --local dnsservername = "209.244.0.3"
+<<<<<<< HEAD
 local dnsservername = "10.211.55.1"
+=======
+local dnsservername = "157.54.10.29" -- MS Corporate
+>>>>>>> 763830638d6995d8d6f1b9748ecb4c55e4bd59c2
 
 local function queryA()
 	local function queryDomain(name)
