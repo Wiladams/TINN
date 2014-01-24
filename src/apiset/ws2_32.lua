@@ -290,7 +290,7 @@ SIO_QUERY_TARGET_PNP_HANDLE   = _WSAIOR(IOC_WS2,24);
 --
 -- New WSAIoctl Options
 --
-local SIO_RCVALL           = _WSAIOW(IOC_VENDOR,1);
+SIO_RCVALL           = _WSAIOW(IOC_VENDOR,1);
 local SIO_RCVALL_MCAST     = _WSAIOW(IOC_VENDOR,2);
 local SIO_RCVALL_IGMPMCAST = _WSAIOW(IOC_VENDOR,3);
 SIO_KEEPALIVE_VALS   = _WSAIOW(IOC_VENDOR,4);
@@ -1199,7 +1199,8 @@ return {
     socktypes = socktypes,
     protocols = protocols,
 
-
+    SIO_RCVALL = SIO_RCVALL,
+    
     __WSAFDIsSet = Lib.__WSAFDIsSet,
 
     accept = Lib.accept,

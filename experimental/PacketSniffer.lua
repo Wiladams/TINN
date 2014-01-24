@@ -23,15 +23,21 @@ function PacketSniffer.init(self, addr, addrlen)
 		return nil, err
 	end
 
-	success, err = socket:bind(addr,addrlen)
+	local success, err = socket:bind(addr,addrlen)
 	if not success then
 		return nil, err
 	end
 
-	self:setPromiscuous(socket)
+	local success, err = self:setPromiscuous(socket)
+
+	if not success then
+		return nil, err
+	end
+
 
 	local obj = {
 		Socket = socket,
+		PacketBuffer = ffi.new("uint8_t[64*1024]")
 	}
 	setmetatable(obj, PacketSniffer_mt)
 
@@ -52,16 +58,34 @@ end
 function PacketSniffer.setPromiscuous(self, socket)
 	local outbuffsize = 0;
 	local pbytesreturned = ffi.new("int32_t[1]")
+	local lpvInBuffer = ffi.new("DWORD[1]", 1)
+	local cbInBuffer = ffi.sizeof(lpvInBuffer)
 
 	local success, err = WinSock.WSAIoctl(
 		socket:getNativeSocket(), 
-		SIO_RCVALL, 
-		nil, 
-		0,
+		ws2_32.SIO_RCVALL, 
+		lpvInBuffer, 
+		cbInBuffer,
 		nil, 
 		outbuffsize,
 		pbytesreturned);
 
+	return success, err
+end
+
+function PacketSniffer.packets(self)
+	local function closure()
+		local bytesreceived, err = self.Socket:receive(self.PacketBuffer, 65536)
+
+		if not bytesreceived then
+			print("packets err: ", err)
+			return nil, err;
+		end
+
+		return bytesreceived, self.PacketBuffer;
+	end
+
+	return closure
 end
 
 return PacketSniffer
