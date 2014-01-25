@@ -7,6 +7,7 @@ local ws2_32 = require("ws2_32")
 local IPUtils = require("IPUtils")
 local bit = require("bit")
 local bswap = bit.bswap;
+local JSON = require("dkjson")
 
 local function printIPV4Header(hdr)
 --[[
@@ -31,12 +32,10 @@ local function IPV4Header_tostring(hdr)
 	local dst = IN_ADDR();
     dst.S_addr = hdr.ip_destaddr
 
-	return string.format("{PROTO='%s', LEN='%d', SRC=,%s', DST='%s'}", 
-		ws2_32.protocols[hdr.ip_protocol], 
-		IPUtils.ntohs(hdr.ip_total_length),
-		src,
-		dst
-		);
+	return {PROTO=ws2_32.protocols[hdr.ip_protocol], 
+		LEN=IPUtils.ntohs(hdr.ip_total_length), 
+		SRC=tostring(src), 
+		DST=tostring(dst)}
 end
 
 --[[
@@ -85,8 +84,8 @@ local function main()
 	for bytecount, buff in sniffer:packets() do
 		--print(bytecount, buff)
 		local iphead = ffi.cast("IPV4_HDR *", buff)
-		print(IPV4Header_tostring(iphead))
 		if (iphead.ip_protocol == IPPROTO_TCP) then
+			print(JSON.encode(IPV4Header_tostring(iphead)))
 			local offset = iphead.ip_header_len*4;
 			local tcphdr = ffi.cast("TCP_HDR *", buff + offset)
 			--print("",offset)
