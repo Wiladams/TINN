@@ -97,21 +97,21 @@ FILE_DEVICE_PMI                 = 0x00000045;
 -- 2048-4095 are reserved for customers.
 --
 
-local CTL_CODE = function( DeviceType, Function, Method, Access ) 
+local function CTL_CODE( DeviceType, Function, Method, Access ) 
 	return bor(lshift(DeviceType, 16), lshift(Access, 14), lshift(Function, 2), Method);
 end
 
 --
 -- Macro to extract device type out of the device io control code
 --
-DEVICE_TYPE_FROM_CTL_CODE = function(ctrlCode)
+function DEVICE_TYPE_FROM_CTL_CODE(ctrlCode)
 	return rshift(band(ctrlCode, 0xffff0000), 16);
 end
 
 --
 -- Macro to extract buffering method out of the device io control code
 --
-METHOD_FROM_CTL_CODE = function(ctrlCode)
+function METHOD_FROM_CTL_CODE(ctrlCode)
 	return (band(ctrlCode, 3));
 end
 
@@ -2775,4 +2775,6 @@ FILE_TYPE_NOTIFICATION_GUID_CRASHDUMP_FILE = DEFINE_GUID( "FILE_TYPE_NOTIFICATIO
 
 --#endif /* _WIN32_WINNT >= 0x0601 */
 
-
+return {
+	CTL_CODE = CTL_CODE,
+}

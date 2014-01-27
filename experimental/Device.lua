@@ -13,12 +13,12 @@ local IOOps = require("IOOps")
 local FsHandles = require("FsHandles");
 local errorhandling = require("core_errorhandling_l1_1_1");
 local WinBase = require("WinBase");
-
+local SetupApi = require("SetupApi")
 
 local Device = {}
 setmetatable(Device, {
 	__call = function(self, ...)
-		return self:open(...)
+		return self:create(...)
 	end,
 })
 local Device_mt = {
@@ -37,8 +37,7 @@ function Device.init(self, rawhandle)
 end
 
 
-function Device.open(self, devicename, dwDesiredAccess, dwShareMode)
-	local lpFileName = string.format("\\\\.\\%s", devicename);
+function Device.create(self, lpFileName, dwDesiredAccess, dwShareMode)
 	dwDesiredAccess = dwDesiredAccess or bor(ffi.C.GENERIC_READ, ffi.C.GENERIC_WRITE);
 	dwShareMode = bor(FILE_SHARE_READ, FILE_SHARE_WRITE);
 	local lpSecurityAttributes = nil;
@@ -61,6 +60,12 @@ function Device.open(self, devicename, dwDesiredAccess, dwShareMode)
 	end
 
 	return self:init(handle)
+end
+
+function Device.openName(self, devicename, dwDesiredAccess, dwShareMode)
+	local lpFileName = string.format("\\\\.\\%s", devicename);
+
+	return self:openDeviceFile(lpFileName)
 end
 
 function Device.getNativeHandle(self)
@@ -109,6 +114,8 @@ function Device.control(self, dwIoControlCode, lpInBuffer, nInBufferSize, lpOutB
 
     return bytes;
 end
+
+
 
 
 return Device

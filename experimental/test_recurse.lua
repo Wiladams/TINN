@@ -1,5 +1,7 @@
 -- test_recurse.lua
+local ffi = require("ffi")
 
+local function test_loops()
 local function looper(count)
 print("looper: ", count)
 
@@ -25,3 +27,18 @@ print("looper2: ", count)
 end
 
 looper2(5)
+
+end
+
+require("WTypes")
+ffi.cdef[[
+static const int ANYSIZE_ARRAY = 1;       
+
+#pragma pack(1)
+typedef struct {
+	int32_t foo;
+	int8_t  bar[ANYSIZE_ARRAY];
+} foobar;
+]]
+
+print("Sizeof: ", ffi.sizeof("foobar"))

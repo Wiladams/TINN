@@ -54,6 +54,7 @@ ERROR_LOGON_FAILURE             = 1326;
 
 ERROR_LOGON_TYPE_NOT_GRANTED    = 1385;
 
+ERROR_INVALID_USER_BUFFER       = 1784;
 
 ffi.cdef[[
 static const int FACILITY_WIN32  = 7;

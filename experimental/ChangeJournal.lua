@@ -63,7 +63,7 @@ end
 
 
 ChangeJournal.open = function(self, driveLetter)
-	local device, err = Device(driveLetter)
+	local device, err = Device:openName(driveLetter)
 
 print("ChangeJournal.open, device: ", device, err)
 

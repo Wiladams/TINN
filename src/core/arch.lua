@@ -26,4 +26,12 @@ function arch.pointerToString(instance)
 	return nil;
 end
 
+function arch.fieldAddress(astruct, fieldname)
+	local structtype = ffi.typeof(astruct);
+	local offset = ffi.offsetof(structtype, fieldname);
+	local structptr = ffi.cast("uint8_t *", astruct); 
+	
+	return structptr + offset;
+end
+
 return arch;

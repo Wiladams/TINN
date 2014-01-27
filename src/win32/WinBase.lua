@@ -461,10 +461,73 @@ typedef struct _REASON_CONTEXT {
 } REASON_CONTEXT, *PREASON_CONTEXT;
 ]]
 
+ffi.cdef[[
+/* Local Memory Flags */
+static const int LMEM_FIXED         = 0x0000;
+static const int LMEM_MOVEABLE      = 0x0002;
+static const int LMEM_NOCOMPACT     = 0x0010;
+static const int LMEM_NODISCARD     = 0x0020;
+static const int LMEM_ZEROINIT      = 0x0040;
+static const int LMEM_MODIFY        = 0x0080;
+static const int LMEM_DISCARDABLE   = 0x0F00;
+static const int LMEM_VALID_FLAGS   = 0x0F72;
+static const int LMEM_INVALID_HANDLE= 0x8000;
+
+static const int LHND                =(LMEM_MOVEABLE | LMEM_ZEROINIT);
+static const int LPTR                =(LMEM_FIXED | LMEM_ZEROINIT);
+
+static const int NONZEROLHND         =(LMEM_MOVEABLE);
+static const int NONZEROLPTR         =(LMEM_FIXED);
+
+HLOCAL
+LocalAlloc(
+    UINT uFlags,
+    SIZE_T uBytes);
+
+HLOCAL
+LocalReAlloc(
+    HLOCAL hMem,
+    SIZE_T uBytes,
+    UINT uFlags);
+
+LPVOID
+LocalLock(
+    HLOCAL hMem);
+
+UINT
+LocalFlags(HLOCAL hMem);
+
+HLOCAL
+LocalFree(HLOCAL hMem);
+
+HLOCAL
+LocalHandle(LPCVOID pMem);
+
+BOOL
+LocalUnlock(HLOCAL hMem);
+
+SIZE_T
+LocalShrink(
+    HLOCAL hMem,
+    UINT cbNewSize);
+
+SIZE_T
+LocalCompact(UINT uMinFree);
+
+SIZE_T
+LocalSize(HLOCAL hMem);
+
+]]
+
+local k32Lib = ffi.load("kernel32")
 
 return {
     Lib = advapiLib,
-    
+    k32Lib = k32Lib,
+        
     CreateProcessWithLogonW = advapiLib.CreateProcessWithLogonW,
     CreateProcessWithTokenW = advapiLib.CreateProcessWithTokenW,
+
+    LocalAlloc = k32Lib.LocalAlloc,
+    LocalFree = k32Lib.LocalFree,
 }
