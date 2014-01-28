@@ -1867,7 +1867,24 @@ static const int PROCESSOR_ARCHITECTURE_IA32_ON_WIN64   = 10;
 static const int PROCESSOR_ARCHITECTURE_UNKNOWN = 0xFFFF;
 ]]
 
-
+-- system registry data types
+ffi.cdef[[
+static const int REG_NONE                  =  ( 0 );   // No value type
+static const int REG_SZ                    =  ( 1 );   // Unicode nul terminated string
+static const int REG_EXPAND_SZ             =  ( 2 );   // Unicode nul terminated string
+                                            // (with environment variable references)
+static const int REG_BINARY                =  ( 3 );   // Free form binary
+static const int REG_DWORD                 =  ( 4 );   // 32-bit number
+static const int REG_DWORD_LITTLE_ENDIAN   =  ( 4 );   // 32-bit number (same as REG_DWORD)
+static const int REG_DWORD_BIG_ENDIAN      =  ( 5 );   // 32-bit number
+static const int REG_LINK                  =  ( 6 );   // Symbolic Link (unicode)
+static const int REG_MULTI_SZ              =  ( 7 );   // Multiple Unicode strings
+static const int REG_RESOURCE_LIST         =  ( 8 );   // Resource list in the resource map
+static const int REG_FULL_RESOURCE_DESCRIPTOR =( 9 );  // Resource list in the hardware description
+static const int REG_RESOURCE_REQUIREMENTS_LIST =( 10 );
+static const int REG_QWORD                 =  ( 11 );  // 64-bit number
+static const int REG_QWORD_LITTLE_ENDIAN   =  ( 11 );  // 64-bit number (same as REG_QWORD)
+]]
 
 return {
     StandardRights = ffi.new("StandardRights");

@@ -5,7 +5,7 @@ local band = bit.band;
 
 local errorhandling = require("core_errorhandling_l1_1_1");
 local SetupApi = require("SetupApi")
-
+local WinNT = require("WinNT")
 
 
 local DeviceRecordSet = {}
@@ -62,7 +62,7 @@ function DeviceRecordSet.getRegistryValue(self, key, idx)
 
 	if res == 0 then
 		local err = errorhandling.GetLastError()
-		print("after SetupDiEnumDeviceInfo, ERROR: ", err)
+		--print("after SetupDiEnumDeviceInfo, ERROR: ", err)
 		return nil, err;
 	end
 
@@ -86,8 +86,13 @@ function DeviceRecordSet.getRegistryValue(self, key, idx)
 	end
 
 	--print("TYPE: ", regDataType[0])
+	if (regDataType[0] == 1) or (regDataType[0] == 7) then
+		return ffi.string(buffer, pbuffersize[0]-1)
+	elseif regDataType[0] == ffi.C.REG_DWORD_LITTLE_ENDIAN then
+		return ffi.cast("DWORD *", buffer)[0]
+	end
 
-	return ffi.string(buffer, pbuffersize[0]-1)
+	return nil;
 end
 
 
@@ -96,26 +101,23 @@ function DeviceRecordSet.devices(self, fields)
 		ffi.C.SPDRP_DEVICEDESC,
 	}
 
-	local idx = 0;
 	local function closure(fields, idx)
 		local res = {}
 
 		local count = 0;
-		for _, key in ipairs(fields) do
+		for _it, key in ipairs(fields) do
 			local value, err = self:getRegistryValue(key, idx)
-			--print(value)
 			if value then
 				count = count + 1;
 				res[tostring(key)] = value;
 			end
 		end
 
-		idx = idx + 1
 		if count == 0 then
 			return nil;
 		end
-
-		return res;
+				
+		return idx+1, res;
 	end
 
 	return closure, fields, 0
