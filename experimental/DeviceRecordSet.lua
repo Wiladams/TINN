@@ -6,7 +6,7 @@ local band = bit.band;
 local errorhandling = require("core_errorhandling_l1_1_1");
 local SetupApi = require("SetupApi")
 local WinNT = require("WinNT")
-
+local iterators = require("iterators")
 
 local DeviceRecordSet = {}
 setmetatable(DeviceRecordSet, {
@@ -21,8 +21,6 @@ local DeviceRecordSet_mt = {
 
 
 function DeviceRecordSet.init(self, rawhandle)
-	print("init: ", rawhandle)
-
 	local obj = {
 		Handle = rawhandle,
 	}
@@ -31,11 +29,11 @@ function DeviceRecordSet.init(self, rawhandle)
 	return obj;
 end
 
-function DeviceRecordSet.create(self, Flags)
+function DeviceRecordSet.create(self, Flags, ClassGuid)
 	Flags = Flags or bor(ffi.C.DIGCF_PRESENT, ffi.C.DIGCF_ALLCLASSES)
 
 	local rawhandle = SetupApi.SetupDiGetClassDevs(
-		nil, 
+		ClassGuid, 
         nil, 
         nil, 
         Flags);
@@ -86,8 +84,14 @@ function DeviceRecordSet.getRegistryValue(self, key, idx)
 	end
 
 	--print("TYPE: ", regDataType[0])
-	if (regDataType[0] == 1) or (regDataType[0] == 7) then
+	if (regDataType[0] == ffi.C.REG_SZ) then
 		return ffi.string(buffer, pbuffersize[0]-1)
+	elseif regDataType[0] == ffi.C.REG_MULTI_SZ then
+		local res = {}
+		for _,name in iterators.mstrziter(buffer, pbuffersize[0]) do
+			table.insert(res, name)
+		end
+		return res;
 	elseif regDataType[0] == ffi.C.REG_DWORD_LITTLE_ENDIAN then
 		return ffi.cast("DWORD *", buffer)[0]
 	end
@@ -98,18 +102,27 @@ end
 
 function DeviceRecordSet.devices(self, fields)
 	fields = fields or {
-		ffi.C.SPDRP_DEVICEDESC,
+		{ffi.C.SPDRP_DEVICEDESC, "description"},
+		{ffi.C.SPDRP_MFG, "manufacturer"},
+		{ffi.C.SPDRP_DEVTYPE, "devicetype"},
+		{ffi.C.SPDRP_CLASS, "class"},
+		{ffi.C.SPDRP_ENUMERATOR_NAME, "enumerator"},
+		{ffi.C.SPDRP_FRIENDLYNAME, "friendlyname"},
+		{ffi.C.SPDRP_LOCATION_INFORMATION , "locationinfo"},
+		{ffi.C.SPDRP_LOCATION_PATHS, "locationpaths"},
+		{ffi.C.SPDRP_PHYSICAL_DEVICE_OBJECT_NAME, "objectname"},
+		{ffi.C.SPDRP_SERVICE, "service"},
 	}
 
 	local function closure(fields, idx)
 		local res = {}
 
 		local count = 0;
-		for _it, key in ipairs(fields) do
-			local value, err = self:getRegistryValue(key, idx)
+		for _it, field in ipairs(fields) do
+			local value, err = self:getRegistryValue(field[1], idx)
 			if value then
 				count = count + 1;
-				res[tostring(key)] = value;
+				res[field[2]] = value;
 			end
 		end
 
@@ -121,6 +134,23 @@ function DeviceRecordSet.devices(self, fields)
 	end
 
 	return closure, fields, 0
+end
+
+function DeviceRecordSet.interfaces(self, classguid)
+		did = ffi.new("SP_DEVICE_INTERFACE_DATA");
+		did.cbSize = ffi.sizeof(did);
+
+	local function closure(params, idx)
+		ffi.fill(did, ffi.sizeof(did), 0)
+		
+		local res = SetupApi.SetupDiEnumDeviceInterfaces(self:getNativeHandle(),
+			nil,
+			classguid,
+			idx,
+			did)
+	end
+
+	return closure, classguid, 0
 end
 
 return DeviceRecordSet

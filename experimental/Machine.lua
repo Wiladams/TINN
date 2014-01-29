@@ -23,7 +23,7 @@ function Machine.Devices.DOSDeviceIterator(self, lpDeviceName)
 	local res = core_file.QueryDosDeviceW(lpDeviceName, lpTargetPath, ucchMax);
 
 --print("RES: ", res)
-	return iterators.wstrziter(lpTargetPath, res)
+	return iterators.wmstrziter(lpTargetPath, res)
 end
 
 

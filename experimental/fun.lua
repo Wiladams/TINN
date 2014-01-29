@@ -933,6 +933,8 @@ local exports = {
 setmetatable(exports, {
     __call = function(t)
         for k, v in pairs(t) do _G[k] = v end
+
+        return exports
     end,
 })
 

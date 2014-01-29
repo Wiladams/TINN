@@ -8,7 +8,6 @@ local Stopwatch = require("StopWatch")
 
 local clock = Stopwatch();
 
-
 -- DNS UDP port
 local IPPORT_DNS = 53;
 
@@ -72,12 +71,6 @@ function DNSNameServer.Query(self, strToQuery, wType, msTimeout)
         return false, err
     end
 
-    --local msSendTime = clock:Milliseconds();
-
-    --print( string.format("DNS query sent, asking the IP of \"%s\".", strToQuery ));
-
-
-
     -- Try to receive the results
     local RecvFromAddr = sockaddr_in();
     local RecvFromAddrSize = ffi.sizeof(RecvFromAddr);
@@ -91,11 +84,6 @@ function DNSNameServer.Query(self, strToQuery, wType, msTimeout)
     if( 0 == cbReceived ) then
         return false, "Nothing received"
     end
-
-
-    --local ellapsed = clock:Milliseconds() - msSendTime;
-    --print(string.format("Received %i bytes (%d milliseconds passed)\n", cbReceived, ellapsed ));
-
 
     -- Parse the DNS response received with DNS API
     local pDnsResponseBuff = ffi.cast("DNS_MESSAGE_BUFFER*", buff);
@@ -150,6 +138,7 @@ end
 function DNSNameServer.A(self, domainToQuery) return self:Query(domainToQuery, ffi.C.DNS_TYPE_A) end
 function DNSNameServer.MX(self, domainToQuery) return self:Query(domainToQuery, ffi.C.DNS_TYPE_MX) end
 function DNSNameServer.CNAME(self, domainToQuery) return self:Query(domainToQuery, ffi.C.DNS_TYPE_CNAME) end
+function DNSNameServer.PTR(self, domainToQuery) return self:Query(domainToQuery, ffi.C.DNS_TYPE_PTR) end
 function DNSNameServer.SRV(self, domainToQuery) return self:Query(domainToQuery, ffi.C.DNS_TYPE_SRV) end
 
 return DNSNameServer

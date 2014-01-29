@@ -79,8 +79,8 @@ end
 
 TcpSplice.run = function(self)
 	-- Start a splice loop in both directions
-	Application:spawn(splice, self.Part1, self.Part2);
-	Application:spawn(splice, self.Part2, self.Part1);
+	Application:coop(splice, self.Part1, self.Part2);
+	Application:coop(splice, self.Part2, self.Part1);
 end
 
 return TcpSplice

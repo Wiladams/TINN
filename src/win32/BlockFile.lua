@@ -25,7 +25,7 @@ local BlockFile_mt = {
 	__index = BlockFile;
 }
 
-BlockFile.init = function(self, rawHandle)
+function BlockFile.init(self, rawHandle)
 	local obj = {
 		Handle = Handle(rawHandle);
 		DeviceOffset = 0;
@@ -37,7 +37,7 @@ BlockFile.init = function(self, rawHandle)
 	return obj;
 end
 
-BlockFile.create = function(self, lpFileName, dwDesiredAccess, dwCreationDisposition, dwShareMode)
+function BlockFile.create(self, lpFileName, dwDesiredAccess, dwCreationDisposition, dwShareMode)
 	if not lpFileName then
 		return nil;
 	end
@@ -64,27 +64,27 @@ BlockFile.create = function(self, lpFileName, dwDesiredAccess, dwCreationDisposi
 	return self:init(rawHandle)
 end
 
-BlockFile.getNativeHandle = function(self) 
+function BlockFile.getNativeHandle(self) 
 	return self.Handle.Handle 
 end
 
 -- Cancel current IO operation
-BlockFile.cancel = function(self)
+function BlockFile.cancel(self)
 	local res = core_file.CancelIo(self:getNativeHandle());
 end
 
 
 -- Close the file handle
-BlockFile.close = function(self)
+function BlockFile.close(self)
 	self.Handle:free();
 	self.Handle = nil;
 end
 
-BlockFile.canSeek = function(self)
+function BlockFile.canSeek(self)
 	return true;
 end
 
-BlockFile.seek = function(self, offset, origin)
+function BlockFile.seek(self, offset, origin)
 	offset = offset or 0
 	origin = origin or StreamOps.SEEK_SET
 
@@ -99,7 +99,7 @@ BlockFile.seek = function(self, offset, origin)
 	return self.DeviceOffset;
 end
 
-BlockFile.flush = function(self)
+function BlockFile.flush(self)
 	local res = core_file.FlushFileBuffers(self:getNativeHandle());
 	if res == 0 then
 		return false, errorhandling.GetLastError();
@@ -108,7 +108,7 @@ BlockFile.flush = function(self)
 	return true;
 end
 
-BlockFile.getSize = function(self)
+function BlockFile.getSize(self)
 	local lpFileSizeHigh = nil;
 
 	local res = core_file.GetFileSize(self:getNativeHandle(), lpFileSizeHigh)
@@ -120,10 +120,8 @@ BlockFile.getSize = function(self)
 	return res;
 end
 
-BlockFile.createOverlapped = function(self, buff, bufflen, operation)
+function BlockFile.createOverlapped(self, buff, bufflen, operation)
 	
-	fileoffset = fileoffset or 0;
-
 	local obj = ffi.new("FileOverlapped");
 	
 	obj.file = self:getNativeHandle();
@@ -139,7 +137,7 @@ end
 
 
 -- Write bytes to the file
-BlockFile.writeBytes = function(self, buff, nNumberOfBytesToWrite, offset)
+function BlockFile.writeBytes(self, buff, nNumberOfBytesToWrite, offset)
 	offset = offset or 0
 	fileoffset = fileoffset or 0
 
@@ -186,7 +184,7 @@ BlockFile.writeBytes = function(self, buff, nNumberOfBytesToWrite, offset)
 end
 
 
-BlockFile.readBytes = function(self, buff, nNumberOfBytesToRead, offset)
+function BlockFile.readBytes(self, buff, nNumberOfBytesToRead, offset)
 	nNumberOfBytesToRead = nNumberOfBytesToRead or 0
 	offset = offset or 0
 

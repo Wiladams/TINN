@@ -1,7 +1,7 @@
 -- functor.lua
 
 
-local Functor = function(func, target)
+local function Functor(func, target)
 	return function(...)
 		if target then
 			return func(target,...)

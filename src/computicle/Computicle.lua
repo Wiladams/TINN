@@ -163,7 +163,7 @@ Computicle.createThreadChunk = function(self, codechunk, params, codeparams)
 	table.insert(res, [[end]]);
 
 	-- make sure the user's code is running in a coroutine
-	table.insert(res, [[Application:spawn(_cmain)]]);
+	table.insert(res, [[Application:coop(_cmain)]]);
 
 	-- What we want to execute after the user's code is loaded
 	-- By default, this will be a message pump

@@ -47,9 +47,9 @@ function Application.init(self, ...)
 	setmetatable(obj, Application_mt)
 
 	-- Create a task for each add-on
-	obj:spawn(obj.wfc.start, obj.wfc)
-	obj:spawn(obj.wft.start, obj.wft)
-	obj:spawn(obj.wfio.start, obj.wfio)
+	obj:coop(obj.wfc.start, obj.wfc)
+	obj:coop(obj.wft.start, obj.wft)
+	obj:coop(obj.wfio.start, obj.wfio)
 
 	return obj;
 end
@@ -84,7 +84,7 @@ function Application.delay(self, func, millis)
 		func();
 	end
 
-	return self:spawn(closure)
+	return self:coop(closure)
 end
 
 function Application.periodic(self, func, millis)
@@ -97,7 +97,7 @@ function Application.periodic(self, func, millis)
 		end
 	end
 
-	return self:spawn(closure)
+	return self:coop(closure)
 end
 
 -- IO Functions
@@ -142,7 +142,7 @@ function Application.when(self, pred, func)
 		func()
 	end
 
-	self:spawn(watchit)
+	self:coop(watchit)
 end
 
 function Application.whenever(self, pred, func)
@@ -154,7 +154,7 @@ function Application.whenever(self, pred, func)
 		end
 	end
 
-	self:spawn(watchit)
+	self:coop(watchit)
 end
 
 -- Event Related Functions
@@ -176,7 +176,7 @@ function Application.onSignal(self, func, eventName)
 		func();
 	end
 
-	return self:spawn(closure)
+	return self:coop(closure)
 end
 
 
@@ -204,12 +204,12 @@ function Application.getNewTaskID(self)
 	return self.TaskID;
 end
 
-function Application.spawn(self, func, ...)
+function Application.coop(self, func, ...)
 	local task = Task(func, ...)
 	task.TaskID = self:getNewTaskID();
 	self.Scheduler:scheduleTask(task, {...});
 
---print("Application.spawn: ", ...)
+--print("Application.coop: ", ...)
 
 	return task;
 end
@@ -233,13 +233,14 @@ function Application.run(self, func, ...)
 	self.Scheduler.OnStepped = Functor(self.onStepped, self)
 
 	if func ~= nil then
-		self:spawn(func, ...)
+		self:coop(func, ...)
 	end
 
 	return self:start();
 end
 
 function Application.exportGlobals(self)
+	_G.coop = Functor(self.coop, self);
 	_G.delay = Functor(self.delay, self);
 	_G.onSignal = Functor(self.onSignal, self);
 	_G.periodic = Functor(self.periodic, self);
@@ -247,7 +248,7 @@ function Application.exportGlobals(self)
 	_G.signalAll = Functor(self.signalAll, self);
 	_G.signalOne = Functor(self.signalOne, self);
 	_G.sleep = Functor(self.sleep, self);
-	_G.spawn = Functor(self.spawn, self);
+	_G.spawn = Functor(self.coop, self);
 	_G.stop = Functor(self.stop, self);
 	_G.taskIsFinished = Application.taskIsFinished;
 	_G.waitSignal = Functor(self.waitForSignal, self);

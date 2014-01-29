@@ -48,7 +48,7 @@ function Storage.logicalDriveNames(self)
 
 	local res = core_file.GetLogicalDriveStringsW(nBufferLength, lpBuffer)
 
-	return iterators.wstrziter(lpBuffer, nBufferLength)
+	return iterators.wmstrziter(lpBuffer, nBufferLength)
 end
 
 --[[

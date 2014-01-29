@@ -2,11 +2,13 @@ local ffi = require("ffi")
 local DNSNameServer = require("DNSNameServer")
 local core_string = require("core_string_l1_1_0")
 
---local dns = DNSNameServer("8.8.8.8") -- "8.8.8.8" is the public DNS server maintained by google inc.
-local dns = DNSNameServer("157.54.10.29") -- ms corporate
+
+--local serveraddress = "10.211.55.1"		-- xfinity
+local serveraddress = "209.244.0.3" -- level 3
 
 local domains = {
 	"www.nanotechstyles.com",
+	"www.adafruit.com",
 	"adafruit.com",
 	"adamation.com",
 	"www.adamation.com",
@@ -29,14 +31,16 @@ local domains = {
 	"luajit.org",
 }
 
+local addresses = {
+	"209.244.0.3",		-- Level 3
+	"94.23.39.66",		-- luajit.org
+	"208.109.4.201",	-- godaddy.com
 
---local dnsservername = "209.244.0.3"
---local dnsservername = "10.211.55.1"
---local dnsservername = "157.54.10.29" -- MS Corporate
+}
 
 local function queryA()
 	local function queryDomain(name)
-		local dns = DNSNameServer(dnsservername) -- ms corporate
+		local dns = DNSNameServer(serveraddress) -- ms corporate
 		print("==== DNS A ====> ", name)
 		for record in dns:A(name) do
 			local a = IN_ADDR();
@@ -47,13 +51,14 @@ local function queryA()
 	end
 
 	for _, name in ipairs(domains) do 
-		--spawn(queryDomain, name)
-		queryDomain(name)
+		spawn(queryDomain, name)
+		--queryDomain(name)
 	end
 end
 
 local function queryCNAME()
 	local function queryDomain(name)
+		local dns = DNSNameServer(serveraddress) -- ms corporate
 		print("==== DNS CNAME ====> ", name)
 		for record in dns:CNAME(name) do
 			print(core_string.toAnsi(record.pName), core_string.toAnsi(record.Data.CNAME.pNameHost))
@@ -62,11 +67,13 @@ local function queryCNAME()
 
 	for _, name in ipairs(domains) do 
 		spawn(queryDomain, name)
+		--queryDomain(name)
 	end
 end
 
 local function queryMX()
 	local function queryDomain(name)
+		local dns = DNSNameServer(serveraddress) -- ms corporate
 		print("==== DNS MX ====> ", name)
 		for record in dns:MX(name) do
 			print(core_string.toAnsi(record.pName), core_string.toAnsi(record.Data["MX"].pNameExchange))
@@ -78,7 +85,23 @@ local function queryMX()
 	end
 end
 
+local function queryPTR()
+	local function queryDomain(name)
+		local dns = DNSNameServer(serveraddress) -- ms corporate
+		print("==== DNS PTR ====> ", name)
+		for record in dns:PTR(name) do
+			print(core_string.toAnsi(record.pName), core_string.toAnsi(record.Data.PTR.pNameHost))
+		end
+	end
+
+	for _, address in ipairs(addresses) do 
+		--spawn(queryDomain, address)
+		queryDomain(address)
+	end
+end
+
 local function querySRV()
+	local dns = DNSNameServer(serveraddress) -- ms corporate
 	for _, name in ipairs(domains) do 
 		print("==== DNS SRV ====> ", name)
 		for record in dns:SRV(name) do
@@ -88,9 +111,10 @@ local function querySRV()
 end
 
 local function main()
-	queryA();
+	--queryA();
 	--queryCNAME();
 	--queryMX();
+	queryPTR();
 	--querySRV();
 end
 

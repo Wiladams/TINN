@@ -14,6 +14,9 @@ local Device = require("Device")
 local Application = require("Application")
 local arch = require("arch")
 local WinIoCtl = require("WinIoCtl")
+local DeviceRecordSet = require("DeviceRecordSet")
+
+
 
 ffi.cdef[[
 typedef enum {
@@ -88,22 +91,10 @@ function Battery.create(self, batteryname)
 end
 
 function Battery.names(self)
-	local dwResult = ffi.C.GBS_ONBATTERY;
-	local Flags = bor(ffi.C.DIGCF_PRESENT, ffi.C.DIGCF_DEVICEINTERFACE);
+    local dwResult = ffi.C.GBS_ONBATTERY;
 
-  print("GUID_DEVCLASS_BATTERY: ", GUID_DEVCLASS_BATTERY)
-
-	local hdev = SetupApi.SetupDiGetClassDevs(
-		GUID_DEVCLASS_BATTERY, 
-        nil, 
-        nil, 
-        Flags);
-
-	if (INVALID_HANDLE_VALUE == hdev) then
-		local err = errorhandling.GetLastError();
-		print("Error getting battery class: ", err)
-		return nil, err;
-	end
+    local drs = DeviceRecordSet(bor(ffi.C.DIGCF_PRESENT, ffi.C.DIGCF_DEVICEINTERFACE), GUID_DEVCLASS_BATTERY);
+    hdev = drs:getNativeHandle();
 
     -- Limit search to 100 batteries max
     for idev = 0, 99 do

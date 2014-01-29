@@ -73,4 +73,4 @@ local handlemessages = function()
   end
 end
 
-Application:spawn(handlemessages);
+Application:coop(handlemessages);

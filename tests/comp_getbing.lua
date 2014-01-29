@@ -38,5 +38,5 @@ local function GET()
 	exit();
 end
 
-Application:spawn(GET);
+Application:coop(GET);
 
