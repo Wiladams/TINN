@@ -7,7 +7,7 @@ local function CreatePreambleChunk(preamble)
 	local success = preamble:WritePreamble(mstream)
 	len = mstream:GetPosition()
 	mstream:Seek(0)
-	local chunk = mstream:ReadString(len)
+	local chunk = mstream:readString(len)
 
 	return chunk
 end
@@ -159,7 +159,7 @@ local function ReadChunks(response)
 			-- or whatever we can read
 			-- and return that
 			local chunksize = 1024*8
-			local str, err = input:ReadString(chunksize)
+			local str, err = input:readString(chunksize)
 --print("HttpChunkIterator.ReadChunks(), connection(close): ",str, err);
 			if not str then
 				return nil;
@@ -170,7 +170,7 @@ local function ReadChunks(response)
 			print("-- UNKNOWN CONTENT SIZE");
 			-- assume 'connection:close'
 			local chunksize = 1024*8
-			local str, err = input:ReadString(chunksize)
+			local str, err = input:readString(chunksize)
 			if not str then
 				return nil;
 			end

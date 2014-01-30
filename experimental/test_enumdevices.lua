@@ -15,12 +15,13 @@ local fun = require("fun")()
 local function printIt(record)
 	print("==========")
 	each(print, record)
-	for k,v in pairs(record) do
+--[[	for k,v in pairs(record) do
 		print(k, v)
 		if type(v) == "table" then
 			printIt(v)
 		end
 	end
+--]]
 	print("----------")
 end
 
@@ -28,17 +29,30 @@ local function enumerateAll()
 	local drs = DeviceRecordSet();
 
 	-- show everything for every device
-	each(printIt, drs:devices())
+	--each(printIt, drs:devices())
 
 	-- do a projection on the fields
---each(printIt, map(function(x) return {objectname = x.objectname, description = x.description} end, drs:devices()))
+	local function projection(fields, gen, param, state)
+		local function projector(x)
+			local res = {}
+			for _,name in ipairs(fields) do
+				--print("name: ", name, x[name])
+				res[name] = x[name];
+			end
+			return res
+		end
+
+		return map(projector, gen, param, state)
+	end
+	--each(printIt, map(function(x) return {objectname = x.objectname, description = x.description} end, drs:devices()))
+	each(printIt, projection({"objectname", "description"}, drs:devices()))
 
 	-- show only certain records
-	local function enumeratorFilter(x)
-		return x.enumerator == "STORAGE"
+	local function enumeratorFilter(name, x)
+		return x.enumerator == name
 	end
 
-	--each(printIt, filter(enumeratorFilter, drs:devices()))
+	--each(printIt, filter(Functor(enumeratorFilter, "STORAGE"), drs:devices()))
 end
 
 
@@ -51,5 +65,5 @@ local function enumerateBatteries()
 	each(printIt, drs:devices())
 end
 
---enumerateAll();
-enumerateBatteries();
+enumerateAll();
+--enumerateBatteries();
