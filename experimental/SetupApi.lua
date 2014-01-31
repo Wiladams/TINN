@@ -26,7 +26,6 @@ static const int DIGCF_DEVICEINTERFACE  = 0x00000010;
 ]]
 
 ffi.cdef[[
-#pragma pack(push)
 #pragma pack(1)
 
 //

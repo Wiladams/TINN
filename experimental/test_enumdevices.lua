@@ -15,12 +15,14 @@ local fun = require("fun")()
 local function printIt(record)
 	print("==========")
 	each(print, record)
+--[[
 	for k,v in pairs(record) do
 		print(k, v)
 		if type(v) == "table" then
 			printIt(v)
 		end
 	end
+--]]
 	print("----------")
 end
 
@@ -48,7 +50,11 @@ local function enumerateBatteries()
 	
 	local drs = DeviceRecordSet(Flags, ClassGuid);
 
-	each(printIt, drs:devices())
+	each(print, drs:interfaces(ClassGuid))
+	--for _,name in  drs:interfaces(ClassGuid) do
+	--	print(name)
+	--end
+
 end
 
 --enumerateAll();
