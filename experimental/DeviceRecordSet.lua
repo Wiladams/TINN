@@ -88,7 +88,7 @@ function DeviceRecordSet.getRegistryValue(self, key, idx)
 		return ffi.string(buffer, pbuffersize[0]-1)
 	elseif regDataType[0] == ffi.C.REG_MULTI_SZ then
 		local res = {}
-		for _,name in iterators.mstrziter(buffer, pbuffersize[0]) do
+		for _,name in iterators.mstrziter{data=buffer, datalength=pbuffersize[0]} do
 			table.insert(res, name)
 		end
 		return res;

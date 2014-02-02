@@ -7,7 +7,7 @@ local stringzutils = require("stringzutils");
 
 ffi.cdef[[
 typedef struct {
-	const uint8_t * Data;
+	const char * Data;
 	const int Offset;
 	const int Length;
 } SToken;

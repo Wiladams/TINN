@@ -15,7 +15,7 @@ typedef struct {
 local OSModuleHandle = ffi.typeof("OSModuleHandle");
 local OSModuleHandle_mt = {
 	__gc = function(self)
-		-- print("GC: OSModuleHandle");
+		print("GC: OSModuleHandle");
 		local status = libraryloader.FreeLibrary(self.Handle);
 	end,
 
@@ -77,11 +77,11 @@ print("OSModule.__index, getProcAddress: ", proc)
 		
 		return castval;
 	end,
-};
+}
 
 
 
-OSModule.init = function(self, handle)
+function OSModule.init(self, handle)
 	local obj = {
 		Handle = OSModuleHandle(handle);
 	};
@@ -91,7 +91,7 @@ OSModule.init = function(self, handle)
 	return obj;
 end
 
-OSModule.create = function(self, name, flags)
+function OSModule.create(self, name, flags)
 	flags = flags or 0
 
 	local handle = libraryloader.LoadLibraryExA(name, nil, flags);
@@ -102,5 +102,19 @@ OSModule.create = function(self, name, flags)
 
 	return self:init(handle);
 end
+
+function OSModule.getNativeHandle(self)
+	return self.Handle.Handle
+end
+
+function OSModule.getProcAddress(self, procName)
+	local addr = libraryloader.GetProcAddress(self:getNativeHandle(), procName);
+	if not addr then
+		return nil, errorhandling.GetLastError();
+	end
+
+	return addr;
+end
+
 
 return OSModule

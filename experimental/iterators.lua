@@ -2,32 +2,34 @@
 local ffi = require("ffi")
 
 
-local function mstrziter(lpBuffer, nBufferLength)
+local function mstrziter(params)
+	params = params or {}
+
+	params.separator = params.separator or 0
+	params.datalength = params.datalength or #params.data
+	params.basetype = params.basetype or ffi.typeof("char")
+	params.basetypeptr = ffi.typeof("const $ *", params.basetype)
+	params.maxlen = params.maxlen or params.datalength-1;
 
 	local function closure(param, idx)
-		local nameBuff = ffi.new("char[256]")
+		if not params.data then
+			return nil;
+		end
+
 		local len = 0;
-
-		while len < param.maxLen do 
-			--print("char: ", string.char(lpBuffer[idx]))
-			if param.buffer[idx] == 0 then
-				break
-			end
-		--print('idx: ', idx)
-
-			nameBuff[len] = param.buffer[idx];
-			len = len + 1;
-			idx = idx + 1;
+		
+		while ffi.cast(param.basetypeptr, param.data)[idx + len] ~= param.separator and (len < param.maxlen) do
+			len = len +1;
 		end
 
 		if len == 0 then
 			return nil;
 		end
 
-		return idx+1, ffi.string(nameBuff, len);
+		return (idx + len+1), ffi.string(ffi.cast(param.basetypeptr, param.data)+idx, len*ffi.sizeof(param.basetype));
 	end
 
-	return closure, {maxLen = 255, buffer = ffi.cast("const char *",lpBuffer), buffLen = nBufferLength or #lpBuffer}, 0;
+	return closure, params, 0;
 end
 
 
