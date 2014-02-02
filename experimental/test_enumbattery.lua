@@ -91,102 +91,57 @@ function Battery.create(self, batteryname)
 end
 
 function Battery.names(self)
-    local dwResult = ffi.C.GBS_ONBATTERY;
 
-    local drs = DeviceRecordSet(bor(ffi.C.DIGCF_PRESENT, ffi.C.DIGCF_DEVICEINTERFACE), GUID_DEVCLASS_BATTERY);
-    hdev = drs:getNativeHandle();
+    local drs, err = DeviceRecordSet(bor(ffi.C.DIGCF_PRESENT, ffi.C.DIGCF_DEVICEINTERFACE), GUID_DEVCLASS_BATTERY);
+
+--    print("Battery.names: ", drs, err)
 
     -- Limit search to 100 batteries max
-    for idev = 0, 99 do
-		did = ffi.new("SP_DEVICE_INTERFACE_DATA");
-		did.cbSize = ffi.sizeof(did);
+    for _,devicePath in  drs:interfaces(GUID_DEVCLASS_BATTERY) do
+        -- enumerate battery information
+        print("BATTERY: ", devicePath)
+        hBattery, err = Device(devicePath)
+      
+        if not hBattery then
+            print("Battery Device creation ERROR: ", err)
+            return nil;
+        end
 
-		local res = SetupApi.SetupDiEnumDeviceInterfaces(hdev,
-			nil,
-			GUID_DEVCLASS_BATTERY,
-			idev,
-			did)
+        -- Ask the battery for its tag.
+        local bqi = ffi.new("BATTERY_QUERY_INFORMATION");
 
-		if res ~= 0 then
-			local cbRequired = ffi.new("DWORD[1]");
+        local dwWait = ffi.new("DWORD[1]", 0);
 
-			-- figure out how much space is needed
-			local res = SetupApi.SetupDiGetDeviceInterfaceDetail(hdev,
-				did,
-				nil,
-				0,
-				cbRequired,
-				nil);
+        local dwOut, err = hBattery:control(IOCTL_BATTERY_QUERY_TAG,
+          dwWait,
+          ffi.sizeof("DWORD"),
+          arch.fieldAddress(bqi, "BatteryTag"),
+          ffi.sizeof("ULONG")); 
 
-			local err = errorhandling.GetLastError()
+        if not dwOut then
+            print("dwOut, err: ", dwOut, err)
+            break;
+        end
 
-			if err ~= ERROR_INSUFFICIENT_BUFFER then
-				print("ERROR, after first InterfaceDetail: ", err)
-				break;
-			end
+        -- We have the tag, so now other things can be asked for
+        local bi = ffi.new("BATTERY_INFORMATION");
+        bqi.InformationLevel = ffi.C.BatteryInformation;
 
-print("REQUIRED: ", cbRequired[0])
-			local pdidd = WinBase.LocalAlloc(ffi.C.LPTR, 1024)
-			local cbSize = ffi.sizeof("SP_DEVICE_INTERFACE_DETAIL_DATA_A");
-			print("cbSize: ", cbSize);
+        local dwOut, err = hBattery:control(IOCTL_BATTERY_QUERY_INFORMATION,
+          bqi,
+          ffi.sizeof(bqi),
+          bi,
+          ffi.sizeof(bi))
 
- 			local didd = ffi.cast("PSP_DEVICE_INTERFACE_DETAIL_DATA_A", pdidd)
- 			didd.cbSize = cbSize;
-
-
-            -- call again now that we have the right sized buffer
-			local res = SetupApi.SetupDiGetDeviceInterfaceDetail(hdev,
-				did,
-				didd,
-				264,
-				nil,
-				nil);
-
-			if res == 0 then
-				local err = errorhandling.GetLastError();
-				print("ERROR, after second InterfaceDetail: ", err)
-				break;
-			end
-
-			-- enumerate battery information
-			print("BATTERY: ", ffi.string(didd.DevicePath))
-			hBattery, err = Device(ffi.string(didd.DevicePath))
-			if not hBattery then
-				print("Battery Device creation ERROR: ", err)
-				break;
-			end
-
-			-- Ask the battery for its tag.
-			local bqi = ffi.new("BATTERY_QUERY_INFORMATION");
-
-			local dwWait = ffi.new("DWORD[1]", 0);
-
-			local dwOut, err = hBattery:control(IOCTL_BATTERY_QUERY_TAG,
-        dwWait,
-        ffi.sizeof("DWORD"),
-        arch.fieldAddress(bqi, "BatteryTag"),
-        ffi.sizeof("ULONG")); 
-
-      if not dwOut then
-        print("dwOut, err: ", dwOut, err)
-        break;
-      end
-
-      -- We have the tag, so now other things can be asked for
-      local bi = ffi.new("BATTERY_INFORMATION");
-      bqi.InformationLevel = ffi.C.BatteryInformation;
-
-      local dwOut, err = hBattery:control(IOCTL_BATTERY_QUERY_INFORMATION,
-        bqi,
-        ffi.sizeof(bqi),
-        bi,
-        ffi.sizeof(bi))
-
-      -- Only non-UPS system batteries count
-      print("Caps: ", bi.Capabilities, band(bi.Capabilities, ffi.C.BATTERY_SYSTEM_BATTERY))
-
-      if (band(bi.Capabilities, ffi.C.BATTERY_SYSTEM_BATTERY) ~= 0 ) then
-        print("System BATTERY")
+        -- Only non-UPS system batteries count
+        print("Caps: ", bi.Capabilities, band(bi.Capabilities, ffi.C.BATTERY_SYSTEM_BATTERY))
+        print("Cycle Count: ", bi.CycleCount)
+        
+        if (band(bi.Capabilities, ffi.C.BATTERY_SYSTEM_BATTERY) ~= 0 ) then
+            print("System BATTERY")
+        end
+    end
+end
 
 --[[
           --if ( band(bi.Capabilities & BATTERY_IS_SHORT_TERM) == 0) then
@@ -214,10 +169,6 @@ print("REQUIRED: ", cbRequired[0])
                          }
         }
 --]]
-      end
-		end
-  end
-end
 
 --[[
 local function GetBatteryState()

@@ -3,10 +3,14 @@ local bit = require("bit")
 local bor = bit.bor;
 local band = bit.band;
 
+local core_string = require("core_string_l1_1_0")
 local errorhandling = require("core_errorhandling_l1_1_1");
 local SetupApi = require("SetupApi")
 local WinNT = require("WinNT")
 local iterators = require("iterators")
+local WinError = require("win_error")
+local WinBase = require("WinBase")
+
 
 local DeviceRecordSet = {}
 setmetatable(DeviceRecordSet, {
@@ -52,7 +56,7 @@ end
 function DeviceRecordSet.getRegistryValue(self, key, idx)
 	idx = idx or 0;
 
-	did = ffi.new("SP_DEVINFO_DATA")
+	local did = ffi.new("SP_DEVINFO_DATA")
 	did.cbSize = ffi.sizeof("SP_DEVINFO_DATA");
 
 --print("HANDLE: ", self.Handle)
@@ -137,20 +141,74 @@ function DeviceRecordSet.devices(self, fields)
 end
 
 function DeviceRecordSet.interfaces(self, classguid)
-		did = ffi.new("SP_DEVICE_INTERFACE_DATA");
-		did.cbSize = ffi.sizeof(did);
+--rint("did.cbSize: ", did.cbSize)
 
 	local function closure(params, idx)
-		ffi.fill(did, ffi.sizeof(did), 0)
-		
+		local did = ffi.new("SP_DEVICE_INTERFACE_DATA");
+		did.cbSize = ffi.sizeof(did);
+
 		local res = SetupApi.SetupDiEnumDeviceInterfaces(self:getNativeHandle(),
 			nil,
-			classguid,
+			params.classguid,
 			idx,
 			did)
+
+		if res == 0 then
+			local err = errorhandling.GetLastError();
+			--print("ERROR, after EnumDeviceInterfaces: ", err)
+			return nil;
+		end
+		
+		-- figure out how much space is needed
+		-- to get the interface detail
+		local cbRequired = ffi.new("DWORD[1]");
+		local res = SetupApi.SetupDiGetDeviceInterfaceDetail(self:getNativeHandle(),
+			did,
+			nil,
+			0,
+			cbRequired,
+			nil);
+
+
+		-- if the error is anything but insufficient buffer
+		-- then return nil
+		local err = errorhandling.GetLastError()
+
+		if err ~= ERROR_INSUFFICIENT_BUFFER then
+			print("ERROR, after first InterfaceDetail: ", err)
+			return nil;
+		end
+		
+		-- allocate a buffer to hold the detail
+		local pdidd = WinBase.LocalAlloc(ffi.C.LPTR, 1024)
+		local cbSize = ffi.sizeof("SP_DEVICE_INTERFACE_DETAIL_DATA_A");
+
+ 		local didd = ffi.cast("PSP_DEVICE_INTERFACE_DETAIL_DATA_A", pdidd)
+ 		didd.cbSize = cbSize;
+
+        -- call again now that we have the right sized buffer
+		local res = SetupApi.SetupDiGetDeviceInterfaceDetail(self:getNativeHandle(),
+			did,
+			didd,
+			264,
+			nil,
+			nil);
+
+		if res == 0 then
+			local err = errorhandling.GetLastError();
+			print("ERROR, after second InterfaceDetail: ", err)
+			return nil;
+		end
+
+		local devicePath = ffi.string(didd.DevicePath)
+
+		-- cleanup
+		WinBase.LocalFree(pdidd)
+
+		return idx+1, devicePath
 	end
 
-	return closure, classguid, 0
+	return closure, {classguid = classguid}, 0
 end
 
 return DeviceRecordSet
