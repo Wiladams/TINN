@@ -14,6 +14,9 @@
 	http://www.faqs.org/rfcs/rfc3076.html
 	http://www.w3.org/TR/REC-xml/
 
+	The way it works... A finite state machine is created when this code is
+	first required into a script.  The 'luxl' object itself is used to 
+	manage the lexing of an input string.
 ]]
 
 local ffi = require "ffi"
@@ -24,6 +27,10 @@ local band = bit.band
 --[[
  Types of characters; 0 is not valid, 1 is letters, 2 are digits
    (including '.') and 3 whitespace.
+
+   Moving from one state to the next is determined by a character
+   class.  The more specific we are about the character class, the
+   more accurate transitions can become.
 --]]
 
 local char_type = ffi.new("const int[256]", {
@@ -117,7 +124,7 @@ local STATE_NAMES = {
 --[[
  State transition table element; contains:
  (1) current state,
- (2) clazz that must match,
+ (2) character class that must match,
  (3) next state if we match, and
  (4) event that is emitted upon match.
 --]]
@@ -219,6 +226,9 @@ local cclass_match = {
 local STATES = {}
 local STATE_FUNCS = {}
 
+--[[
+	return: event, state_f, character
+--]]
 local function next_char(ps, state, verbose)
 	local i = ps.ix
 	if i >= ps.bufsz then
@@ -321,6 +331,9 @@ for i=0,#STATE_NAMES do
 	code('STATES[', name, '_f] = ', i, '\n')
 end
 -- Compile FSM code
+-- print the code out so it can be captured
+print(fsm_code);
+
 local state_funcs = assert(loadstring(fsm_code, "luxl FSM code"))
 state_funcs(STATE_FUNCS, next_char, char_type)
 fsm_code = nil
@@ -338,19 +351,21 @@ local luxl = {
 }
 setmetatable(luxl, {
 	__call = function(self, ...)
-		return self:init(...);
+		return self:new(...);
 	end,
 });
 local luxl_mt = { __index = luxl }
 
-luxl.init = function(self, buffer, bufflen)
+function luxl.new(self, buffer, bufflen)
 	local obj = {
-		buf = ffi.cast("const uint8_t *", buffer);			-- pointer to "uint8_t *" buffer (0 based)
+		buf = ffi.cast("const char *", buffer);			-- pointer to "uint8_t *" buffer (0 based)
 		bufsz = bufflen;		-- size of input buffer
 		state = ST_START;		-- current state
 		event = self.EVENT_NONE;		-- current event
 		err = 0;				-- number of errors thus far
-		markix = 0;				-- offset of current item of interest
+		mark = 0;
+		i = 0;
+		ix = 0;				-- offset of current item of interest
 		marksz = 0;				-- size of current item of interest
 		
 		
@@ -373,15 +388,15 @@ luxl.init = function(self, buffer, bufflen)
 end
 
 -- Setting Event handlers
-luxl.OnMessage = function(self, handler)
+function luxl.OnMessage(self, handler)
 	self.MessageHandler = handler;
 end
 
-luxl.OnError = function(self, handler)
+function luxl.OnError(self, handler)
 	self.ErrorHandler = handler;
 end
 
-luxl.OnEvent = function(self, handler)
+function luxl.OnEvent (self, handler)
 	self.EventHandler = handler;
 end
 
@@ -402,10 +417,12 @@ end
 	Returns event type, starting offset, size
 --]]
 
-luxl.getNext = function(self)
+function luxl.getNext(self)
 	local event, state_f, c
 	local ps = self.ps
 	ps.mark = 0
+	self.mark = 0;
+
 	state_f = STATE_FUNCS[self.state]
 	repeat
 		event, state_f, c = next_char(ps, state_f, self.MessageHandler)
@@ -425,20 +442,18 @@ luxl.getNext = function(self)
 	-- basically we are guaranteed never to have an event of
 	--   type EVENT_MARK or EVENT_NONE here.
 	self.event = event
-	local markix = ps.mark
-	local marksz = ps.i-ps.mark
-	self.markix = markix
-	self.marksz = marksz
+	self.mark = ps.mark
+	self.marksz = ps.i-ps.mark
 	
 	if(self.EventHandler) then
-		self.EventHandler(event, markix, marksz)
+		self.EventHandler(event, self.ix, self.marksz)
 	end
 	
-	return event, markix, marksz
+	return event, self.ix, self.marksz
 end
 
 -- return an iterator over the lexemes
-luxl.lexemes = function(self)
+function luxl.lexemes(self)
 	return function()
 		local event, offset, size = self:getNext();
 		if(event == EVENT_END_DOC) then

@@ -3,8 +3,6 @@
 
 local ffi = require("ffi");
 local WTypes = require("WTypes");
-local Lib = ffi.load("psapi");
-local K32Lib = ffi.load("kernel32");
 
 ffi.cdef[[
 // Structure for GetProcessMemoryInfo()
@@ -189,6 +187,8 @@ QueryFullProcessImageNameW(
 ]]
 
 
+local Lib = ffi.load("psapi");
+local K32Lib = ffi.load("kernel32");
 
 return {
     Lib = Lib,

@@ -39,7 +39,7 @@ local function toUnicode(in_Src, nsrcBytes)
 	nsrcBytes = nsrcBytes or #in_Src
 
 	-- find out how many characters needed
-	local charsneeded = k32Lib.MultiByteToWideChar(ffi.C.CP_ACP, 0, in_Src, nsrcBytes, nil, 0);
+	local charsneeded = k32Lib.MultiByteToWideChar(ffi.C.CP_ACP, 0, ffi.cast("const char *",in_Src), nsrcBytes, nil, 0);
 
 	if charsneeded < 0 then
 		return nil;
@@ -52,18 +52,26 @@ local function toUnicode(in_Src, nsrcBytes)
 	buff[charswritten] = 0
 
 
-	return buff;
+	return buff, charswritten;
 end
 
 local function toAnsi(in_Src, nsrcBytes)
 	if in_Src == nil then 
 		return nil;
 	end
-
-	local srcShorts = ffi.cast("const uint16_t *", in_Src)
+	
+	local cchWideChar = nsrcBytes or -1;
 
 	-- find out how many characters needed
-	local bytesneeded = k32Lib.WideCharToMultiByte(ffi.C.CP_ACP, 0, srcShorts, -1, nil, 0, nil, nil);
+	local bytesneeded = k32Lib.WideCharToMultiByte(
+		ffi.C.CP_ACP, 
+		0, 
+		ffi.cast("const uint16_t *", in_Src), 
+		cchWideChar, 
+		nil, 
+		0, 
+		nil, 
+		nil);
 
 --print("BN: ", bytesneeded);
 
@@ -71,11 +79,25 @@ local function toAnsi(in_Src, nsrcBytes)
 		return nil;
 	end
 
-	local buff = ffi.new("uint8_t[?]", bytesneeded+1)
-	local byteswritten = k32Lib.WideCharToMultiByte(ffi.C.CP_ACP, 0, srcShorts, -1, buff, bytesneeded, nil, nil);
-	buff[byteswritten] = 0
+	-- create a buffer to stuff the converted string into
+	local buff = ffi.new("uint8_t[?]", bytesneeded)
 
-	return ffi.string(buff, byteswritten-1);
+	-- do the actual string conversion
+	local byteswritten = k32Lib.WideCharToMultiByte(
+		ffi.C.CP_ACP, 
+		0, 
+		ffi.cast("const uint16_t *", in_Src), 
+		cchWideChar, 
+		buff, 
+		bytesneeded, 
+		nil, 
+		nil);
+
+	if cchWideChar == -1 then
+		return ffi.string(buff, byteswritten-1);
+	end
+
+	return ffi.string(buff, byteswritten)
 end
 
 local TEXT = function (quote)
