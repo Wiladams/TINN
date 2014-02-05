@@ -41,7 +41,7 @@ end
 local test_sample = function(sample)
 	local p1 = luxl(sample, #sample);
 
-	for event, offset, size in p1:lexemes() do
+	for _it, event, offset, size in p1:lexemes() do
 		--print(event, offset, size);
 		print(getEventInfo(sample, event, offset, size));
 	end

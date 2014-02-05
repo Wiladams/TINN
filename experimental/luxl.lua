@@ -332,7 +332,7 @@ for i=0,#STATE_NAMES do
 end
 -- Compile FSM code
 -- print the code out so it can be captured
-print(fsm_code);
+--print(fsm_code);
 
 local state_funcs = assert(loadstring(fsm_code, "luxl FSM code"))
 state_funcs(STATE_FUNCS, next_char, char_type)
@@ -420,6 +420,9 @@ end
 function luxl.getNext(self)
 	local event, state_f, c
 	local ps = self.ps
+	
+	self.i = ps.i;
+	
 	ps.mark = 0
 	self.mark = 0;
 
@@ -449,19 +452,21 @@ function luxl.getNext(self)
 		self.EventHandler(event, self.ix, self.marksz)
 	end
 	
-	return event, self.ix, self.marksz
+	return self, event, self.ix, self.marksz
 end
 
 -- return an iterator over the lexemes
 function luxl.lexemes(self)
-	return function()
-		local event, offset, size = self:getNext();
+	local function closure(param, state)
+		local _state, event, offset, size = self:getNext();
 		if(event == EVENT_END_DOC) then
 			return nil;
 		else
-			return event, offset, size;
+			return _state, event, offset, size;
 		end
 	end
+
+	return closure, self, nil
 end
 
 return luxl

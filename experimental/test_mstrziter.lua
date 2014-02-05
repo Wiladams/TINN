@@ -55,7 +55,7 @@ local function wmstrziter(data, datalength)
 end
 
 
---[=[
+---[=[
 -- straight iteration
 print("---- each(print, mstrziter(src)")
 each(print, mstrziter(src))

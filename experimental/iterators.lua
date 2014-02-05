@@ -12,10 +12,7 @@ local function nil_gen(param, state)
 end
 
 local function delim_gen(param, idx)
-	-- some setup
 	local len = 0;
-
-	--print("idx, nelems: ", idx, param.nelems)
 
 	while ((idx+len) < param.nelems) do
 		--print("wchar: ", string.char(ffi.cast(param.basetypeptr, param.data)[idx + len]))
