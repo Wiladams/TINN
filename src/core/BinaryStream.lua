@@ -63,8 +63,12 @@ function BinaryStream.new(stream, bigendian)
 end
 
 
-BinaryStream.ReadByte = function(self)
-	return self.Stream:ReadByte()
+function BinaryStream.readByte(self)
+	return self.Stream:readByte()
+end
+
+function BinaryStream:readBytes(buffer, size, offset)
+	return self.Stream:readBytes(buffer, size, offset)
 end
 
 function BinaryStream:ReadBytesN(buff, n, reverse)
@@ -78,6 +82,8 @@ function BinaryStream:ReadBytesN(buff, n, reverse)
 		end
 	end
 end
+
+
 
 function BinaryStream:ReadIntN(n)
 	local value = 0;
@@ -135,30 +141,32 @@ function BinaryStream:ReadDouble()
 	return tonumber(self.valunion.Double);
 end
 
-function BinaryStream:ReadBytes(buffer, size, offset)
-	return self.Stream:ReadBytes(buffer, size, offset)
+
+
+
+--[[
+	Writing
+--]]
+
+function BinaryStream:writeByte(value)
+	return self.Stream:writeByte(value) == 1;
+end
+
+function BinaryStream.writeBytes(self, buff, len, offset)
+	return self.Stream:writeBytes(buff, len, offset);
 end
 
 function BinaryStream:WriteBytesN(buff, n, reverse)
 	if reverse then
 		for i=n,1,-1 do
-			self:WriteByte(buff[i-1])	
+			self:writeByte(buff[i-1])	
 		end
 	else
 		for i=1,n do
-			self:WriteByte(buff[i-1])
+			self:writeByte(buff[i-1])
 		end
 	end
 end
-
-
-
-
-function BinaryStream:WriteByte(value)
-	return self.Stream:WriteByte(value) == 1;
-end
-
-
 
 function BinaryStream:WriteIntN(n, value)
 	--print("WriteIntN: ", value, tonumber(value));
@@ -166,11 +174,11 @@ function BinaryStream:WriteIntN(n, value)
 
 	if self.BigEndian then
 		for i=n,1,-1 do
-			self:WriteByte(rshift(band(lshift(0xff,8*(i-1)), value), 8*(i-1)));
+			self:writeByte(rshift(band(lshift(0xff,8*(i-1)), value), 8*(i-1)));
 		end
 	else
 		for i=1,n do
-			self:WriteByte(rshift(band(lshift(0xff,8*(i-1)), value), 8*(i-1)));
+			self:writeByte(rshift(band(lshift(0xff,8*(i-1)), value), 8*(i-1)));
 		end
 	end
 
@@ -222,5 +230,12 @@ function BinaryStream:WriteDouble(value)
 
 	return self
 end
+
+BinaryStream.ReadByte = BinaryStream.readByte;
+BinaryStream.ReadBytes = BinaryStream.readBytes;
+
+BinaryStream.WriteByte = BinaryStream.writeByte;
+BinaryStream.WriteBytes = BinaryStream.writeBytes;
+
 
 return BinaryStream;

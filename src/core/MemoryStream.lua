@@ -54,7 +54,7 @@ function MemoryStream.create(self, ...)
 		bufflen = select(1,...)
 		buff = ffi.new("uint8_t[?]", bufflen);
 	else
-		buff = ffi.cast("unit8_t *", select(1,...))
+		buff = ffi.cast("uint8_t *", select(1,...))
 		if nargs >= 2 and type(select(2,...)) == "number" then
 			bufflen = select(2,...);
 			byteswritten = bufflen;

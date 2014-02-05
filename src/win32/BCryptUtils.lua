@@ -347,12 +347,12 @@ end
 	Convenience Functions
 --]]
 
-CryptUtils.GetRandomBytes = function(howmany)
+CryptUtils.GetRandomBytes = function(howmany, rngBuff)
 	howmany = howmany or 4
-
-	local rngBuff = ffi.new("uint8_t[?]", howmany)
+	rngBuff = rngBuff or ffi.new("uint8_t[?]", howmany)
 
 	local status =  BCrypt.Lib.BCryptGenRandom(nil, rngBuff, howmany, BCrypt.BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+
 	if status >= 0 then
 		return rngBuff, howmany
 	end

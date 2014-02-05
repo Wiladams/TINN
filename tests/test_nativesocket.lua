@@ -5,16 +5,6 @@ local Application = require("Application")
 local NativeSocket = require("NativeSocket")
 local NetStream = require("NetStream")
 
-local socket, err = NativeSocket:createClient("www.bing.com", 80)
-
-print("Socket: ", socket, err)
-
-if not socket then
-	print("No socket created: ", err)
-	return;
-end
-
-netstream = NetStream:init(socket)
 
 function waiter()
 	sleep(3000)
@@ -22,6 +12,16 @@ function waiter()
 end
 
 function main()
+	local socket, err = NativeSocket:createClient("www.bing.com", 80)
+
+print("Socket: ", socket, err)
+
+	if not socket then
+		print("No socket created: ", err)
+		return;
+	end
+
+	netstream = NetStream:init(socket)
 	--spawn(waiter)
 
 	netstream:writeLine("GET / HTTP/1.1")
@@ -33,6 +33,8 @@ function main()
 	local line, err = netstream:readLine();
 
 	print("Line: ", line, err)
+
+	netstream:closeDown();
 end
 
 run(main)
