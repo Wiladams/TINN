@@ -28,6 +28,11 @@ local lshift = bit.lshift
 local rshift = bit.rshift
 
 local BinaryStream = {}
+setmetatable(BinaryStream, {
+	__call = function(self, ...)
+		return BinaryStream.new(...);
+	end,
+})
 local BinaryStream_mt = {
 	__index = BinaryStream;
 }
@@ -149,7 +154,9 @@ end
 --]]
 
 function BinaryStream:writeByte(value)
-	return self.Stream:writeByte(value) == 1;
+	self.valunion.Byte = value;
+	return self.Stream:writeBytes(self.valunion.bytes, 1, 0);
+	--return self.Stream:writeByte(value) == 1;
 end
 
 function BinaryStream.writeBytes(self, buff, len, offset)

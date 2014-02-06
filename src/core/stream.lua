@@ -84,7 +84,7 @@ Stream.refillReadingBuffer = function(self)
 end
 
 
-Stream.readByte = function(self)
+function Stream.readByte(self)
 
 	-- First see if we can get a byte out of the
 	-- Reading buffer
