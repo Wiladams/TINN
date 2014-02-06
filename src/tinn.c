@@ -19,6 +19,9 @@
 
 #include "lj_arch.h"
 
+#include "binlib.h"
+
+
 #if LJ_TARGET_POSIX
 #include <unistd.h>
 #define lua_stdin_is_tty()	isatty(0)
@@ -561,7 +564,10 @@ static int pmain(lua_State *L)
   }
   lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
   luaL_openlibs(L);  /* open libraries */
-  luaopen_lpeg(L);
+
+  luaopen_lpeg(L);      // lpeg library
+  luaopen_binlib(L);    // binlib library
+
   lua_gc(L, LUA_GCRESTART, -1);
 
   if (!(flags & FLAGS_NOENV)) {

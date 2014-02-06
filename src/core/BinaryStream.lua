@@ -181,15 +181,21 @@ function BinaryStream:WriteIntN(n, value)
 
 	if self.BigEndian then
 		for i=n,1,-1 do
-			self:writeByte(rshift(band(lshift(0xff,8*(i-1)), value), 8*(i-1)));
+			local bytesWritten, err = self:writeByte(rshift(band(lshift(0xff,8*(i-1)), value), 8*(i-1)));
+			if not bytesWritten then
+				return false, err
+			end
 		end
 	else
 		for i=1,n do
-			self:writeByte(rshift(band(lshift(0xff,8*(i-1)), value), 8*(i-1)));
+			local bytesWritten, err = self:writeByte(rshift(band(lshift(0xff,8*(i-1)), value), 8*(i-1)));
+			if not bytesWritten then
+				return false, err;
+			end
 		end
 	end
 
-	return value;
+	return n;
 end
 
 function BinaryStream:WriteInt16(value)

@@ -38,6 +38,14 @@ end
 
 --[[
 --]]
+function Stream.close(self)
+	if self.Device.close then
+		return self.Device:close();
+	end
+
+	return self;
+end
+
 Stream.flush = function(self)
 	return self.Device:flush();
 end
@@ -248,6 +256,8 @@ function Stream.writeByte(self, value)
 end
 
 function Stream.writeBytes(self, buffer, len, offset)
+	--print("Stream:writeBytes: ", len)
+
 	return self.Device:writeBytes(buffer, len, offset);
 end
 

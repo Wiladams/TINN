@@ -139,9 +139,8 @@ end
 -- Write bytes to the file
 function BlockFile.writeBytes(self, buff, nNumberOfBytesToWrite, offset)
 	offset = offset or 0
-	fileoffset = fileoffset or 0
 
---print("BlockFile:writeBytes: ", buff, nNumberOfBytesToWrite, offset, deviceoffset)
+print("BlockFile:writeBytes: ", buff, nNumberOfBytesToWrite, offset, self.DeviceOffset)
 --print("BlockFile:writeBytes: ", self.Handle)
 
 	if not self.Handle then
@@ -151,7 +150,8 @@ function BlockFile.writeBytes(self, buff, nNumberOfBytesToWrite, offset)
 	local lpBuffer = ffi.cast("const char *",buff) + offset
 	local lpNumberOfBytesWritten = nil;
 	local lpOverlapped = self:createOverlapped(ffi.cast("uint8_t *",buff)+offset, 
-		nNumberOfBytesToWrite, IOOps.WRITE);
+		nNumberOfBytesToWrite, 
+		IOOps.WRITE);
 
 
 	if lpOverlapped == nil then
@@ -161,7 +161,9 @@ function BlockFile.writeBytes(self, buff, nNumberOfBytesToWrite, offset)
 --print("lpOverlapped: ", lpOverlapped)
 --print("lpNumberOfBytesWritten: ", lpNumberOfBytesWritten)
 
-	local res = core_file.WriteFile(self:getNativeHandle(), lpBuffer, nNumberOfBytesToWrite,
+	local res = core_file.WriteFile(self:getNativeHandle(), 
+		lpBuffer, 
+		nNumberOfBytesToWrite,
 		lpNumberOfBytesWritten,
   		ffi.cast("OVERLAPPED *",lpOverlapped));
 
@@ -177,7 +179,9 @@ function BlockFile.writeBytes(self, buff, nNumberOfBytesToWrite, offset)
 
 
     local key, bytes, ovl = Application:waitForIO(self, lpOverlapped);
---print("key, bytes, ovl: ", key, bytes, ovl)
+
+print("BlockFile.writeBytes: key, bytes, ovl: ", key, bytes, ovl)
+
 	self.DeviceOffset = self.DeviceOffset + bytes;
 	
 	return bytes

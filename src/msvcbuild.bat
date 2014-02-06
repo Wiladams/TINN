@@ -244,9 +244,13 @@
 
 @set KHRONOSLIB=gl_constants.obj gl_ffi.obj gl_types.obj GLContext.obj glext.obj GLSLProgram.obj GLTexture.obj glu.obj GLWindow.obj OglMan.obj View3D.obj wglext.obj
 
+%LJCOMPILE% binlib.c 
+@if errorlevel 1 goto :BAD
+
 %LJCOMPILE% lpeg.c
 @if errorlevel 1 goto :BAD
-@set CLIBS=lpeg.obj
+
+@set CLIBS=lpeg.obj binlib.obj
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
