@@ -9,6 +9,60 @@
 --]]
 local setmetatable = setmetatable;
 
+
+--[[
+	A bag behaves similar to a dictionary.
+	You can add values to it using simple array indexing
+	You can also retrieve values based on array indexing
+	The one addition is the '#' length operator works
+--]]
+local Bag = {}
+setmetatable(Bag, {
+	__call = function(self, ...)
+		return self:_new(...);
+	end,
+})
+
+local Bag_mt = {
+	__index = function(self, key)
+		--print("__index: ", key)
+		return self.tbl[key]
+	end,
+
+	__newindex = function(self, key, value)		
+		--print("__newindex: ", key, value)
+		if value == nil then
+			self.__Count = self.__Count - 1;
+		else
+			self.__Count = self.__Count + 1;
+		end
+
+		--rawset(self, key, value)
+		self.tbl[key] = value;
+	end,
+
+	__len = function(self)
+--		print("__len: ", self.__Count)
+		return self.__Count;
+	end,
+
+	__pairs = function(self)
+		return pairs(self.tbl)
+	end,
+}
+
+function Bag._new(self, obj)
+	local obj = {
+		tbl = {},
+		__Count = 0,
+	}
+
+	setmetatable(obj, Bag_mt);
+
+	return obj;
+end
+
+
 -- The basic list type
 -- This will be used to implement queues and other things
 local List = {}
@@ -198,6 +252,7 @@ Queue.Dequeue = Queue.dequeue;
 Queue.Len = Queue.length;
 
 return {
+	Bag = Bag;
 	List = List;
 	Queue = Queue;
 	Stack = Stack;
