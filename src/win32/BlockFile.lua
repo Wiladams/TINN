@@ -93,7 +93,7 @@ function BlockFile.seek(self, offset, origin)
 	elseif origin == StreamOps.SEEK_SET then
 		self.DeviceOffset = offset;
 	elseif origin == StreamOps.SEEK_END then
-		self.DeviceOffset = self:getSize() - offset
+		self.DeviceOffset = self:getSize() - 1- offset
 	end
 
 	return self.DeviceOffset;
