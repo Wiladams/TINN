@@ -5,7 +5,10 @@
 ---
 --- Distributed under the MIT/X11 License. See COPYING.md for more details.
 ---
-
+-- https://github.com/rtsisyk/luafun
+--
+-- modified  from original, primarily making functions straight up instead 
+-- of variable assignments.
 --------------------------------------------------------------------------------
 -- Tools
 --------------------------------------------------------------------------------
@@ -42,11 +45,11 @@ end
 -- Basic Functions
 --------------------------------------------------------------------------------
 
-local nil_gen = function(_param, _state)
+local function nil_gen(_param, _state)
     return nil
 end
 
-local string_gen = function(param, state)
+local function string_gen(param, state)
     local state = state + 1
     if state > #param then
         return nil
@@ -56,13 +59,13 @@ local string_gen = function(param, state)
 end
 
 local pairs_gen = pairs({ a = 0 }) -- get the generating function from pairs
-local map_gen = function(tab, key)
+local function map_gen(tab, key)
     local value
     local key, value = pairs_gen(tab, key)
     return key, key, value
 end
 
-local iter = function(obj, param, state)
+local function iter(obj, param, state)
     assert(obj ~= nil, "invalid iterator")
     if (type(obj) == "function") then
         return obj, param, state
@@ -82,7 +85,7 @@ local iter = function(obj, param, state)
           obj, type(obj)))
 end
 
-local iter_tab = function(obj)
+local function iter_tab(obj)
     if type(obj) == "function" then
        return obj, nil, nil
     elseif type(obj) == "table" and type(obj[1]) == "function" then
@@ -92,7 +95,7 @@ local iter_tab = function(obj)
     end
 end
 
-local each = function(fun, gen, param, state)
+local function each(fun, gen, param, state)
     local gen_x, param_x, state_x = iter(gen, param, state)
     repeat
         state_x = call_if_not_empty(fun, gen_x(param_x, state_x))
@@ -103,7 +106,7 @@ end
 -- Generators
 --------------------------------------------------------------------------------
 
-local range_gen = function(param, state)
+local function range_gen(param, state)
     local stop, step = param[1], param[2]
     local state = state + step
     if state >= stop then
@@ -112,7 +115,7 @@ local range_gen = function(param, state)
     return state, state
 end
 
-local range_rev_gen = function(param, state)
+local function range_rev_gen(param, state)
     local stop, step = param[1], param[2]
     local state = state + step
     if state <= stop then
@@ -121,7 +124,7 @@ local range_rev_gen = function(param, state)
     return state, state
 end
 
-local range = function(start, stop, step)
+local function range(start, stop, step)
     if step == nil then
         step = 1
         if stop == nil then

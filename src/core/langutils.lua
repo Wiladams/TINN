@@ -1,5 +1,5 @@
 
-local importGlobal = function(thing, name)
+local function importGlobal(thing, name)
 	if name and thing then
 		_G[name] = thing;
 	elseif type(thing) == "table" then

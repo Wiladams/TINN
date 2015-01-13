@@ -2,7 +2,7 @@ local Machine = require("Machine")
 local JSON = require("dkjson")
 
 local function showDOSDevices()
-	print("==== DOS Devices ====")
+	print("---- DOS Devices ----")
 	local res = {}
 	for junction in Machine.Devices:DOSDeviceIterator() do
 		local junct = {junction=junction, paths={}}

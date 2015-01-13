@@ -19,13 +19,13 @@ static const int  DRIVE_RAMDISK    = 6;
 
 
 local driveTypes = {
-	[ffi.C.DRIVE_UNKNOWN] = "UNKNOWN",
-	[ffi.C.DRIVE_NO_ROOT_DIR] = "NO_ROOT_DIR",
-	[ffi.C.DRIVE_REMOVABLE] = "REMOVABLE",
-	[ffi.C.DRIVE_FIXED] = "FIXED",
-	[ffi.C.DRIVE_REMOTE] = "REMOTE",
-	[ffi.C.DRIVE_CDROM] = "CDROM",
-	[ffi.C.DRIVE_RAMDISK] = "RAMDISK",
+	[ffi.C.DRIVE_UNKNOWN] 		= "UNKNOWN",
+	[ffi.C.DRIVE_NO_ROOT_DIR] 	= "NO_ROOT_DIR",
+	[ffi.C.DRIVE_REMOVABLE] 	= "REMOVABLE",
+	[ffi.C.DRIVE_FIXED] 		= "FIXED",
+	[ffi.C.DRIVE_REMOTE] 		= "REMOTE",
+	[ffi.C.DRIVE_CDROM] 		= "CDROM",
+	[ffi.C.DRIVE_RAMDISK] 		= "RAMDISK",
 }
 
 
@@ -45,7 +45,6 @@ end
 function Storage.logicalDriveNames(self)
 	local nBufferLength = 255;
 	local lpBuffer = ffi.new("wchar_t[256]");
-
 	local res = core_file.GetLogicalDriveStringsW(nBufferLength, lpBuffer)
 
 	return iterators.wmstrziter(lpBuffer, nBufferLength)
