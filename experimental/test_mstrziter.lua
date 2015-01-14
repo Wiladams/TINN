@@ -1,8 +1,8 @@
 local ffi = require("ffi")
 local core_string = require("core_string_l1_1_0")
 
-require("fun")()
-local iterators = require("iterators")
+local fun = require("fun")()
+local iterators = require("msiterators")
 local striter = iterators.striter
 
 ffi.cdef[[

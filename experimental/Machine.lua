@@ -4,7 +4,7 @@ local core_file = require("core_file_l1_2_0");
 local core_string = require("core_string_l1_1_0")
 local errorhandling = require("core_errorhandling_l1_1_1");
 local WinError = require("win_error")
-local iterators = require("iterators")
+local iterators = require("msiterators")
 local Storage = require("Storage")
 
 local Machine = {

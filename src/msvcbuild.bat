@@ -35,6 +35,7 @@
 %LUAC% core/Functor.lua Functor.obj
 %LUAC% core/langutils.lua langutils.obj
 %LUAC% core/MemoryStream.lua MemoryStream.obj
+%LUAC% core/msiterators.lua msiterators.obj
 %LUAC% core/re.lua re.obj
 %LUAC% REPL.lua REPL.obj
 %LUAC% core/Query.lua Query.obj
@@ -46,7 +47,7 @@
 %LUAC% core/tabutils.lua tabutils.obj
 %LUAC% core/Vector.lua Vector.obj
 %LUAC% core/zlib.lua zlib.obj
-@set TINNLIB=arch.obj base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  fun.obj Functor.obj langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stdlib.obj stream.obj StreamOps.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
+@set TINNLIB=arch.obj base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  fun.obj Functor.obj langutils.obj MemoryStream.obj msiterators.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stdlib.obj stream.obj StreamOps.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
 
 @rem TINN Task library
 %LUAC% task/Application.lua Application.obj

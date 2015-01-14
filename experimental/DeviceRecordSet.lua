@@ -7,7 +7,7 @@ local core_string = require("core_string_l1_1_0")
 local errorhandling = require("core_errorhandling_l1_1_1");
 local SetupApi = require("SetupApi")
 local WinNT = require("WinNT")
-local iterators = require("iterators")
+local iterators = require("msiterators")
 local WinError = require("win_error")
 local WinBase = require("WinBase")
 
