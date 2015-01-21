@@ -244,13 +244,16 @@
 
 @set KHRONOSLIB=gl_constants.obj gl_ffi.obj gl_types.obj GLContext.obj glext.obj GLSLProgram.obj GLTexture.obj glu.obj GLWindow.obj OglMan.obj View3D.obj wglext.obj
 
-%LJCOMPILE% binlib.c 
+@rem %LJCOMPILE% binlib.c 
+@rem @if errorlevel 1 goto :BAD
+
+%LJCOMPILE% dll_main.cpp 
 @if errorlevel 1 goto :BAD
 
 %LJCOMPILE% lpeg.c
 @if errorlevel 1 goto :BAD
 
-@set CLIBS=lpeg.obj binlib.obj
+@set CLIBS=lpeg.obj dll_main.obj
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
@@ -266,6 +269,8 @@ if exist tinn.exe.manifest^
 if exist tinnsh.exe.manifest^
   %LJMT% -manifest tinnsh.exe.manifest -outputresource:tinnsh.exe
 
+%LJLINK% /DLL /out:libtinn.dll %LJLIBNAME% %CLIBS% %COMPUTICLELIB% %OLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %WINCOREAPI% %WIN32LIB%
+@if errorlevel 1 goto :BAD
 
 
 @del *.obj *.manifest

@@ -115,7 +115,7 @@ function MemoryStream:seek(pos, origin)
 			self.Position = pos;
 		end
 	elseif origin == StreamOps.SEEK_END then
-		local newpos = self.Length-1 + pos
+		local newpos = self.Length - 1 - pos
 		if newpos >= 0 and newpos < self.Length then
 			self.Position = newpos
 		end

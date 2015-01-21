@@ -195,6 +195,7 @@ local socktypes = {
 }
 
 local protocols = {
+    [IPPROTO_IGMP] = "IPPROTO_IGMP",
     [IPPROTO_IP]  = "IPPROTO_IP",
     [IPPROTO_TCP] = "IPPROTO_TCP",
     [IPPROTO_UDP] = "IPPROTO_UDP",

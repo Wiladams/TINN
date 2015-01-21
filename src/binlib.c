@@ -40,7 +40,7 @@
 
 
 #include <ctype.h>
-//#include <string.h>
+#include <string.h>
 //#include <nbase.h>
 
 //extern "C" {
@@ -117,30 +117,39 @@ static void doswap(int swap, void *p, size_t n)
 
 static int l_unpack(lua_State *L) 		/** unpack(f,s, [init]) */
 {
- size_t len;
- const char *s=luaL_checklstring(L,2,&len); /* switched s and f */
- const char *f=luaL_checkstring(L,1);
- int i_read = luaL_optint(L,3,1)-1;
- unsigned int i;
- if (i_read >= 0) {
-   i = i_read;
- } else {
-   i = 0;
- }
- int n=0;
- int swap=0;
- int done=0;
- lua_pushnil(L);
- while (*f && done == 0)
- {
-  int c=*f++;
-  int N=1;
-  if (isdigit((int) (unsigned char) *f)) 
-  {
-   N=0;
-   while (isdigit((int) (unsigned char) *f)) N=10*N+(*f++)-'0';
-   if (N==0 && c==OP_STRING) { lua_pushliteral(L,""); ++n; }
+  size_t len;
+  int n=0;
+  int swap=0;
+  int done=0;
+
+  const char *s=luaL_checklstring(L,2,&len); /* switched s and f */
+  const char *f=luaL_checkstring(L,1);
+  int i_read = luaL_optint(L,3,1)-1;
+  unsigned int i;
+  
+  if (i_read >= 0) {
+    i = i_read;
+  } else {
+    i = 0;
   }
+
+  lua_pushnil(L);
+
+  while (*f && done == 0)
+  {
+    int c=*f++;
+    int N=1;
+    if (isdigit((int) (unsigned char) *f)) 
+    {
+      N=0;
+      while (isdigit((int) (unsigned char) *f)) 
+        N=10*N+(*f++)-'0';
+   
+      if (N==0 && c==OP_STRING) { 
+        lua_pushliteral(L,""); ++n; 
+      }
+  }
+
   while (N-- && done == 0) switch (c)
   {
    case OP_LITTLEENDIAN:
@@ -188,9 +197,9 @@ static int l_unpack(lua_State *L) 		/** unpack(f,s, [init]) */
 
    case OP_BINMSB:
      {
+       unsigned char sbyte = 0x80;
        luaL_Buffer buf;
        luaL_buffinit(L,&buf);
-       unsigned char sbyte = 0x80;
        N++;
        if (i+N > len) {done = 1; break;}
        for (unsigned int ii = i; ii < i+N; ii++) {

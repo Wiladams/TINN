@@ -19,7 +19,7 @@
 
 #include "lj_arch.h"
 
-#include "binlib.h"
+//#include "binlib.h"
 
 
 #if LJ_TARGET_POSIX
@@ -566,7 +566,7 @@ static int pmain(lua_State *L)
   luaL_openlibs(L);  /* open libraries */
 
   luaopen_lpeg(L);      // lpeg library
-  luaopen_binlib(L);    // binlib library
+  //luaopen_binlib(L);    // binlib library
 
   lua_gc(L, LUA_GCRESTART, -1);
 
