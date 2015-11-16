@@ -9,26 +9,46 @@ local core_console = require("core_console_l1_1_0");
 
 --[[
 	Test cases
-
-
 --]]
 print("test_OSModule.lua - Test");
 
+
+local function getCInfo(key)
+	-- This first case covers values, this includes:
+	-- constants, enums, and functions from within a library
+	local success, info = pcall(function() return ffi.C[key] end)
+	if success then 
+		print(string.format("getCInfo(ffi.C.%s) : ", key, info))
+		return info 
+	end
+
+	-- this second case covers when we want to return 
+	-- a type declaration
+	success, info = pcall(function() return ffi.typeof(key) end)
+	if success then 
+		print(string.format("getCInfo(ffi.typeof(%s)) : ", key, info))
+		return info 
+	end
+
+	return nil, "not a constant nor a type";
+end
+
+
 local function test_loadmodule()
-	local kernel32, err = OSModule("kernel32");
+	local k32, err = OSModule("kernel32");
 
-	print(kernel32, err);
+	print("OSModule: ", k32, err);
 
-	local GetConsoleMode = kernel32.GetConsoleMode;
+	local GetConsoleMode = k32.GetConsoleMode;
 
---[[
 	print("GetConsoleMode", GetConsoleMode);
 
 	local lpMode = ffi.new("DWORD[1]");
 	local status = GetConsoleMode(nil, lpMode);
 
 	print("Status: ", status);
---]]
+
+	print(k32.SYSTEMTIME);
 end
 
 local function test_Signature()
@@ -54,7 +74,7 @@ function test_loadlibrary()
 	flags = 0;
 	local handle = libraryloader.LoadLibraryExA("kernel32", nil, flags);
 
-	print("test_loadlibrary, LoadLibraryExA: ", res);
+	print("test_loadlibrary, LoadLibraryExA: ", handle);
 
 	if handle == nil then
 		local err = errorhandling.GetLastError();
@@ -77,5 +97,12 @@ end
 
 --test_Signature();
 --test_loadmodule();
-test_loadlibrary();
+--test_loadlibrary();
 
+ffi.cdef[[
+static const int someInt = 23;
+]]
+
+print("GetConsoleMode : ", getCInfo("GetConsoleMode"))
+print("SYSTEMTIME : ", getCInfo("SYSTEMTIME"))
+print("someInt : ", getCInfo("someInt"))

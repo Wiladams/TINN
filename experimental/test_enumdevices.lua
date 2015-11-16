@@ -22,8 +22,8 @@ local function enumerateAll()
 	local drs = DeviceRecordSet();
 
 	-- show everything for every device
-	--each(printIt, drs:devices())
-
+	each(printIt, drs:devices())
+--[[
 	-- do a projection on the fields
 	local function projection(fields, gen, param, state)
 		local function projector(x)
@@ -38,7 +38,7 @@ local function enumerateAll()
 		return map(projector, gen, param, state)
 	end
 	--each(printIt, map(function(x) return {objectname = x.objectname, description = x.description} end, drs:devices()))
-	each(printIt, projection({"objectname", "description"}, drs:devices()))
+	each(printIt, projection({"locationpaths", "objectname", "description", "friendlyname"}, drs:devices()))
 
 	-- show only certain records
 	local function enumeratorFilter(name, x)
@@ -46,6 +46,7 @@ local function enumerateAll()
 	end
 
 	--each(printIt, filter(Functor(enumeratorFilter, "STORAGE"), drs:devices()))
+--]]
 end
 
 

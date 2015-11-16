@@ -1,7 +1,6 @@
 
 local ffi = require("ffi")
 
---local User32Lib = ffi.load("user32")
 local Desktop_ffi = require("Desktop_ffi")
 local errorhandling = require("core_errorhandling_l1_1_1");
 

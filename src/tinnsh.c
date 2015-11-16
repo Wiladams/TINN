@@ -15,7 +15,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
-#include "luajit.h"
+//#include "luajit.h"
 
 #include "lj_arch.h"
 
@@ -116,7 +116,7 @@ static int docall(lua_State *L, int narg, int clear)
 
 static void print_version(void)
 {
-  fputs(LUAJIT_VERSION " -- " LUAJIT_COPYRIGHT ". " LUAJIT_URL "\n", stdout);
+  fputs("tinnsh.exe, Copyright William Adams 2015", stdout);
 }
 
 static void print_jit_status(lua_State *L)
@@ -456,7 +456,7 @@ static int pmain(lua_State *L)
   int flags = 0;
   globalL = L;
   if (argv[0] && argv[0][0]) progname = argv[0];
-  LUAJIT_VERSION_SYM();  /* linker-enforced version check */
+//  LUAJIT_VERSION_SYM();  /* linker-enforced version check */
   script = collectargs(argv, &flags);
   if (script < 0) {  /* invalid args? */
     print_usage();

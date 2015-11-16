@@ -35,4 +35,6 @@ typedef void (*Newpf) (lua_State *L,
                        const void *ud,  /* (user) data to be passed to 'f' */
                        size_t l);  /* size of data to be passed to 'f' */
 
+int luaopen_lpeg (lua_State *L);
+
 #endif
