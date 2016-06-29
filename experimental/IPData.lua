@@ -4,7 +4,7 @@
 
 --  Decimal   Keyword            Protocol
 
-IPProtocols = {
+local IPProtocols = {
      { 0,    "HOPOPT",          "IPv6 Hop-by-Hop Option"},                
      { 1,    "ICMP",            "Internet Control Message"},              
      { 2,    "IGMP",            "Internet Group Management"},             
@@ -148,6 +148,27 @@ IPProtocols = {
      {255,   "RAW"},                                              
 }
 
+local function lookup(id)
+     local fieldnum;
+
+     if type(id) == "number" then
+          fieldnum = 1
+     elseif type(id) == "string" then
+          fieldnum = 2
+     end
+
+     if not fieldnum then
+          return nil;
+     end
+
+     for _idx, entry in ipairs(IPProtocols) do
+          if entry[fieldnum] == id then
+               return entry[2]
+          end
+     end
+
+     return nil;
+end
 
 --[[
 No Name Protocols
@@ -161,3 +182,8 @@ No Name Protocols
      {253,                   Use for experimentation and testing   
      {254,                   Use for experimentation and testing   
 --]]
+
+return {
+     Protocols = IPProtocols,
+     lookup = lookup,
+}

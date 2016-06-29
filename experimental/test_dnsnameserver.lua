@@ -34,7 +34,7 @@ local domains = {
 local addresses = {
 	"209.244.0.3",		-- Level 3
 	"94.23.39.66",		-- luajit.org
-	"208.109.4.201",	-- godaddy.com
+	"208.109.4.201",	-- godaddy.com	D1.6D.04.C9
 
 }
 
@@ -111,10 +111,10 @@ local function querySRV()
 end
 
 local function main()
-	--queryA();
+	queryA();
 	--queryCNAME();
 	--queryMX();
-	queryPTR();
+	--queryPTR();
 	--querySRV();
 end
 

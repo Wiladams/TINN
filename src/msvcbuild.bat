@@ -31,9 +31,11 @@
 %LUAC% core/Collections.lua Collections.obj
 %LUAC% core/dkjson.lua dkjson.obj
 %LUAC% core/FileStream.lua FileStream.obj
+%LUAC% core/fun.lua fun.obj
 %LUAC% core/Functor.lua Functor.obj
 %LUAC% core/langutils.lua langutils.obj
 %LUAC% core/MemoryStream.lua MemoryStream.obj
+%LUAC% core/msiterators.lua msiterators.obj
 %LUAC% core/re.lua re.obj
 %LUAC% REPL.lua REPL.obj
 %LUAC% core/Query.lua Query.obj
@@ -45,7 +47,7 @@
 %LUAC% core/tabutils.lua tabutils.obj
 %LUAC% core/Vector.lua Vector.obj
 %LUAC% core/zlib.lua zlib.obj
-@set TINNLIB=arch.obj base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  Functor.obj langutils.obj MemoryStream.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stdlib.obj stream.obj StreamOps.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
+@set TINNLIB=arch.obj base64.obj BinaryStream.obj BitBang.obj Collections.obj dkjson.obj FileStream.obj  fun.obj Functor.obj langutils.obj MemoryStream.obj msiterators.obj re.obj REPL.obj Query.obj ResourceMapper.obj Shell.obj stdlib.obj stream.obj StreamOps.obj stringzutils.obj tabutils.obj Vector.obj zlib.obj
 
 @rem TINN Task library
 %LUAC% task/Application.lua Application.obj
@@ -244,42 +246,46 @@
 
 @set KHRONOSLIB=gl_constants.obj gl_ffi.obj gl_types.obj GLContext.obj glext.obj GLSLProgram.obj GLTexture.obj glu.obj GLWindow.obj OglMan.obj View3D.obj wglext.obj
 
+%LJCOMPILE% sqlite3.c 
+@if errorlevel 1 goto :BAD
+
 @rem %LJCOMPILE% binlib.c 
 @rem @if errorlevel 1 goto :BAD
 
-%LJCOMPILE% dll_main.cpp 
+%LJCOMPILE% dll_main.c
 @if errorlevel 1 goto :BAD
 
 %LJCOMPILE% lpeg.c
 @if errorlevel 1 goto :BAD
 
-@set CLIBS=lpeg.obj dll_main.obj
+@set CLIBS=lpeg.obj dll_main.obj sqlite3.obj
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
-%LJLINK% /out:tinn.exe %LJLIBNAME% tinn.obj %CLIBS% %COMPUTICLELIB% %OLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%  %LJLIBNAME%
+
+%LJLINK% /out:tinn.exe %LJLIBNAME% tinn.obj %CLIBS% %TINNLIB% %COMPUTICLELIB% %OLELIB% %TINNNET%  %TASKLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB%
 @if errorlevel 1 goto :BAD
 if exist tinn.exe.manifest^
   %LJMT% -manifest tinn.exe.manifest -outputresource:tinn.exe
 
-%LJCOMPILE% tinnsh.c
-@if errorlevel 1 goto :BAD
-%LJLINK% /out:tinnsh.exe %LJLIBNAME% tinnsh.obj %CLIBS% %COMPUTICLELIB% %OLELIB% %TINNNET% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB% %LJLIBNAME%
-@if errorlevel 1 goto :BAD
-if exist tinnsh.exe.manifest^
-  %LJMT% -manifest tinnsh.exe.manifest -outputresource:tinnsh.exe
+@%LJCOMPILE% tinnsh.c
+@rem if errorlevel 1 goto :BAD
+@rem %LJLINK% /out:tinnsh.exe %LJLIBNAME% tinnsh.obj %CLIBS% %COMPUTICLELIB% %OLELIB% %TINNNET% %TINNLIB% %GRAPHICSLIB% %KHRONOSLIB% %WINCOREAPI% %WIN32LIB% %LJLIBNAME%
+@rem if errorlevel 1 goto :BAD
+@rem if exist tinnsh.exe.manifest^
+@rem  %LJMT% -manifest tinnsh.exe.manifest -outputresource:tinnsh.exe
 
-%LJLINK% /DLL /out:libtinn.dll %LJLIBNAME% %CLIBS% %COMPUTICLELIB% %OLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %WINCOREAPI% %WIN32LIB%
-@if errorlevel 1 goto :BAD
+@rem %LJLINK% /DLL /out:libtinn.dll %LJLIBNAME% %CLIBS% %COMPUTICLELIB% %OLELIB% %TINNNET% %TINNLIB% %TASKLIB% %GRAPHICSLIB% %WINCOREAPI% %WIN32LIB%
+@rem @if errorlevel 1 goto :BAD
 
 
-@del *.obj *.manifest
+del *.obj *.manifest
 @echo.
 @echo === Successfully built TINN for Windows/%LJARCH% ===
 move tinn.exe bin 
-move tinnsh.exe bin
+@rem move tinnsh.exe bin
 @rem copy /Y init.lua bin
-@goto :END
+goto :END
 :BAD
 @echo.
 @echo *******************************************************

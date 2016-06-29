@@ -87,11 +87,11 @@ local function wmstrziter(data, datalength)
 
 		while len < maxLen do 
 			--print("char: ", string.char(lpBuffer[idx]))
-			if lpBuffer[idx] == 0 then
+			if data[idx] == 0 then
 				break
 			end
 		
-			nameBuff[len] = lpBuffer[idx];
+			nameBuff[len] = data[idx];
 			len = len + 1;
 			idx = idx + 1;
 		end
