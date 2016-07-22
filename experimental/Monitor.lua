@@ -19,7 +19,7 @@ local Monitor_mt = {
 
 Monitor.init = function(self, hMonitor)
 	if hMonitor == nil then
-		return nil, "a valid handle was not specified"
+		return false, "a valid handle was not specified"
 	end
 
 	local info = Monitor_ffi.MONITORINFOEXA();

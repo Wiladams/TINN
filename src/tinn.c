@@ -15,7 +15,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
-#include "luajit.h"
+//#include "luajit.h"
 
 #include "lj_arch.h"
 
@@ -134,7 +134,7 @@ static int docall(lua_State *L, int narg, int clear)
 
 static void print_version(void)
 {
-  fputs(LUAJIT_VERSION " -- " LUAJIT_COPYRIGHT ". " LUAJIT_URL "\n", stdout);
+  fputs("TINN - Copyright 2015 William Adams", stdout);
 }
 
 static void print_jit_status(lua_State *L)
@@ -522,18 +522,23 @@ static int pmain(lua_State *L)
   int script;
   int flags = 0;
   globalL = L;
-  if (argv[0] && argv[0][0]) progname = argv[0];
-  LUAJIT_VERSION_SYM();  /* linker-enforced version check */
+  if (argv[0] && argv[0][0]) 
+    progname = argv[0];
+  
+//  LUAJIT_VERSION_SYM();  /* linker-enforced version check */
   script = collectargs(argv, &flags);
+  
   if (script < 0) {  /* invalid args? */
     print_usage();
     s->status = 1;
     return 0;
   }
+  
   if ((flags & FLAGS_NOENV)) {
     lua_pushboolean(L, 1);
     lua_setfield(L, LUA_REGISTRYINDEX, "LUA_NOENV");
   }
+  
   lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
   luaL_openlibs(L);  /* open libraries */
 

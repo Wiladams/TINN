@@ -1,7 +1,6 @@
 -- test_wkscli.lua
 local ffi = require("ffi")
 
-print("Arg: ", arg);
 
 local Workstation = require("Workstation");
 local wkscli = require("wkscli")
@@ -21,7 +20,7 @@ local printTable = function(tbl, title)
 end
 
 local function printRecords(records, title)
-print("printRecords: ", title, records)
+--print("printRecords: ", title, records)
 
 	if title then
 		print(title);
@@ -39,6 +38,8 @@ end
 
 
 local function test_workstation()
+	print("---- test_workstation ----");
+	
 	local station = Workstation();
 
 	print("after workstation construction")
@@ -101,4 +102,5 @@ print("NetUseEnum: ", wkscli.NetUseEnum)
 	return closure;
 end
 
-test_uses();
+test_workstation();
+--test_uses();

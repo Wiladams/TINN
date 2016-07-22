@@ -34,7 +34,7 @@ function WorkStation.uses(self)
 	local TotalEntries = ffi.new("DWORD[1]");
 	local ResumeHandle = ffi.new("DWORD[1]");
 
-print("WorkStation.uses, 1.0")
+--print("WorkStation.uses, 1.0")
 
 	local status = wkscli.NetUseEnum (
      self.ServerName,
@@ -45,9 +45,9 @@ print("WorkStation.uses, 1.0")
      TotalEntries,
      ResumeHandle);
 
-	print("uses, STATUS: ", status);
-	print("uses, Entries: ", EntriesRead[0]);
-	print("uses, TotalEntries: ", TotalEntries[0]);
+--	print("uses, STATUS: ", status);
+--	print("uses, Entries: ", EntriesRead[0]);
+--	print("uses, TotalEntries: ", TotalEntries[0]);
 
 	local buff, err = netutils.NetApiBuffer(BufPtr[0]);
 

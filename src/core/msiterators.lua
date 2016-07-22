@@ -69,7 +69,17 @@ local function striter(params)
 	return nil_gen, nil, nil
 end
 
+local function mstriter(data, separator, datalength)
+	return fun.map(function(ptr,len) return ffi.string(ptr, len) end, 
+		striter({data = data, datalength = datalength, separator=separator, basetype="char"}))
+end
 
+local function mstrziter(data, datalength)
+	datalength = datalength or #data
+
+	return fun.map(function(ptr,len) return ffi.string(ptr, len) end, 
+		striter({data = data, datalength = datalength, separator=0, basetype="char"}))
+end
 
 -- given a unicode string which contains
 -- null terminated strings
@@ -86,7 +96,7 @@ local function wmstrziter(data, datalength)
 		local len = 0;
 
 		while len < maxLen do 
-			--print("char: ", string.char(lpBuffer[idx]))
+			print("char: ", string.char(lpBuffer[idx]))
 			if data[idx] == 0 then
 				break
 			end

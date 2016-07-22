@@ -77,11 +77,11 @@ function Scheduler.scheduleTask(self, task, params)
 end
 
 function Scheduler.spawn(self, func, ...)
-	print("Scheduler.spawn - BEGIN")
+	--print("Scheduler.spawn - BEGIN")
 	local task = Task(func, ...)
 	task.TaskID = self:getNewTaskID();
 	self:scheduleTask(task, {...});
-	print("Scheduler.spawn - END")
+	--print("Scheduler.spawn - END")
 	
 	return task;
 end
@@ -139,8 +139,6 @@ function Scheduler.step(self)
 	-- In both cases, we parse out the results of the resume 
 	-- into a success indicator and the rest of the values returned 
 	-- from the routine
-	--local pcallsuccess = results[1];
-	--table.remove(results,1);
 
 	local success = results[1];
 	table.remove(results,1);

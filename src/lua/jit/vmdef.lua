@@ -8,7 +8,7 @@ irnames = "LT    GE    LE    GT    ULT   UGE   ULE   UGT   EQ    NE    ABC   RET
 
 irfpm = { [0]="floor", "ceil", "trunc", "sqrt", "exp", "exp2", "log", "log2", "log10", "sin", "cos", "tan", "other", },
 
-irfield = { [0]="str.len", "func.env", "func.pc", "thread.env", "tab.meta", "tab.array", "tab.node", "tab.asize", "tab.hmask", "tab.nomm", "udata.meta", "udata.udtype", "udata.file", "cdata.ctypeid", "cdata.ptr", "cdata.int", "cdata.int64", "cdata.int64_4", },
+irfield = { [0]="str.len", "func.env", "func.pc", "func.ffid", "thread.env", "tab.meta", "tab.array", "tab.node", "tab.asize", "tab.hmask", "tab.nomm", "udata.meta", "udata.udtype", "udata.file", "cdata.ctypeid", "cdata.ptr", "cdata.int", "cdata.int64", "cdata.int64_4", },
 
 ircall = {
 [0]="lj_str_cmp",
@@ -120,6 +120,7 @@ traceerr = {
 "trace too deep",
 "too many snapshots",
 "blacklisted",
+"retry recording",
 "NYI: bytecode %d",
 "leaving loop in root trace",
 "inner loop in root trace",
@@ -340,6 +341,7 @@ ffnames = {
 "ffi.new",
 "ffi.cast",
 "ffi.typeof",
+"ffi.typeinfo",
 "ffi.istype",
 "ffi.sizeof",
 "ffi.alignof",
