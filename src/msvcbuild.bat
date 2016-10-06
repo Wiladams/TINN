@@ -20,7 +20,7 @@
 
 @set LUAC=luajit -b
 @set LJDLLNAME=lua51.dll
-@set LJLIBNAME=lua51.lib
+@set LJLIBNAME=bin/lua51.lib
 @set ZLIBNAME=zlib.lib
 
 @rem The TINN core library
@@ -246,19 +246,20 @@
 
 @set KHRONOSLIB=gl_constants.obj gl_ffi.obj gl_types.obj GLContext.obj glext.obj GLSLProgram.obj GLTexture.obj glu.obj GLWindow.obj OglMan.obj View3D.obj wglext.obj
 
-%LJCOMPILE% sqlite3.c 
-@if errorlevel 1 goto :BAD
+@rem %LJCOMPILE% sqlite3.c 
+@rem @if errorlevel 1 goto :BAD
 
 @rem %LJCOMPILE% binlib.c 
 @rem @if errorlevel 1 goto :BAD
 
-%LJCOMPILE% dll_main.c
-@if errorlevel 1 goto :BAD
+@rem %LJCOMPILE% dll_main.c
+@rem @if errorlevel 1 goto :BAD
 
 %LJCOMPILE% lpeg.c
 @if errorlevel 1 goto :BAD
 
-@set CLIBS=lpeg.obj dll_main.obj sqlite3.obj
+@rem @set CLIBS=lpeg.obj dll_main.obj sqlite3.obj
+@set CLIBS=lpeg.obj
 
 %LJCOMPILE% tinn.c
 @if errorlevel 1 goto :BAD
