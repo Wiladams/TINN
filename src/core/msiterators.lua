@@ -96,7 +96,7 @@ local function wmstrziter(data, datalength)
 		local len = 0;
 
 		while len < maxLen do 
-			print("char: ", string.char(lpBuffer[idx]))
+			--print("char: ", string.char(lpBuffer[idx]))
 			if data[idx] == 0 then
 				break
 			end

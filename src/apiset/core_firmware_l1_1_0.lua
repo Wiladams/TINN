@@ -3,7 +3,7 @@
 
 local ffi = require("ffi");
 
-local Lib = ffi.load("kernel32");
+local WTypes = require("WTypes");
 
 ffi.cdef[[
 DWORD
@@ -22,6 +22,8 @@ SetFirmwareEnvironmentVariableW(
     DWORD    nSize
     );
 ]]
+
+local Lib = ffi.load("kernel32");
 
 return {
     Lib = Lib,

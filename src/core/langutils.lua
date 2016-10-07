@@ -1,13 +1,15 @@
 
-local function importGlobal(thing, name)
+local function importGlobal(thing, name, tbl)
+	tbl = tbl or _G;
+
 	if name and thing then
-		_G[name] = thing;
+		tbl[name] = thing;
 	elseif type(thing) == "table" then
 		for k,v in pairs(thing) do 
 			--if type(v) == "table" then
 			--	makeGlobal(v, k);
 			--else
-				_G[k]=v
+				tbl[k]=v
 			--end 
 		end
 	end

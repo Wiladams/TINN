@@ -159,7 +159,7 @@ end
 
 
 
-function strchr(s, c)
+local function strchr(s, c)
 	local p = ffi.cast("const char *", s);
 
 	while p[0] ~= c do
@@ -172,7 +172,7 @@ function strchr(s, c)
 	return p
 end
 
-function strrchr(s, c)
+local function strrchr(s, c)
 	local p = ffi.cast("const char *", s);
 	local offset = strlen(p);
 
@@ -186,7 +186,7 @@ function strrchr(s, c)
 	return nil
 end
 
-function strstr(str, target)
+local function strstr(str, target)
 
 	if (target == nil or target[0] == 0) then
 		return str;
@@ -222,7 +222,7 @@ end
 -- Given two null terminated strings
 -- return how many bytes they have in common
 -- this is for prefix matching
-function string_same(a, b)
+local function string_same(a, b)
 	local p1 = ffi.cast("const char *", a);
 	local p2 = ffi.cast("const char *", b);
 
@@ -276,6 +276,8 @@ return {
 	strlen = strlen,
 	strcpy = strcpy,
 	strncmp = strncmp,
+	
+	string_same = string_same,
 
 	bintohex = bintohex,
 	hextobin = hextobin,
