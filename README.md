@@ -1,19 +1,12 @@
 TINN
 ===
-Make some changes
-As an acronym, TINN could stand for many things:
-*	Test Infrastructure for Network Nodes
-*	Tcp IP Networking Nodule
 
-One thing is for sure though  
-	
-	TINN Is Not Node
+TINN is a Swiss army knife for coding on the Windows platform, using the lua language.  
+With TINN, you can create any number of interesting applications from somewhat scalable 
+web services to collaborative video games.
 
-
-TINN is like a Swiss army knife for coding on the Windows platform.  With TINN, you can create any number
-of interesting applications from somewhat scalable web services to collaborative video games.
-
-TINN is based on the LuaJIT compiler.  As such, the programs you write for TINN are actually normal looking LuaJIT scripts.
+TINN is based on the LuaJIT compiler.  As such, the programs you write for TINN are actually 
+normal looking LuaJIT scripts.
 
 Included in the box with TINN are some basic modules  
 *	lpeg - for interesting text parsing and manipulation  
@@ -31,8 +24,8 @@ model for seamlessly dealing with cooperative processing.
   
 Here is a very simple example of getting the IP address of the networking interface:  
 ```
-local net = require("Network")()`  
-print(net:GetLocalInterface())`  
+local Network = require("Network")
+print("local: ", Network:GetLocalAddress())
 ```  
   
 The general philosophy behind TINN is to make fairly mundane things very easy, make very hard things very approachable, and keep really easy things really easy.  
@@ -43,12 +36,12 @@ Building TINN
 
 Within the src directory, you will find almost everything you need to build TINN.  As TINN is specifically
 meant for Windows, there is a msvcbuild.bat file.  If you've ever compiled the LuaJIT project, this will look
-very familiar because it's the same file, with some specific modifications.
+very familiar because it's derived from the LuaJIT build file, with very project specific modifications.
 *	Bring up a Visual Studio command prompt  
 *	cd to the src directory  
 *	run the msvcbuild.bat script  
 
-You will end up with a tinn.exe file located in the '.\bin' directory.  To use TINN, you will need the copy all the stuff in the '.\bin' directory to a location of your choosing.  Best is to move the directory to somewhere, and then make that part of your path.  The root directory also contains the files msvcr100.dll and msvcp100.dll.  These are the C runtime library files for Visual Studio 10.0.
+You will end up with a tinn.exe file located in the '.\bin' directory.  To use TINN, you will need the copy all the stuff in the '.\bin' directory to a location of your choosing.  Best is to move the directory to somewhere, and then make that part of your path.  The root directory also contains the files to somewhere in your PATH.
 
 Using TINN
 ----------
@@ -57,40 +50,6 @@ Run the tinn.exe program, and pass it the name of the script you want to run:
 
 tinn.exe test_network.lua
 
-
-TINN introduces a couple of fairly useful constructs.  'include' and 'use'.
-
-the "require()" function is native the the Lua language.  'include' builds upon this by making a global variable with
-the same name as the required module.
-
-include('dsrole')
-
-This will make available a global variable with the name 'dsrole'.  This gives you a ready handle on the module.  Really
-it's different than simply calling 'require' where it is needed, as the system also maintains a handle on the module.
-
-use('dsrole')
-
-The 'use()' function is slightly different.  It will also perform a 'require' on the module, but it will also make global anything that is returned from the call.  This assumes that what is returned from the call is a table.  This is useful for
-quickly turning a module into a set of globally accessible functions.  So, if you have a module that looks like the following:
-
-```
--- dsrole.lua
-local dsrole = {
-    DsRoleFreeMemory = Lib.DsRoleFreeMemory,
-    DsRoleGetPrimaryDomainInformation = Lib.DsRoleGetPrimaryDomainInformation,    
-};
-```
-
-return dsrole
-
-If you then call:
-
-use("dsrole")
-
-The functions, DsRoleFreeMemory, and DsRoleGetPrimaryDomainInformation will become functions in the global namespace.
-this is very convenient from the programmer's perspective as it makes coding look very similar to what you would do 
-if you were simply programming in 'C' using these APIs.  At the same time, you are not forced to use this mechanism.
-If you prefer to maintain functions in their modular scoped spaces, then you can simply use the regular 'require' function.  Ideally, you should not use the 'use' mechanism.
 
 Examples
 --------
@@ -117,53 +76,53 @@ The user does not need to know which library contains the AllocConsole call.  Th
 
 The API sets that are currently implemented.
 
-cabinet.lua<p>
-core_console_l1_1_0.lua<p>
-core_console_l2_1_0.lua<p>
-core_datetime_l1_1_1.lua<p>
-core_debug_l1_1_1.lua<p>
-core_errorhandling_l1_1_1.lua<p>
-core_file_l1_2_0.lua<p>
-core_file_l2_1_0.lua<p>
-core_firmware_l1_1_0.lua<p>
-core_interlocked.lua<p>
-core_io_l1_1_1.lua<p>
-core_libraryloader_l1_1_1.lua<p>
-core_memory_l1_1_1.lua<p>
-core_namedpipe_l1_2_0.lua<p>
-core_processenvironment.lua<p>
-core_processthreads_l1_1_1.lua<p>
-core_profile_l1_1_0.lua<p>
-core_psapi_l1_1_0.lua<p>
-core_shutdown_l1_1_0.lua<p>
-core_string_l1_1_0.lua<p>
-core_synch_l1_2_0.lua<p>
-core_sysinfo_l1_2_0.lua<p>
-core_timezone_l1_1_0.lua<p>
-crypt.lua<p>
-dsrole.lua<p>
-Handle_ffi.lua<p>
-Heap_ffi.lua<p>
-httpapi.lua<p>
-lmcons.lua<p>
-mswsock.lua<p>
-NTSecAPI.lua<p>
-power_base_l1_1_0.lua<p>
-samcli.lua<p>
-security_base_l1_2_0.lua<p>
-security_credentials_l1_1_0.lua<p>
-security_lsalookup_l2_1_0.lua<p>
-security_sddl_l1_1_0.lua<p>
-service_core_l1_1_1.lua<p>
-service_management_l1_1_0.lua<p>
-sspicli.lua<p>
-sspi_ffi.lua<p>
-SubAuth.lua<p>
-UMS_ffi.lua<p>
-Util_ffi.lua<p>
-WinBer_ffi.lua<p>
-WinCon.lua<p>
-wkscli.lua<p>
+* cabinet.lua<p>
+* core_console_l1_1_0.lua<p>
+* core_console_l2_1_0.lua<p>
+* core_datetime_l1_1_1.lua<p>
+* core_debug_l1_1_1.lua<p>
+* core_errorhandling_l1_1_1.lua<p>
+* core_file_l1_2_0.lua<p>
+* core_file_l2_1_0.lua<p>
+* core_firmware_l1_1_0.lua<p>
+* core_interlocked.lua<p>
+* core_io_l1_1_1.lua<p>
+* core_libraryloader_l1_1_1.lua<p>
+* core_memory_l1_1_1.lua<p>
+* core_namedpipe_l1_2_0.lua<p>
+* core_processenvironment.lua<p>
+* core_processthreads_l1_1_1.lua<p>
+* core_profile_l1_1_0.lua<p>
+* core_psapi_l1_1_0.lua<p>
+* core_shutdown_l1_1_0.lua<p>
+* core_string_l1_1_0.lua<p>
+* core_synch_l1_2_0.lua<p>
+* core_sysinfo_l1_2_0.lua<p>
+* core_timezone_l1_1_0.lua<p>
+* crypt.lua<p>
+* dsrole.lua<p>
+* Handle_ffi.lua<p>
+* Heap_ffi.lua<p>
+* httpapi.lua<p>
+* lmcons.lua<p>
+* mswsock.lua<p>
+* NTSecAPI.lua<p>
+* power_base_l1_1_0.lua<p>
+* samcli.lua<p>
+* security_base_l1_2_0.lua<p>
+* security_credentials_l1_1_0.lua<p>
+* security_lsalookup_l2_1_0.lua<p>
+* security_sddl_l1_1_0.lua<p>
+* service_core_l1_1_1.lua<p>
+* service_management_l1_1_0.lua<p>
+* sspicli.lua<p>
+* sspi_ffi.lua<p>
+* SubAuth.lua<p>
+* UMS_ffi.lua<p>
+* Util_ffi.lua<p>
+* WinBer_ffi.lua<p>
+* WinCon.lua<p>
+* wkscli.lua<p>
 
 License
 -------
