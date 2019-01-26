@@ -1,1 +1,1 @@
-local HttpResponse = require("HttpResponse")
+local WebResponse = require("WebResponse")
