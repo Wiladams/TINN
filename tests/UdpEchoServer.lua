@@ -39,13 +39,13 @@ local loop = function()
     		return false, err;
     	end
 
-    	--print("BYTESREAD: ", bytesread, from);
+    	print("BYTESREAD: ", bytesread, from);
     	
-    	--print(ffi.string(buff, bytesread));
+    	print(ffi.string(buff, bytesread));
 
     	-- echo back to sender
     	local bytessent, err = socket:sendTo(from, fromLen, buff, bufflen);
-	    --collectgarbage();
+	    collectgarbage();
     end
 end
 

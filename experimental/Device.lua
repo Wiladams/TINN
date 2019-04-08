@@ -65,7 +65,7 @@ end
 function Device.openName(self, devicename, dwDesiredAccess, dwShareMode)
 	local lpFileName = string.format("\\\\.\\%s", devicename);
 
-	return self:openDeviceFile(lpFileName)
+	return self:create(lpFileName)
 end
 
 function Device.getNativeHandle(self)

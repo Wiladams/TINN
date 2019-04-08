@@ -1,7 +1,8 @@
 -- test_Timer.lua
 
+require("Application")
 local Timer = require("Timer")
-local parallel = require("parallel")()
+
 
 
 local function printThis()

@@ -79,7 +79,7 @@ loop = function(phrase)
     
         if dtc then
             transcount = transcount + 1;
-            --print(transcount, dtc, err);
+            print(transcount, dtc, err);
         else
             print("Error: ", i, err);        
         end
