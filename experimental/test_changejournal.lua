@@ -6,8 +6,7 @@ local WinError = require("win_error");
 local core_string = require("core_string_l1_1_0");
 local ChangeJournal = require("ChangeJournal");
 
-local driveletter = "c:"
-
+local driveletter = arg[1] or "c:"
 
 
 local function openJournal(driveletter)

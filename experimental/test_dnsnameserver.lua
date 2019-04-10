@@ -66,7 +66,11 @@ local function queryCNAME()
 	end
 
 	for _, name in ipairs(domains) do 
+		-- doing this way runs the queries in parallel
 		spawn(queryDomain, name)
+
+		-- doing it this way makes them run serially
+		-- much slower
 		--queryDomain(name)
 	end
 end
@@ -111,8 +115,8 @@ local function querySRV()
 end
 
 local function main()
-	queryA();
-	--queryCNAME();
+	--queryA();
+	queryCNAME();
 	--queryMX();
 	--queryPTR();
 	--querySRV();
