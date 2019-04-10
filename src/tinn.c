@@ -134,7 +134,7 @@ static int docall(lua_State *L, int narg, int clear)
 
 static void print_version(void)
 {
-  fputs("TINN - Copyright 2015 William Adams", stdout);
+  fputs("TINN - Copyright 2019 William Adams ", stdout);
 }
 
 static void print_jit_status(lua_State *L)
