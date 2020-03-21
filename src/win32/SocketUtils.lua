@@ -22,7 +22,7 @@ local newSocketAddress = function(name, namelen)
 end
 
 
-local host_serv = function(hostname, servicename, family, sockttype, isnumericstring)
+local host_serv = function(hostname, servicename, family, socktype, isnumericstring)
 	hostname = hostname or "localhost"
 	family = family or AF_UNSPEC;
 	socktype = socktype or SOCK_STREAM;
